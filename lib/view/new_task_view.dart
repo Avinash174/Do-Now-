@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../const/app_colors.dart';
-import '../services/auth_service.dart';
+
 import '../view_model/task_view_model.dart';
 
 class NewTaskView extends ConsumerStatefulWidget {

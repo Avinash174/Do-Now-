@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "458445587081",
+    "project_id": "do-now-app-12345",
+    "storage_bucket": "do-now-app-12345.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:458445587081:android:a43b3bf1083d45c2287c58",
+        "android_client_info": {
+          "package_name": "com.example.do_now"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaqH3srtQALSgyRwPvrnrLP6qBgvz_D_s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

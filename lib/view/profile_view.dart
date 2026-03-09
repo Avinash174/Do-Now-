@@ -175,7 +175,7 @@ class ProfileView extends ConsumerWidget {
           ),
           _buildMenuTile(
             icon: Icons.info_outline,
-            title: 'About TaskFlow',
+            title: 'About Do Now',
             onTap: () {},
           ),
 

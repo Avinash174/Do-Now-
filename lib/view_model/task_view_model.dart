@@ -1,9 +1,33 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../model/task_model.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';
+
+enum TaskFilter { all, pending, completed }
+
+// Current filter state
+class TaskFilterNotifier extends Notifier<TaskFilter> {
+  @override
+  TaskFilter build() => TaskFilter.all;
+
+  void update(TaskFilter filter) => state = filter;
+}
+
+final taskFilterProvider = NotifierProvider<TaskFilterNotifier, TaskFilter>(
+  TaskFilterNotifier.new,
+);
+
+// Current search query
+class TaskSearchNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+
+  void update(String query) => state = query;
+}
+
+final taskSearchProvider = NotifierProvider<TaskSearchNotifier, String>(
+  TaskSearchNotifier.new,
+);
 
 // Streams live task list from Firebase for the current user
 final tasksProvider = StreamProvider<List<TaskModel>>((ref) {
@@ -13,25 +37,70 @@ final tasksProvider = StreamProvider<List<TaskModel>>((ref) {
   final db = ref.read(databaseServiceProvider);
   return db.watchTasks(user.uid).map((event) {
     if (event.snapshot.value == null) return [];
-    final data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
-    return data.entries
-        .map(
-          (e) => TaskModel.fromMap(
-            e.key.toString(),
-            Map<dynamic, dynamic>.from(e.value as Map),
-          ),
-        )
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    try {
+      final data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
+      return data.entries
+          .map(
+            (e) => TaskModel.fromMap(
+              e.key.toString(),
+              Map<dynamic, dynamic>.from(e.value as Map),
+            ),
+          )
+          .toList()
+        ..sort((a, b) => a.scheduleTime.compareTo(b.scheduleTime));
+    } catch (e) {
+      return [];
+    }
   });
 });
 
-// Computed stats derived from the tasks list
-final taskStatsProvider = Provider<Map<String, int>>((ref) {
+// Combines tasks, filters, and search query
+final filteredTasksProvider = Provider<List<TaskModel>>((ref) {
+  final tasks = ref.watch(tasksProvider).value ?? [];
+  final filter = ref.watch(taskFilterProvider);
+  final search = ref.watch(taskSearchProvider).toLowerCase();
+
+  return tasks.where((task) {
+    // Filter by completion status
+    final matchesFilter =
+        filter == TaskFilter.all ||
+        (filter == TaskFilter.completed && task.isCompleted) ||
+        (filter == TaskFilter.pending && !task.isCompleted);
+
+    // Filter by search query
+    final matchesSearch =
+        search.isEmpty ||
+        task.title.toLowerCase().contains(search) ||
+        task.description.toLowerCase().contains(search) ||
+        task.category.toLowerCase().contains(search);
+
+    return matchesFilter && matchesSearch;
+  }).toList();
+});
+
+// Detailed stats derived from all tasks
+final taskStatsProvider = Provider<Map<String, dynamic>>((ref) {
   final tasks = ref.watch(tasksProvider).value ?? [];
   final total = tasks.length;
   final done = tasks.where((t) => t.isCompleted).length;
-  return {'total': total, 'done': done, 'pending': total - done};
+  final pending = total - done;
+
+  // Group by category
+  final Map<String, int> categories = {};
+  for (var task in tasks) {
+    categories[task.category] = (categories[task.category] ?? 0) + 1;
+  }
+
+  // Completion rate
+  final completionRate = total == 0 ? 0.0 : (done / total);
+
+  return {
+    'total': total,
+    'done': done,
+    'pending': pending,
+    'rate': completionRate,
+    'categories': categories,
+  };
 });
 
 class TaskViewModel {

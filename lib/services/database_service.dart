@@ -1,6 +1,7 @@
 import 'dart:developer' as dev;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auth_service.dart';
 
@@ -86,8 +87,9 @@ class DatabaseService {
     dev.log('DatabaseService: Adding task for $uid: $title', name: 'database');
     try {
       final newTaskRef = _db.child('users/$uid/tasks').push();
+      final taskId = newTaskRef.key;
       await newTaskRef.set({
-        'id': newTaskRef.key,
+        'id': taskId,
         'title': title,
         'description': description,
         'category': category,
@@ -95,8 +97,13 @@ class DatabaseService {
         'scheduleTime': scheduleTime,
         'createdAt': ServerValue.timestamp,
       });
+
+      // Store taskId locally as requested
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('last_task_id', taskId ?? '');
+
       dev.log(
-        'DatabaseService: Task added successfully with ID ${newTaskRef.key}',
+        'DatabaseService: Task added successfully with ID $taskId and saved to SharedPreferences',
         name: 'database',
       );
     } catch (e) {

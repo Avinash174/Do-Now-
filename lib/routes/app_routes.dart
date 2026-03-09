@@ -44,18 +44,20 @@ class AppRoutes {
         return introduction;
       }
 
-      // Check if user is already logged in
+      // Check if user is already logged in (Check both Firebase and local session)
       final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
+      final localSessionId = prefs.getString('user_session_id');
+
+      if (user != null || localSessionId != null) {
         dev.log(
-          'AppRoutes: User logged in (${user.email}), going to home',
+          'AppRoutes: Session found (Firebase: ${user?.uid}, Local: $localSessionId), going to home',
           name: 'navigation',
         );
         return home;
       }
 
       dev.log(
-        'AppRoutes: User not logged in, going to login',
+        'AppRoutes: No active session, going to login',
         name: 'navigation',
       );
       return login;

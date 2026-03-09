@@ -50,20 +50,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
     }
   }
 
-  Future<void> _loginWithGoogle() async {
-    setState(() => _isLoading = true);
-    try {
-      final user = await ref.read(authServiceProvider).signInWithGoogle();
-      if (user != null && mounted) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
-      }
-    } catch (e) {
-      _showSnackBar('Google signup failed: $e');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
   void _showSnackBar(String msg, {bool isError = true}) {
     AppUtils.showSnackBar(context, msg, isError: isError);
   }
@@ -205,52 +191,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                           ),
                         ),
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: AppColors.borderColor)),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'OR',
-                        style: TextStyle(color: AppColors.textLight),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: AppColors.borderColor)),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: OutlinedButton(
-                    onPressed: _loginWithGoogle,
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      side: const BorderSide(color: AppColors.borderColor),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/images/google_logo.png',
-                          height: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Continue with Google',
-                          style: GoogleFonts.outfit(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+
                 const SizedBox(height: 40),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

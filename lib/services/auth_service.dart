@@ -2,6 +2,7 @@ import 'dart:developer' as dev;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'database_service.dart';
 
@@ -16,6 +17,20 @@ final authStateProvider = StreamProvider<User?>((ref) {
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  // Helper to save session locally
+  Future<void> _saveSession(String uid) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_session_id', uid);
+    dev.log('AuthService: Session saved for UID: $uid', name: 'auth');
+  }
+
+  // Helper to clear session locally
+  Future<void> _clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_session_id');
+    dev.log('AuthService: Session cleared', name: 'auth');
+  }
 
   Future<UserCredential?> signUpWithEmailPassword(
     String name,
@@ -42,6 +57,8 @@ class AuthService {
           name: name,
           email: email,
         );
+        // Store session in SharedPreferences as requested
+        await _saveSession(credential.user!.uid);
       }
 
       return credential;
@@ -69,6 +86,12 @@ class AuthService {
         password: password,
       );
       dev.log('AuthService: Login successful for $email', name: 'auth');
+
+      if (credential.user != null) {
+        // Store session in SharedPreferences as requested
+        await _saveSession(credential.user!.uid);
+      }
+
       return credential;
     } catch (e) {
       dev.log(
@@ -112,17 +135,20 @@ class AuthService {
       dev.log('AuthService: Firebase Google login success', name: 'auth');
 
       // Save user profile info if it's a new user
-      if (userCredential.user != null &&
-          userCredential.additionalUserInfo?.isNewUser == true) {
-        dev.log(
-          'AuthService: New Google user, creating database profile',
-          name: 'auth',
-        );
-        await DatabaseService().createUserProfile(
-          uid: userCredential.user!.uid,
-          name: userCredential.user!.displayName ?? 'User',
-          email: userCredential.user!.email ?? '',
-        );
+      if (userCredential.user != null) {
+        if (userCredential.additionalUserInfo?.isNewUser == true) {
+          dev.log(
+            'AuthService: New Google user, creating database profile',
+            name: 'auth',
+          );
+          await DatabaseService().createUserProfile(
+            uid: userCredential.user!.uid,
+            name: userCredential.user!.displayName ?? 'User',
+            email: userCredential.user!.email ?? '',
+          );
+        }
+        // Store session in SharedPreferences as requested
+        await _saveSession(userCredential.user!.uid);
       }
 
       return userCredential;
@@ -155,6 +181,8 @@ class AuthService {
     dev.log('AuthService: User logging out', name: 'auth');
     await _googleSignIn.signOut();
     await _auth.signOut();
+    // Clear local session as requested
+    await _clearSession();
     dev.log('AuthService: Logged out successfully', name: 'auth');
   }
 

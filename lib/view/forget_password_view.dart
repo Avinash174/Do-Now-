@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../utils/app_utils.dart';
 
 import '../const/app_colors.dart';
 import '../services/auth_service.dart';
@@ -27,7 +29,11 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
     try {
       await ref.read(authServiceProvider).sendPasswordResetEmail(email);
       if (mounted) {
-        _showSnackBar('Password reset link sent! Check your inbox.');
+        _showSnackBar(
+          'Password reset link sent! Check your inbox.',
+          isError: false,
+          isSuccess: true,
+        );
         Navigator.pop(context);
       }
     } catch (e) {
@@ -37,8 +43,12 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
     }
   }
 
-  void _showSnackBar(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  void _showSnackBar(
+    String msg, {
+    bool isError = true,
+    bool isSuccess = false,
+  }) {
+    AppUtils.showSnackBar(context, msg, isError: isError, isSuccess: isSuccess);
   }
 
   @override
@@ -48,9 +58,16 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
+          icon: Icon(
+            Theme.of(context).platform == TargetPlatform.iOS
+                ? Icons.arrow_back_ios_new
+                : Icons.arrow_back,
             color: AppColors.textDark,
             size: 20,
           ),

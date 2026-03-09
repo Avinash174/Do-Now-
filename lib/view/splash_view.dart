@@ -1,28 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../const/app_colors.dart';
 import '../routes/app_routes.dart';
 
-class SplashView extends StatefulWidget {
+class SplashView extends ConsumerStatefulWidget {
   const SplashView({super.key});
 
   @override
-  State<SplashView> createState() => _SplashViewState();
+  ConsumerState<SplashView> createState() => _SplashViewState();
 }
 
-class _SplashViewState extends State<SplashView> {
+class _SplashViewState extends ConsumerState<SplashView> {
   @override
   void initState() {
     super.initState();
-    _navigateToNext();
+    // Hide status bar on splash screen
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    _startNavigation();
   }
 
-  Future<void> _navigateToNext() async {
-    await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
-    final initialRoute = await AppRoutes.getInitialRoute();
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, initialRoute);
+  @override
+  void dispose() {
+    // Restore status bar when leaving splash screen
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+    );
+    super.dispose();
+  }
+
+  Future<void> _startNavigation() async {
+    try {
+      // Run both the minimum splash duration and the route logic in parallel
+      final results = await Future.wait([
+        Future.delayed(const Duration(seconds: 3)),
+        AppRoutes.getInitialRoute(),
+      ]);
+
+      final nextRoute = results[1] as String;
+
+      if (!mounted) return;
+
+      // Navigate to the next screen
+      Navigator.pushReplacementNamed(context, nextRoute);
+    } catch (e) {
+      debugPrint('Navigation Error: $e');
+      // Fallback in case of error
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.login);
+      }
     }
   }
 
@@ -34,38 +65,11 @@ class _SplashViewState extends State<SplashView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.check_circle,
-                    color: AppColors.primaryBlue,
-                    size: 60,
-                  ),
-                )
+            Image.asset('assets/images/app_logo.png', width: 140, height: 140)
                 .animate()
                 .scale(duration: 600.ms, curve: Curves.easeOutBack)
                 .fadeIn()
                 .shimmer(delay: 800.ms, duration: 1500.ms),
-            const SizedBox(height: 24),
-            const Text(
-              'Do Now',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
-                color: AppColors.textDark,
-              ),
-            ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.3, end: 0),
-            const SizedBox(height: 8),
-            const Text(
-              'Master your productivity',
-              style: TextStyle(fontSize: 16, color: AppColors.textLight),
-            ).animate().fadeIn(delay: 600.ms),
           ],
         ),
       ),

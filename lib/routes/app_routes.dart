@@ -1,5 +1,7 @@
+import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../view/login_view.dart';
 import '../view/signup_view.dart';
@@ -29,12 +31,41 @@ class AppRoutes {
   };
 
   static Future<String> getInitialRoute() async {
-    final prefs = await SharedPreferences.getInstance();
-    final onboardingSeen = prefs.getBool('onboarding_seen') ?? false;
+    dev.log('AppRoutes: Calculating initial route...', name: 'navigation');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final onboardingSeen = prefs.getBool('onboarding_seen') ?? false;
 
-    if (!onboardingSeen) {
-      return introduction;
+      if (!onboardingSeen) {
+        dev.log(
+          'AppRoutes: Onboarding not seen, going to introduction',
+          name: 'navigation',
+        );
+        return introduction;
+      }
+
+      // Check if user is already logged in
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        dev.log(
+          'AppRoutes: User logged in (${user.email}), going to home',
+          name: 'navigation',
+        );
+        return home;
+      }
+
+      dev.log(
+        'AppRoutes: User not logged in, going to login',
+        name: 'navigation',
+      );
+      return login;
+    } catch (e) {
+      dev.log(
+        'AppRoutes: Error in getInitialRoute: $e',
+        name: 'navigation',
+        error: e,
+      );
+      return login;
     }
-    return login;
   }
 }

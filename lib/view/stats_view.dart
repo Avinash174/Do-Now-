@@ -190,27 +190,34 @@ class StatsView extends ConsumerWidget {
             ),
             child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: AppColors.textLight,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+          const SizedBox(width: 12), // Reduced width slightly
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 12, // Slightly smaller font
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                  color: AppColors.textDark,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 18, // Slightly smaller font
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

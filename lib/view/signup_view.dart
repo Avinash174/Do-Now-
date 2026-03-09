@@ -1,11 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../const/app_colors.dart';
 import '../services/auth_service.dart';
 import '../routes/app_routes.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../utils/app_utils.dart';
 
 class SignupView extends ConsumerStatefulWidget {
   const SignupView({super.key});
@@ -71,14 +73,14 @@ class _SignupViewState extends ConsumerState<SignupView> {
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
     } catch (e) {
-      _showSnackBar('Google signup failed');
+      _showSnackBar('Google signup failed: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _showSnackBar(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  void _showSnackBar(String msg, {bool isError = true}) {
+    AppUtils.showSnackBar(context, msg, isError: isError);
   }
 
   @override
@@ -88,9 +90,16 @@ class _SignupViewState extends ConsumerState<SignupView> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
+          icon: Icon(
+            Theme.of(context).platform == TargetPlatform.iOS
+                ? Icons.arrow_back_ios_new
+                : Icons.arrow_back,
             color: AppColors.textDark,
             size: 20,
           ),
@@ -128,6 +137,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
               const SizedBox(height: 10),
               TextFormField(
                 controller: _nameController,
+                textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
                   hintText: 'John Doe',
                   prefixIcon: const Icon(Icons.person_outline, size: 20),
@@ -149,6 +159,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
                   hintText: 'hello@example.com',
                   prefixIcon: const Icon(Icons.email_outlined, size: 20),
@@ -170,6 +181,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
+                textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
                   hintText: '••••••••',
                   prefixIcon: const Icon(Icons.lock_outline, size: 20),
@@ -186,6 +198,29 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     ),
                     onPressed: () =>
                         setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Confirm Password',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _confirmPasswordController,
+                obscureText: _obscurePassword,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) => _signUp(),
+                decoration: InputDecoration(
+                  hintText: '••••••••',
+                  prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
               ),
@@ -240,11 +275,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.g_mobiledata,
-                        color: Colors.blue,
-                        size: 28,
-                      ),
+                      Image.asset('assets/images/google_logo.png', height: 24),
                       const SizedBox(width: 8),
                       Text(
                         'Signup with Google',

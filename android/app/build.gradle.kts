@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.io.File
 
 plugins {
     id("com.android.application")
@@ -34,7 +35,11 @@ android {
         create("release") {
             keyAlias = keystoreProperties.getProperty("keyAlias") ?: ""
             keyPassword = keystoreProperties.getProperty("keyPassword") ?: ""
-            storeFile = keystoreProperties.getProperty("storeFile")?.let { rootProject.file(it) }
+            storeFile = keystoreProperties.getProperty("storeFile")?.let { path ->
+                // Support both absolute paths and paths relative to rootProject
+                val f = File(path)
+                if (f.isAbsolute) f else rootProject.file(path)
+            }
             storePassword = keystoreProperties.getProperty("storePassword") ?: ""
         }
     }

@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:developer' as dev;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'database_service.dart';
 import 'settings_service.dart';
+import '../firebase_options.dart';
 import '../routes/app_routes.dart';
 import '../model/task_model.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -18,6 +20,42 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(ref);
 });
 
+// ─── IMPORTANT: Must be a top-level function ────────────────────────────────
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Firebase must be initialized before using any Firebase service in background
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  dev.log(
+    'NotificationService: Background msg: ${message.notification?.title}',
+    name: 'fcm',
+  );
+
+  // Show a local notification for background messages so user sees them
+  final plugin = FlutterLocalNotificationsPlugin();
+  const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+  await plugin.initialize(
+    const InitializationSettings(android: androidSettings),
+  );
+  final notification = message.notification;
+  if (notification != null) {
+    await plugin.show(
+      message.hashCode,
+      notification.title,
+      notification.body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'high_importance_channel',
+          'High Importance Notifications',
+          importance: Importance.max,
+          priority: Priority.high,
+          showWhen: true,
+        ),
+      ),
+      payload: jsonEncode(message.data),
+    );
+  }
+}
+
 class NotificationService {
   final Ref _ref;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -26,36 +64,76 @@ class NotificationService {
 
   NotificationService(this._ref);
 
+  // ─── Create Android notification channels ─────────────────────────────────
+  static const _highImportanceChannel = AndroidNotificationChannel(
+    'high_importance_channel',
+    'High Importance Notifications',
+    description: 'This channel is used for important Firebase notifications.',
+    importance: Importance.max,
+    playSound: true,
+    enableVibration: true,
+  );
+
+  static const _taskReminderChannel = AndroidNotificationChannel(
+    'task_reminders',
+    'Task Reminders',
+    description: 'Notifications for scheduled tasks',
+    importance: Importance.max,
+    playSound: true,
+    enableVibration: true,
+  );
+
   Future<void> initialize() async {
     dev.log('NotificationService: Initializing', name: 'fcm');
 
     // Initialize Timezones
     tz.initializeTimeZones();
-    final timeZoneName = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(timeZoneName.toString()));
+    final tzInfo = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(tzInfo.toString()));
 
     try {
-      // 1. Request Permissions
+      // 1. Create notification channels (Android 8+)
       if (Platform.isAndroid) {
-        await _localNotifications
+        final androidPlugin = _localNotifications
             .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin
-            >()
-            ?.requestNotificationsPermission();
+            >();
+
+        await androidPlugin?.createNotificationChannel(_highImportanceChannel);
+        await androidPlugin?.createNotificationChannel(_taskReminderChannel);
+
+        // Request notification permission (Android 13+)
+        await androidPlugin?.requestNotificationsPermission();
+
+        // Request exact alarm permission (Android 12+ for scheduled notifications)
+        await androidPlugin?.requestExactAlarmsPermission();
       }
 
-      NotificationSettings settings = await _firebaseMessaging
-          .requestPermission(alert: true, badge: true, sound: true);
+      // 2. Request FCM permissions
+      final settings = await _firebaseMessaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
 
-      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        dev.log('NotificationService: Permissions granted', name: 'fcm');
+      dev.log(
+        'NotificationService: Permission status: ${settings.authorizationStatus}',
+        name: 'fcm',
+      );
 
-        // 2. Initialize Local Notifications for Foreground
-        const AndroidInitializationSettings androidSettings =
-            AndroidInitializationSettings('@mipmap/ic_launcher');
-        const DarwinInitializationSettings iosSettings =
-            DarwinInitializationSettings();
-        const InitializationSettings initSettings = InitializationSettings(
+      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional) {
+        // 3. Initialize Local Notifications
+        const androidSettings = AndroidInitializationSettings(
+          '@mipmap/ic_launcher',
+        );
+        const iosSettings = DarwinInitializationSettings(
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
+        const initSettings = InitializationSettings(
           android: androidSettings,
           iOS: iosSettings,
         );
@@ -71,21 +149,46 @@ class NotificationService {
               _handleNotificationPayload(details.payload!);
             }
           },
+          onDidReceiveBackgroundNotificationResponse:
+              _onBackgroundNotificationResponse,
         );
 
-        // 3. Setup FCM Listeners
+        // 4. Force FCM to deliver foreground messages as heads-up notifications
+        await _firebaseMessaging.setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+
+        // 5. Setup FCM Listeners
         _setupFCMListeners();
 
-        // 4. Setup Auth Listener to save token on login
+        // 6. Setup Auth Listener to save token on login
         _setupAuthListener();
 
-        // 5. Get and Save Token if already logged in
+        // 7. Get and save current token
         await _updateToken();
 
         // Listen for token refresh
         _firebaseMessaging.onTokenRefresh.listen((newToken) {
+          dev.log('NotificationService: Token refreshed', name: 'fcm');
           _updateToken(token: newToken);
         });
+
+        // 8. Check if app was opened from a terminated state notification
+        final initialMessage = await _firebaseMessaging.getInitialMessage();
+        if (initialMessage != null) {
+          dev.log(
+            'NotificationService: App opened from terminated state via notification',
+            name: 'fcm',
+          );
+          _handleNotificationPayload(jsonEncode(initialMessage.data));
+        }
+      } else {
+        dev.log(
+          'NotificationService: Permissions NOT granted: ${settings.authorizationStatus}',
+          name: 'fcm',
+        );
       }
     } catch (e) {
       dev.log('NotificationService: Init error: $e', name: 'fcm', error: e);
@@ -105,7 +208,7 @@ class NotificationService {
   }
 
   void _setupFCMListeners() {
-    // Foreground Messages
+    // Foreground Messages — Firebase doesn't show heads-up by default, we do it manually
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       dev.log(
         'NotificationService: Foreground msg: ${message.notification?.title}',
@@ -114,10 +217,10 @@ class NotificationService {
       _showLocalNotification(message);
     });
 
-    // Background/Terminated Click
+    // Background/Terminated → user tapped the notification
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       dev.log(
-        'NotificationService: Notification click: ${message.data}',
+        'NotificationService: Notification tapped from background: ${message.data}',
         name: 'fcm',
       );
       _handleNotificationPayload(jsonEncode(message.data));
@@ -125,7 +228,6 @@ class NotificationService {
   }
 
   void _handleNotificationPayload(String payload) {
-    // Basic navigation logic - can be expanded based on data
     dev.log('NotificationService: Handling payload: $payload', name: 'fcm');
     AppRoutes.navigatorKey.currentState?.pushNamed(AppRoutes.notifications);
   }
@@ -136,7 +238,10 @@ class NotificationService {
       final user = FirebaseAuth.instance.currentUser;
 
       if (finalToken != null && user != null) {
-        dev.log('NotificationService: Saving token: $finalToken', name: 'fcm');
+        dev.log(
+          'NotificationService: Saving FCM token for ${user.uid}',
+          name: 'fcm',
+        );
         await _ref
             .read(databaseServiceProvider)
             .saveFCMToken(user.uid, finalToken);
@@ -150,25 +255,26 @@ class NotificationService {
     final notification = message.notification;
     if (notification == null) return;
 
-    final settings = _ref.read(settingsServiceProvider);
-    if (!settings.pushNotificationsEnabled) return;
+    final appSettings = _ref.read(settingsServiceProvider);
+    if (!appSettings.pushNotificationsEnabled) return;
 
-    final AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          'high_importance_channel',
-          'High Importance Notifications',
-          importance: Importance.max,
-          priority: Priority.high,
-          showWhen: true,
-          enableVibration: settings.vibrationEnabled,
-          playSound: settings.soundEnabled,
-        );
+    final androidDetails = AndroidNotificationDetails(
+      _highImportanceChannel.id,
+      _highImportanceChannel.name,
+      channelDescription: _highImportanceChannel.description,
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: true,
+      enableVibration: appSettings.vibrationEnabled,
+      playSound: appSettings.soundEnabled,
+    );
 
-    final NotificationDetails platformDetails = NotificationDetails(
+    final platformDetails = NotificationDetails(
       android: androidDetails,
       iOS: DarwinNotificationDetails(
         presentAlert: true,
-        presentSound: settings.soundEnabled,
+        presentSound: appSettings.soundEnabled,
+        presentBadge: true,
       ),
     );
 
@@ -182,20 +288,26 @@ class NotificationService {
   }
 
   Future<void> scheduleTaskNotification(TaskModel task) async {
-    final settings = _ref.read(settingsServiceProvider);
-    if (!settings.taskRemindersEnabled) return;
+    final appSettings = _ref.read(settingsServiceProvider);
+    if (!appSettings.taskRemindersEnabled) return;
 
     final scheduleDate = DateTime.fromMillisecondsSinceEpoch(task.scheduleTime);
-    if (scheduleDate.isBefore(DateTime.now())) return;
+    if (scheduleDate.isBefore(DateTime.now())) {
+      dev.log(
+        'NotificationService: Schedule time is in the past, skipping',
+        name: 'fcm',
+      );
+      return;
+    }
 
     final androidDetails = AndroidNotificationDetails(
-      'task_reminders',
-      'Task Reminders',
-      channelDescription: 'Notifications for scheduled tasks',
+      _taskReminderChannel.id,
+      _taskReminderChannel.name,
+      channelDescription: _taskReminderChannel.description,
       importance: Importance.max,
       priority: Priority.high,
-      enableVibration: settings.vibrationEnabled,
-      playSound: settings.soundEnabled,
+      enableVibration: appSettings.vibrationEnabled,
+      playSound: appSettings.soundEnabled,
     );
 
     final platformDetails = NotificationDetails(
@@ -203,13 +315,14 @@ class NotificationService {
       iOS: const DarwinNotificationDetails(
         presentAlert: true,
         presentSound: true,
+        presentBadge: true,
       ),
     );
 
     await _localNotifications.zonedSchedule(
       task.id.hashCode,
       'Task Reminder: ${task.title}',
-      task.description,
+      task.description.isNotEmpty ? task.description : 'Your task is due soon!',
       tz.TZDateTime.from(scheduleDate, tz.local),
       platformDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -219,7 +332,7 @@ class NotificationService {
     );
 
     dev.log(
-      'NotificationService: Scheduled notification for task ${task.id} at $scheduleDate',
+      'NotificationService: Scheduled notification for task ${task.id} at $scheduleDate (${tz.local.name})',
       name: 'fcm',
     );
   }
@@ -233,10 +346,11 @@ class NotificationService {
   }
 }
 
+// Top-level callback for background notification taps — must be top-level
 @pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+void _onBackgroundNotificationResponse(NotificationResponse details) {
   dev.log(
-    'NotificationService: Background msg: ${message.messageId}',
+    'NotificationService: Background notification tapped: ${details.payload}',
     name: 'fcm',
   );
 }

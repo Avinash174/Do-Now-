@@ -32,7 +32,7 @@ class ProfileView extends ConsumerWidget {
             children: [
               Container(
                 width: double.infinity,
-                height: size.height * 0.45,
+                height: size.height * 0.48,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -81,7 +81,7 @@ class ProfileView extends ConsumerWidget {
                           letterSpacing: 0.5,
                         ),
                       ),
-                      SizedBox(height: size.height * 0.04),
+                      SizedBox(height: size.height * 0.02),
                       userAsync.when(
                         loading: () => const Center(
                           child: CircularProgressIndicator(
@@ -182,7 +182,7 @@ class ProfileView extends ConsumerWidget {
                                   ).animate().fadeIn(delay: 400.ms).scale(),
                                 ],
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 12),
                               Text(
                                     name,
                                     textAlign: TextAlign.center,

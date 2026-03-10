@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:developer' as dev;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -35,6 +36,14 @@ class NotificationService {
 
     try {
       // 1. Request Permissions
+      if (Platform.isAndroid) {
+        await _localNotifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.requestNotificationsPermission();
+      }
+
       NotificationSettings settings = await _firebaseMessaging
           .requestPermission(alert: true, badge: true, sound: true);
 
@@ -141,18 +150,26 @@ class NotificationService {
     final notification = message.notification;
     if (notification == null) return;
 
-    const AndroidNotificationDetails androidDetails =
+    final settings = _ref.read(settingsServiceProvider);
+    if (!settings.pushNotificationsEnabled) return;
+
+    final AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
           'high_importance_channel',
           'High Importance Notifications',
           importance: Importance.max,
           priority: Priority.high,
           showWhen: true,
+          enableVibration: settings.vibrationEnabled,
+          playSound: settings.soundEnabled,
         );
 
-    const NotificationDetails platformDetails = NotificationDetails(
+    final NotificationDetails platformDetails = NotificationDetails(
       android: androidDetails,
-      iOS: DarwinNotificationDetails(),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentSound: settings.soundEnabled,
+      ),
     );
 
     await _localNotifications.show(

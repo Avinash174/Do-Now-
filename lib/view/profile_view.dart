@@ -71,7 +71,7 @@ class ProfileView extends ConsumerWidget {
                   width: double.infinity,
                   child: Column(
                     children: [
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 5),
                       Text(
                         'Profile',
                         style: GoogleFonts.plusJakartaSans(
@@ -81,7 +81,7 @@ class ProfileView extends ConsumerWidget {
                           letterSpacing: 0.5,
                         ),
                       ),
-                      SizedBox(height: size.height * 0.02),
+                      const SizedBox(height: 8),
                       userAsync.when(
                         loading: () => const Center(
                           child: CircularProgressIndicator(
@@ -134,8 +134,8 @@ class ProfileView extends ConsumerWidget {
                                               style:
                                                   GoogleFonts.plusJakartaSans(
                                                     fontSize: isSmallScreen
-                                                        ? 40
-                                                        : 48,
+                                                        ? 32
+                                                        : 40,
                                                     fontWeight: FontWeight.w900,
                                                     color:
                                                         AppColors.primaryBlue,
@@ -182,7 +182,7 @@ class ProfileView extends ConsumerWidget {
                                   ).animate().fadeIn(delay: 400.ms).scale(),
                                 ],
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 8),
                               Text(
                                     name,
                                     textAlign: TextAlign.center,

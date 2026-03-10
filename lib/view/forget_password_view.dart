@@ -59,7 +59,7 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
     final isSmallScreen = size.width < 360;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -70,11 +70,13 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: Theme.of(context).cardColor,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.black.withValues(alpha: 0.05),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -83,7 +85,7 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
               Theme.of(context).platform == TargetPlatform.iOS
                   ? Icons.arrow_back_ios_new
                   : Icons.arrow_back,
-              color: AppColors.textDark,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               size: 18,
             ),
           ),
@@ -103,7 +105,7 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: isSmallScreen ? 28 : 34,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textDark,
+                  color: Theme.of(context).textTheme.headlineLarge?.color,
                   letterSpacing: -1,
                 ),
               ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0),
@@ -112,7 +114,9 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
                     'Don\'t worry! It happens. Please enter the email address associated with your account.',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: isSmallScreen ? 14 : 16,
-                      color: AppColors.textLight.withValues(alpha: 0.7),
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w500,
                       height: 1.5,
                     ),
@@ -186,17 +190,21 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: isSmallScreen ? 13 : 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.textDark.withValues(alpha: 0.9),
+            color: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.color?.withValues(alpha: 0.9),
           ),
         ),
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: AppColors.black.withValues(alpha: 0.02),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black.withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -208,23 +216,23 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: isSmallScreen ? 14 : 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.textDark,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.plusJakartaSans(
-                color: AppColors.textLight.withValues(alpha: 0.4),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
               prefixIcon: Icon(icon, color: AppColors.primaryBlue, size: 20),
               filled: true,
-              fillColor: AppColors.white,
+              fillColor: Theme.of(context).cardColor,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(
-                  color: AppColors.black.withValues(alpha: 0.05),
-                ),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),

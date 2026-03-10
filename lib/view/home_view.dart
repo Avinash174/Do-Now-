@@ -319,6 +319,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
       loading: () => '',
       error: (err, stack) => user?.email ?? '',
     );
+    final photoUrl = userAsync.when(
+      data: (data) => data?['photoUrl']?.toString(),
+      loading: () => null,
+      error: (err, stack) => null,
+    );
 
     final stats = ref.watch(taskStatsProvider);
     final pendingCount = stats['pending'] as int;
@@ -346,7 +351,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildTopBar(userName, userEmail)
+                    _buildTopBar(userName, userEmail, photoUrl)
                         .animate()
                         .fadeIn(duration: 500.ms)
                         .slideY(begin: -0.1, end: 0),
@@ -396,7 +401,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  Widget _buildTopBar(String name, String email) {
+  Widget _buildTopBar(String name, String email, String? photoUrl) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
 
@@ -494,14 +499,19 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 child: CircleAvatar(
                   radius: isSmallScreen ? 20 : 24,
                   backgroundColor: AppColors.white,
-                  child: Text(
-                    name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: isSmallScreen ? 16 : 18,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
+                  backgroundImage: photoUrl != null
+                      ? NetworkImage(photoUrl)
+                      : null,
+                  child: photoUrl == null
+                      ? Text(
+                          name.isNotEmpty ? name[0].toUpperCase() : 'U',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: isSmallScreen ? 16 : 18,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryBlue,
+                          ),
+                        )
+                      : null,
                 ),
               ),
             ),

@@ -220,7 +220,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: AppColors.black.withValues(alpha: 0.02),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black.withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -341,19 +343,21 @@ class _LoginViewState extends ConsumerState<LoginView> {
   Widget _buildDivider(bool isSmallScreen) {
     return Row(
       children: [
-        Expanded(child: Divider(color: AppColors.black.withValues(alpha: 0.1))),
+        Expanded(child: Divider(color: Theme.of(context).dividerColor)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'Or continue with',
             style: GoogleFonts.plusJakartaSans(
               fontSize: isSmallScreen ? 12 : 13,
-              color: AppColors.textLight.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).textTheme.bodySmall?.color?.withValues(alpha: 0.6),
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
-        Expanded(child: Divider(color: AppColors.black.withValues(alpha: 0.1))),
+        Expanded(child: Divider(color: Theme.of(context).dividerColor)),
       ],
     ).animate().fadeIn(delay: 700.ms);
   }

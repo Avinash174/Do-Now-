@@ -98,7 +98,9 @@ class _SignupViewState extends ConsumerState<SignupView> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.black.withValues(alpha: 0.05),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -107,7 +109,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
               Theme.of(context).platform == TargetPlatform.iOS
                   ? Icons.arrow_back_ios_new
                   : Icons.arrow_back,
-              color: AppColors.textDark,
+              color: Theme.of(context).iconTheme.color,
               size: 18,
             ),
           ),
@@ -127,7 +129,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: isSmallScreen ? 28 : 34,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textDark,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   letterSpacing: -1,
                 ),
               ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0),
@@ -136,7 +138,9 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     'Join us to start your productive journey',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: isSmallScreen ? 14 : 16,
-                      color: AppColors.textLight.withValues(alpha: 0.7),
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w500,
                     ),
                   )
@@ -289,7 +293,9 @@ class _SignupViewState extends ConsumerState<SignupView> {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: AppColors.black.withValues(alpha: 0.02),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black.withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

@@ -186,8 +186,11 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final userAsync = ref.watch(userProfileProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -225,30 +228,49 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
               Center(
                 child: Stack(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                          width: 4,
-                        ),
+                    userAsync.when(
+                      data: (profile) {
+                        final photoUrl = profile?['photoUrl'];
+                        return Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primaryBlue.withValues(
+                                alpha: 0.1,
+                              ),
+                              width: 4,
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            radius: size.width * 0.15,
+                            backgroundColor: AppColors.primaryBlue.withValues(
+                              alpha: 0.1,
+                            ),
+                            backgroundImage: _selectedImage != null
+                                ? FileImage(_selectedImage!)
+                                : (photoUrl != null
+                                      ? NetworkImage(photoUrl)
+                                      : null),
+                            child: _selectedImage == null && photoUrl == null
+                                ? Icon(
+                                    Icons.person_rounded,
+                                    size: size.width * 0.15,
+                                    color: AppColors.primaryBlue,
+                                  )
+                                : null,
+                          ),
+                        );
+                      },
+                      loading: () => ShimmerLoading(
+                        width: size.width * 0.3,
+                        height: size.width * 0.3,
+                        borderRadius: 100,
                       ),
-                      child: CircleAvatar(
-                        radius: size.width * 0.15,
-                        backgroundColor: AppColors.primaryBlue.withValues(
-                          alpha: 0.1,
-                        ),
-                        backgroundImage: _selectedImage != null
-                            ? FileImage(_selectedImage!)
-                            : null,
-                        child: _selectedImage == null
-                            ? Icon(
-                                Icons.person_rounded,
-                                size: size.width * 0.15,
-                                color: AppColors.primaryBlue,
-                              )
-                            : null,
+                      error: (err, _) => const Icon(
+                        Icons.error_outline_rounded,
+                        color: AppColors.danger,
+                        size: 40,
                       ),
                     ),
                     Positioned(
@@ -297,13 +319,17 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                     duration: const Duration(milliseconds: 300),
                     decoration: BoxDecoration(
                       color: _nameFocus.hasFocus
-                          ? Theme.of(context).cardColor
-                          : Theme.of(context).cardColor.withValues(alpha: 0.5),
+                          ? theme.cardColor
+                          : theme.cardColor.withValues(
+                              alpha: isDark ? 0.3 : 0.5,
+                            ),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: _nameFocus.hasFocus
                             ? AppColors.primaryBlue
-                            : Theme.of(context).dividerColor,
+                            : theme.dividerColor.withValues(
+                                alpha: isDark ? 0.3 : 0.1,
+                              ),
                         width: _nameFocus.hasFocus ? 1.5 : 1.0,
                       ),
                       boxShadow: _nameFocus.hasFocus

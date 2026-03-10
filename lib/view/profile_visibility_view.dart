@@ -27,20 +27,30 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final textColor =
-        theme.textTheme.titleLarge?.color ??
-        (isDark ? Colors.white : AppColors.textDark);
-    final mutedTextColor =
-        theme.textTheme.bodySmall?.color ??
-        (isDark ? Colors.white70 : AppColors.textLight);
+    // Standardized theme colors
+    final textColor = isDark ? Colors.white : AppColors.textDark;
+    final mutedTextColor = isDark ? Colors.white70 : AppColors.textLight;
+    final cardColor = isDark ? theme.cardColor : Colors.white;
+    final borderColor = isDark
+        ? theme.dividerColor.withValues(alpha: 0.15)
+        : AppColors.borderColor;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: theme.scaffoldBackgroundColor,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
+      ),
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           elevation: 0,
+          scrolledUnderElevation: 0,
           leading: PlatformBackButton(color: textColor),
           title: Text(
             'Profile Visibility',
@@ -54,9 +64,10 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(
               horizontal: size.width * 0.06,
-              vertical: 24,
+              vertical: 20,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,15 +79,21 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        AppColors.primaryAccent.withValues(alpha: 0.1),
-                        AppColors.primaryBlue.withValues(alpha: 0.1),
+                        AppColors.primaryAccent.withValues(
+                          alpha: isDark ? 0.2 : 0.1,
+                        ),
+                        AppColors.primaryBlue.withValues(
+                          alpha: isDark ? 0.2 : 0.1,
+                        ),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                      color: AppColors.primaryBlue.withValues(
+                        alpha: isDark ? 0.3 : 0.15,
+                      ),
                     ),
                   ),
                   child: Column(
@@ -85,7 +102,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
+                          gradient: const LinearGradient(
                             colors: [
                               AppColors.primaryBlue,
                               AppColors.primaryAccent,
@@ -94,6 +111,15 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryBlue.withValues(
+                                alpha: 0.3,
+                              ),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
                         child: const Icon(
                           Icons.visibility_rounded,
@@ -104,21 +130,23 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                         duration: 500.ms,
                         curve: Curves.easeOut,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       Text(
-                        'Manage Your Privacy',
+                        'Privacy Control Center',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
                           color: textColor,
+                          letterSpacing: -0.5,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Control who can see your profile and data',
+                        'Customize how you appear to others In the workspace',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
+                          fontWeight: FontWeight.w500,
                           color: mutedTextColor,
                         ),
                       ),
@@ -128,123 +156,128 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 const SizedBox(height: 32),
 
                 // Visibility Options
-                Text(
-                  'PROFILE VISIBILITY',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryBlue,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+                _buildSectionHeader('PROFILE SCOPE'),
                 const SizedBox(height: 16),
                 _buildVisibilityOption(
                   context: context,
-                  title: 'Public',
-                  subtitle: 'Anyone can view your profile',
+                  title: 'Public Access',
+                  subtitle: 'Visible to everyone on the platform',
                   icon: Icons.public_rounded,
                   value: 'public',
                   textColor: textColor,
                   mutedTextColor: mutedTextColor,
+                  cardColor: cardColor,
+                  borderColor: borderColor,
                 ),
                 const SizedBox(height: 12),
                 _buildVisibilityOption(
                   context: context,
-                  title: 'Friends Only',
-                  subtitle: 'Only your friends can view',
+                  title: 'Connections Only',
+                  subtitle: 'Only your direct friends can view',
                   icon: Icons.group_rounded,
                   value: 'friends_only',
                   textColor: textColor,
                   mutedTextColor: mutedTextColor,
+                  cardColor: cardColor,
+                  borderColor: borderColor,
                 ),
                 const SizedBox(height: 12),
                 _buildVisibilityOption(
                   context: context,
-                  title: 'Private',
-                  subtitle: 'Only you can see your profile',
+                  title: 'Encrypted Private',
+                  subtitle: 'HIDDEN from everyone but yourself',
                   icon: Icons.lock_rounded,
                   value: 'private',
                   textColor: textColor,
                   mutedTextColor: mutedTextColor,
+                  cardColor: cardColor,
+                  borderColor: borderColor,
                 ),
 
                 const SizedBox(height: 32),
 
                 // Personal Info Visibility
-                Text(
-                  'PERSONAL INFORMATION',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryBlue,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+                _buildSectionHeader('SENSITIVE INFORMATION'),
                 const SizedBox(height: 16),
                 _buildInfoVisibilityTile(
                   context: context,
                   icon: Icons.mail_outline_rounded,
-                  title: 'Show Email Address',
-                  subtitle: 'Allow others to see your email',
+                  title: 'Display Email',
+                  subtitle: 'Show your registered email address',
                   value: _showEmail,
                   onChanged: (value) => setState(() => _showEmail = value),
                   color: AppColors.info,
                   textColor: textColor,
                   mutedTextColor: mutedTextColor,
+                  cardColor: cardColor,
+                  borderColor: borderColor,
                 ),
                 const SizedBox(height: 12),
                 _buildInfoVisibilityTile(
                   context: context,
                   icon: Icons.phone_outlined,
-                  title: 'Show Phone Number',
-                  subtitle: 'Allow others to see your phone',
+                  title: 'Display Contact',
+                  subtitle: 'Show your connected phone number',
                   value: _showPhone,
                   onChanged: (value) => setState(() => _showPhone = value),
                   color: AppColors.warning,
                   textColor: textColor,
                   mutedTextColor: mutedTextColor,
+                  cardColor: cardColor,
+                  borderColor: borderColor,
                 ),
 
                 const SizedBox(height: 32),
 
                 // Activity & Interactions
-                Text(
-                  'ACTIVITY & INTERACTIONS',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryBlue,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+                _buildSectionHeader('DYNAMIC INTERACTIONS'),
                 const SizedBox(height: 16),
                 _buildInfoVisibilityTile(
                   context: context,
                   icon: Icons.message_outlined,
-                  title: 'Allow Messages',
-                  subtitle: 'Others can send you messages',
+                  title: 'Direct Messaging',
+                  subtitle: 'Allow users to reach out to you',
                   value: _allowMessages,
                   onChanged: (value) => setState(() => _allowMessages = value),
                   color: AppColors.success,
                   textColor: textColor,
                   mutedTextColor: mutedTextColor,
+                  cardColor: cardColor,
+                  borderColor: borderColor,
                 ),
                 const SizedBox(height: 12),
                 _buildInfoVisibilityTile(
                   context: context,
                   icon: Icons.timeline_rounded,
-                  title: 'Show Activity Status',
-                  subtitle: 'Let others see when you\'re active',
+                  title: 'Activity Status',
+                  subtitle: 'Broadcast when you are currently online',
                   value: _showActivity,
                   onChanged: (value) => setState(() => _showActivity = value),
                   color: AppColors.primaryBlue,
                   textColor: textColor,
                   mutedTextColor: mutedTextColor,
+                  cardColor: cardColor,
+                  borderColor: borderColor,
                 ),
                 const SizedBox(height: 100),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        title.toUpperCase(),
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          color: AppColors.primaryBlue,
+          letterSpacing: 1.5,
         ),
       ),
     );
@@ -258,9 +291,9 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
     required String value,
     required Color textColor,
     required Color mutedTextColor,
+    required Color cardColor,
+    required Color borderColor,
   }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final isSelected = _profileVisibility == value;
 
     return GestureDetector(
@@ -271,36 +304,47 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(16),
+          color: cardColor,
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primaryBlue
-                : theme.dividerColor.withValues(alpha: isDark ? 0.3 : 0.1),
+            color: isSelected ? AppColors.primaryBlue : borderColor,
             width: isSelected ? 2 : 1,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                    blurRadius: 16,
-                    spreadRadius: 2,
-                  ),
-                ]
-              : [],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.2
+                    : 0.03,
+              ),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              width: 50,
-              height: 50,
+              width: 52,
+              height: 52,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primaryBlue, AppColors.primaryAccent],
+                  colors: [
+                    AppColors.primaryBlue.withValues(
+                      alpha: isSelected ? 1.0 : 0.1,
+                    ),
+                    AppColors.primaryAccent.withValues(
+                      alpha: isSelected ? 1.0 : 0.1,
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: Colors.white, size: 24),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.white : AppColors.primaryBlue,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -310,7 +354,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                   Text(
                     title,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
+                      fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: isSelected ? AppColors.primaryBlue : textColor,
                     ),
@@ -320,6 +364,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                     subtitle,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
+                      fontWeight: FontWeight.w500,
                       color: isSelected
                           ? AppColors.primaryBlue.withValues(alpha: 0.7)
                           : mutedTextColor,
@@ -328,7 +373,8 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 ],
               ),
             ),
-            Container(
+            AnimatedContainer(
+              duration: 200.ms,
               width: 24,
               height: 24,
               decoration: BoxDecoration(
@@ -336,7 +382,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 border: Border.all(
                   color: isSelected
                       ? AppColors.primaryBlue
-                      : theme.dividerColor.withValues(alpha: 0.2),
+                      : mutedTextColor.withValues(alpha: 0.3),
                   width: 2,
                 ),
                 color: isSelected ? AppColors.primaryBlue : Colors.transparent,
@@ -352,7 +398,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
           ],
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.05, end: 0);
   }
 
   Widget _buildInfoVisibilityTile({
@@ -365,43 +411,45 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
     required Color color,
     required Color textColor,
     required Color mutedTextColor,
+    required Color cardColor,
+    required Color borderColor,
   }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
+        color: cardColor,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: value
-              ? color.withValues(alpha: 0.3)
-              : theme.dividerColor.withValues(alpha: isDark ? 0.3 : 0.1),
+          color: value ? color.withValues(alpha: 0.3) : borderColor,
           width: value ? 2 : 1,
         ),
-        boxShadow: value
-            ? [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.1),
-                  blurRadius: 16,
-                  spreadRadius: 2,
-                ),
-              ]
-            : [],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.2
+                  : 0.03,
+            ),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [color.withValues(alpha: 0.8), color],
+                colors: [
+                  color.withValues(alpha: 0.1),
+                  color.withValues(alpha: 0.2),
+                ],
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -411,7 +459,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 Text(
                   title,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: textColor,
                   ),
@@ -421,6 +469,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                   subtitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
+                    fontWeight: FontWeight.w500,
                     color: mutedTextColor,
                   ),
                 ),
@@ -439,6 +488,6 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
           ),
         ],
       ),
-    );
+    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.05, end: 0);
   }
 }

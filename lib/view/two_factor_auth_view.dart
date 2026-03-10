@@ -25,11 +25,16 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Theme-based colors for consistency
+    // Enhanced colors for better contrast in dark mode
     final textColor = isDark ? Colors.white : AppColors.textDark;
-    final mutedTextColor = isDark ? Colors.white70 : AppColors.textMuted;
-    final cardColor = theme.cardColor;
-    final borderColor = isDark ? Colors.white10 : AppColors.borderColor;
+    final mutedTextColor = isDark
+        ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ??
+              Colors.white70
+        : AppColors.textMuted;
+    final cardColor = isDark ? theme.cardColor : Colors.white;
+    final borderColor = isDark
+        ? theme.dividerColor.withValues(alpha: 0.2)
+        : AppColors.borderColor;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -40,11 +45,12 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
         systemNavigationBarIconBrightness: isDark
             ? Brightness.light
             : Brightness.dark,
+        systemNavigationBarDividerColor: Colors.transparent,
       ),
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
           leading: PlatformBackButton(color: textColor),
@@ -68,21 +74,24 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header card - Improved for dark mode visibility
+                // Header card - Improved visibility
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: cardColor,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: borderColor),
+                    border: Border.all(
+                      color: borderColor,
+                      width: isDark ? 1.5 : 1,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(
-                          alpha: isDark ? 0.3 : 0.05,
+                          alpha: isDark ? 0.4 : 0.05,
                         ),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                        blurRadius: 30,
+                        offset: const Offset(0, 15),
                       ),
                     ],
                   ),
@@ -92,7 +101,7 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
+                          gradient: const LinearGradient(
                             colors: [
                               AppColors.primaryBlue,
                               AppColors.primaryAccent,
@@ -104,10 +113,10 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.primaryBlue.withValues(
-                                alpha: 0.3,
+                                alpha: 0.4,
                               ),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
@@ -122,7 +131,7 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'Secure Your Account',
+                        'Highly Secure Account',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
@@ -131,7 +140,7 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Add an extra layer of protection to your account and keep your data safe.',
+                        'Protect your account with an extra verification layer when you sign in.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
@@ -147,12 +156,14 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                 Padding(
                   padding: const EdgeInsets.only(left: 4, bottom: 16),
                   child: Text(
-                    'AUTHENTICATION METHODS',
+                    'CHOOSE YOUR METHOD',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.primaryBlue,
-                      letterSpacing: 1.2,
+                      color: isDark
+                          ? AppColors.primaryBlue.withValues(alpha: 0.9)
+                          : AppColors.primaryBlue,
+                      letterSpacing: 1.5,
                     ),
                   ),
                 ),
@@ -161,8 +172,8 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                 _buildAuthMethodTile(
                   context: context,
                   icon: Icons.alternate_email_rounded,
-                  title: 'Email Verification',
-                  subtitle: 'Get a secure code via email',
+                  title: 'Email Security',
+                  subtitle: 'Receive unique codes via your email',
                   value: _emailEnabled,
                   color: AppColors.info,
                   onChanged: (value) => setState(() => _emailEnabled = value),
@@ -172,9 +183,9 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                 // SMS 2FA
                 _buildAuthMethodTile(
                   context: context,
-                  icon: Icons.chat_bubble_outline_rounded,
+                  icon: Icons.sms_rounded,
                   title: 'SMS Message',
-                  subtitle: 'Receive code via text message',
+                  subtitle: 'Verify with text message alerts',
                   value: _smsEnabled,
                   color: AppColors.warning,
                   onChanged: (value) => setState(() => _smsEnabled = value),
@@ -185,8 +196,8 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                 _buildAuthMethodTile(
                   context: context,
                   icon: Icons.phonelink_lock_rounded,
-                  title: 'Authenticator App',
-                  subtitle: 'Use Google or Microsoft Authenticator',
+                  title: 'Authenticator Tool',
+                  subtitle: 'Use trusted 2FA apps like Google',
                   value: _appEnabled,
                   color: AppColors.success,
                   onChanged: (value) => setState(() => _appEnabled = value),
@@ -194,34 +205,31 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
 
                 const SizedBox(height: 32),
 
-                // Info card - Highly visible for all themes
+                // Info card for better UX
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                    color: AppColors.primaryBlue.withValues(
+                      alpha: isDark ? 0.15 : 0.08,
+                    ),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                      color: AppColors.primaryBlue.withValues(
+                        alpha: isDark ? 0.3 : 0.15,
+                      ),
                     ),
                   ),
                   child: Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.info_outline_rounded,
-                          color: AppColors.primaryBlue,
-                          size: 20,
-                        ),
+                      const Icon(
+                        Icons.verified_user_rounded,
+                        color: AppColors.primaryBlue,
+                        size: 24,
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(
-                          'We recommend enabling at least one verification method for better security.',
+                          'For maximum protection, we recommend activating at least one method.',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             color: textColor,
@@ -254,23 +262,25 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : AppColors.textDark;
     final mutedTextColor = isDark ? Colors.white70 : AppColors.textMuted;
-    final cardColor = Theme.of(context).cardColor;
-    final borderColor = isDark ? Colors.white10 : AppColors.borderColor;
+    final cardColor = isDark ? Theme.of(context).cardColor : Colors.white;
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.1)
+        : AppColors.borderColor;
 
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: value ? color.withValues(alpha: 0.5) : borderColor,
+          color: value ? color.withValues(alpha: 0.6) : borderColor,
           width: value ? 2 : 1,
         ),
         boxShadow: value
             ? [
                 BoxShadow(
-                  color: color.withValues(alpha: 0.15),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: color.withValues(alpha: 0.2),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
                 ),
               ]
             : [],
@@ -311,7 +321,7 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
           child: Switch.adaptive(
             value: value,
             activeColor: color,
-            activeTrackColor: color.withValues(alpha: 0.3),
+            activeTrackColor: color.withValues(alpha: 0.4),
             onChanged: (val) {
               HapticFeedback.mediumImpact();
               onChanged(val);

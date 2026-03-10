@@ -1,4 +1,4 @@
-# do_now
+# Do Now
 
 A new Flutter project.
 

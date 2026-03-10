@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,8 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../const/app_colors.dart';
 import '../services/auth_service.dart';
 import '../routes/app_routes.dart';
-import '../utils/app_utils.dart';
-import '../utils/shimmer_utils.dart';
+import '../utils/snackbar_utils.dart';
+import '../utils/widgets_utils.dart';
 
 class SignupView extends ConsumerStatefulWidget {
   const SignupView({super.key});
@@ -23,8 +22,24 @@ class _SignupViewState extends ConsumerState<SignupView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  final _nameFocus = FocusNode();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  final _confirmPasswordFocus = FocusNode();
+
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameFocus.addListener(() => setState(() {}));
+    _emailFocus.addListener(() => setState(() {}));
+    _passwordFocus.addListener(() => setState(() {}));
+    _confirmPasswordFocus.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
@@ -32,6 +47,10 @@ class _SignupViewState extends ConsumerState<SignupView> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _nameFocus.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
     super.dispose();
   }
 
@@ -42,220 +61,256 @@ class _SignupViewState extends ConsumerState<SignupView> {
     final confirm = _confirmPasswordController.text.trim();
 
     if (name.isEmpty || email.isEmpty || password.isEmpty || confirm.isEmpty) {
-      _showSnackBar('Please fill in all fields');
+      HapticFeedback.vibrate();
+      SnackbarUtils.showError(
+        context,
+        'Missing Data',
+        'Please complete all required identity parameters.',
+      );
       return;
     }
+
     if (password != confirm) {
-      _showSnackBar('Passwords do not match');
+      HapticFeedback.vibrate();
+      SnackbarUtils.showError(
+        context,
+        'Crossover Error',
+        'Verification signature must match the original password.',
+      );
       return;
     }
+
     if (password.length < 6) {
-      _showSnackBar('Password must be at least 6 characters');
+      HapticFeedback.vibrate();
+      SnackbarUtils.showError(
+        context,
+        'Security Breach',
+        'Encryption code must be at least 6 characters long.',
+      );
       return;
     }
 
     setState(() => _isLoading = true);
+    HapticFeedback.mediumImpact();
+
     try {
       await ref
           .read(authServiceProvider)
           .signUpWithEmailPassword(name, email, password);
-      if (mounted) Navigator.pushReplacementNamed(context, AppRoutes.home);
-    } catch (e) {
-      String errorMessage = 'Sign up failed';
-      if (e is FirebaseAuthException) {
-        errorMessage = e.message ?? errorMessage;
-      } else {
-        errorMessage = e.toString();
+      if (mounted) {
+        SnackbarUtils.showSuccess(
+          context,
+          'Access Granted',
+          'Your new identity has been registered in the system.',
+        );
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
-      _showSnackBar(errorMessage);
+    } catch (e) {
+      if (mounted) {
+        SnackbarUtils.showError(context, 'Registration Failed', e.toString());
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _showSnackBar(String msg, {bool isError = true}) {
-    AppUtils.showSnackBar(context, msg, isError: isError);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.black.withValues(alpha: 0.2)
-                      : Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: Icon(
-              Theme.of(context).platform == TargetPlatform.iOS
-                  ? Icons.arrow_back_ios_new
-                  : Icons.arrow_back,
-              color: Theme.of(context).iconTheme.color,
-              size: 18,
+    final textColor = isDark ? Colors.white : AppColors.textDark;
+    final mutedTextColor = isDark ? Colors.white70 : AppColors.textLight;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: theme.scaffoldBackgroundColor,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: PlatformBackButton(color: textColor),
+          ),
+          title: Text(
+            'New Identity',
+            style: GoogleFonts.plusJakartaSans(
+              color: textColor,
+              fontWeight: FontWeight.w900,
+              fontSize: isSmallScreen ? 18 : 20,
+              letterSpacing: -0.5,
             ),
           ),
-          onPressed: () => Navigator.pop(context),
+          centerTitle: true,
         ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-              Text(
-                'Create Account',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: isSmallScreen ? 28 : 34,
-                  fontWeight: FontWeight.w800,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                  letterSpacing: -1,
-                ),
-              ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0),
-              const SizedBox(height: 8),
-              Text(
-                    'Join us to start your productive journey',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: isSmallScreen ? 14 : 16,
-                      color: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  )
-                  .animate()
-                  .fadeIn(delay: 100.ms, duration: 400.ms)
-                  .slideY(begin: 0.2, end: 0),
-              SizedBox(height: size.height * 0.05),
-
-              _buildInputField(
-                label: 'Full Name',
-                hint: 'John Doe',
-                controller: _nameController,
-                icon: Icons.person_outline_rounded,
-                isSmallScreen: isSmallScreen,
-              ).animate().fadeIn(delay: 200.ms).slideX(begin: 0.1, end: 0),
-
-              const SizedBox(height: 24),
-
-              _buildInputField(
-                label: 'Email Address',
-                hint: 'hello@example.com',
-                controller: _emailController,
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-                isSmallScreen: isSmallScreen,
-              ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.1, end: 0),
-
-              const SizedBox(height: 24),
-
-              _buildInputField(
-                label: 'Password',
-                hint: '••••••••',
-                controller: _passwordController,
-                icon: Icons.lock_outline_rounded,
-                isPassword: true,
-                obscureText: _obscurePassword,
-                isSmallScreen: isSmallScreen,
-                onSuffixIconTap: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
-              ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1, end: 0),
-
-              const SizedBox(height: 24),
-
-              _buildInputField(
-                label: 'Confirm Password',
-                hint: '••••••••',
-                controller: _confirmPasswordController,
-                icon: Icons.lock_reset_rounded,
-                isPassword: true,
-                obscureText: _obscurePassword,
-                isSmallScreen: isSmallScreen,
-              ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0),
-
-              SizedBox(height: size.height * 0.05),
-
-              SizedBox(
-                width: double.infinity,
-                height: isSmallScreen ? 56 : 60,
-                child: _isLoading
-                    ? ShimmerLoading(
-                        width: double.infinity,
-                        height: isSmallScreen ? 56 : 60,
-                        borderRadius: 18,
-                      )
-                    : ElevatedButton(
-                        onPressed: _signUp,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryBlue,
-                          foregroundColor: AppColors.white,
-                          elevation: 8,
-                          shadowColor: AppColors.primaryBlue.withValues(
-                            alpha: 0.4,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                        ),
-                        child: Text(
-                          'Create Account',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: isSmallScreen ? 15 : 16,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-              ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2, end: 0),
-
-              const SizedBox(height: 40),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Already have an account? ',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: isSmallScreen ? 13 : 14,
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                      fontWeight: FontWeight.w500,
-                    ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                Text(
+                  'Join the Pulse',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: isSmallScreen ? 32 : 38,
+                    fontWeight: FontWeight.w900,
+                    color: textColor,
+                    letterSpacing: -1.5,
                   ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Text(
-                      'Login',
+                ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0),
+                const SizedBox(height: 8),
+                Text(
+                      'Register your unique credentials to access the full potential of productivity and task automation.',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: isSmallScreen ? 13 : 14,
-                        color: AppColors.primaryBlue,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        color: mutedTextColor,
+                        fontWeight: FontWeight.w500,
+                        height: 1.5,
+                      ),
+                    )
+                    .animate(delay: 100.ms)
+                    .fadeIn(duration: 400.ms)
+                    .slideY(begin: 0.2, end: 0),
+
+                SizedBox(height: size.height * 0.04),
+
+                _buildInputField(
+                  label: 'FULL IDENTIFIER',
+                  hint: 'Enter your preferred name',
+                  controller: _nameController,
+                  focusNode: _nameFocus,
+                  icon: Icons.person_outline_rounded,
+                  isDark: isDark,
+                  textColor: textColor,
+                ).animate(delay: 200.ms).fadeIn().slideX(begin: 0.1, end: 0),
+
+                const SizedBox(height: 20),
+
+                _buildInputField(
+                  label: 'RECOVERY IDENTIFIER',
+                  hint: 'Enter your verified email',
+                  controller: _emailController,
+                  focusNode: _emailFocus,
+                  icon: Icons.alternate_email_rounded,
+                  isDark: isDark,
+                  textColor: textColor,
+                ).animate(delay: 250.ms).fadeIn().slideX(begin: 0.1, end: 0),
+
+                const SizedBox(height: 20),
+
+                _buildInputField(
+                  label: 'SECURE ENCRYPTION',
+                  hint: 'Create a resilient password',
+                  controller: _passwordController,
+                  focusNode: _passwordFocus,
+                  icon: Icons.lock_outline_rounded,
+                  isPassword: true,
+                  obscureText: _obscurePassword,
+                  onSuffixIconTap: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                  isDark: isDark,
+                  textColor: textColor,
+                ).animate(delay: 300.ms).fadeIn().slideX(begin: 0.1, end: 0),
+
+                const SizedBox(height: 20),
+
+                _buildInputField(
+                  label: 'RE-VERIFICATION',
+                  hint: 'Confirm your encryption code',
+                  controller: _confirmPasswordController,
+                  focusNode: _confirmPasswordFocus,
+                  icon: Icons.verified_user_outlined,
+                  isPassword: true,
+                  obscureText: _obscureConfirmPassword,
+                  onSuffixIconTap: () => setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  ),
+                  isDark: isDark,
+                  textColor: textColor,
+                ).animate(delay: 350.ms).fadeIn().slideX(begin: 0.1, end: 0),
+
+                SizedBox(height: size.height * 0.05),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 64,
+                  child: _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryBlue,
+                            strokeWidth: 3,
+                          ),
+                        )
+                      : ElevatedButton(
+                          onPressed: _signUp,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlue,
+                            foregroundColor: AppColors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                          ),
+                          child: Text(
+                            'Initialize Identity',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                ).animate(delay: 400.ms).fadeIn().slideY(begin: 0.2, end: 0),
+
+                const SizedBox(height: 30),
+
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: RichText(
+                      text: TextSpan(
+                        text: 'Existing Identity? ',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: mutedTextColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'Login',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: AppColors.primaryBlue,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ).animate().fadeIn(delay: 700.ms),
-              const SizedBox(height: 40),
-            ],
+                ).animate(delay: 500.ms).fadeIn(),
+
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),
@@ -266,91 +321,99 @@ class _SignupViewState extends ConsumerState<SignupView> {
     required String label,
     required String hint,
     required TextEditingController controller,
+    required FocusNode focusNode,
     required IconData icon,
     bool isPassword = false,
     bool obscureText = false,
     VoidCallback? onSuffixIconTap,
-    TextInputType? keyboardType,
-    required bool isSmallScreen,
+    required bool isDark,
+    required Color textColor,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: isSmallScreen ? 13 : 14,
-            fontWeight: FontWeight.w700,
-            color: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.color?.withValues(alpha: 0.9),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primaryBlue,
+              letterSpacing: 1.5,
+            ),
           ),
         ),
-        const SizedBox(height: 10),
-        Container(
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.black.withValues(alpha: 0.2)
-                    : Colors.black.withValues(alpha: 0.02),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: focusNode.hasFocus
+                ? (isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.02))
+                : Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: focusNode.hasFocus
+                  ? AppColors.primaryBlue
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.black.withValues(alpha: 0.05)),
+              width: focusNode.hasFocus ? 2 : 1.5,
+            ),
+            boxShadow: focusNode.hasFocus
+                ? [
+                    BoxShadow(
+                      color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : [],
           ),
           child: TextFormField(
             controller: controller,
+            focusNode: focusNode,
             obscureText: obscureText,
-            keyboardType: keyboardType,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: isSmallScreen ? 14 : 15,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: textColor,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.plusJakartaSans(
-                color: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
-                fontSize: 14,
+                color: AppColors.textLight.withValues(alpha: 0.4),
+                fontSize: 15,
                 fontWeight: FontWeight.w500,
               ),
-              prefixIcon: Icon(icon, color: AppColors.primaryBlue, size: 20),
+              prefixIcon: Icon(
+                icon,
+                color: focusNode.hasFocus
+                    ? AppColors.primaryBlue
+                    : AppColors.textLight.withValues(alpha: 0.5),
+                size: 22,
+              ),
               suffixIcon: isPassword
                   ? IconButton(
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        onSuffixIconTap?.call();
+                      },
                       icon: Icon(
                         obscureText
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+                        color: focusNode.hasFocus
+                            ? AppColors.primaryBlue
+                            : AppColors.textLight.withValues(alpha: 0.5),
                         size: 20,
                       ),
-                      onPressed: onSuffixIconTap,
                     )
                   : null,
-              filled: true,
-              fillColor: Theme.of(context).cardColor,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: const BorderSide(
-                  color: AppColors.primaryBlue,
-                  width: 1.5,
-                ),
-              ),
+              border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
-                vertical: 18,
+                vertical: 20,
                 horizontal: 16,
               ),
             ),

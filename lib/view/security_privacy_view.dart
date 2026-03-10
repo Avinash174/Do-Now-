@@ -12,17 +12,17 @@ class SecurityPrivacyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isSmallScreen = size.width < 360;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
 
-    // Standardized theme colors
     final textColor = isDark ? Colors.white : AppColors.textDark;
-    final mutedTextColor = isDark ? Colors.white70 : AppColors.textLight;
-    final cardColor = isDark ? theme.cardColor : Colors.white;
+    final mutedTextColor = isDark
+        ? Colors.white.withValues(alpha: 0.6)
+        : AppColors.textLight;
     final borderColor = isDark
-        ? theme.dividerColor.withValues(alpha: 0.15)
+        ? Colors.white.withValues(alpha: 0.1)
         : AppColors.borderColor;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -40,142 +40,147 @@ class SecurityPrivacyView extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          scrolledUnderElevation: 0,
-          leading: PlatformBackButton(color: textColor),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: PlatformBackButton(color: textColor),
+          ),
           title: Text(
-            'Security & Privacy',
+            'Sanctuary Settings',
             style: GoogleFonts.plusJakartaSans(
               color: textColor,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               fontSize: isSmallScreen ? 18 : 20,
+              letterSpacing: -0.5,
             ),
           ),
           centerTitle: true,
         ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              horizontal: size.width * 0.06,
-              vertical: 20,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionHeader(
-                  context,
-                  'SECURITY & AUTHENTICATION',
-                  isSmallScreen,
-                ),
-                const SizedBox(height: 16),
-                _buildSecurityTile(
-                  context,
-                  'Password Management',
-                  'Change your account password regularly',
-                  Icons.lock_person_rounded,
-                  () => Navigator.pushNamed(context, AppRoutes.changePassword),
-                  isSmallScreen,
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-                const SizedBox(height: 12),
-                _buildSecurityTile(
-                  context,
-                  'Secondary Verification',
-                  'Enable Two-Factor Authentication',
-                  Icons.verified_user_rounded,
-                  () => Navigator.pushNamed(context, AppRoutes.twoFactorAuth),
-                  isSmallScreen,
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                  iconColor: AppColors.success,
-                ),
-                const SizedBox(height: 12),
-                _buildSecurityTile(
-                  context,
-                  'App Access Biometrics',
-                  'Unlock with Face ID or Fingerprint',
-                  Icons.face_unlock_rounded,
-                  () => Navigator.pushNamed(context, AppRoutes.faceIdBiometric),
-                  isSmallScreen,
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                  iconColor: AppColors.info,
-                ),
-                const SizedBox(height: 32),
-                _buildSectionHeader(context, 'PRIVACY & DATA', isSmallScreen),
-                const SizedBox(height: 16),
-                _buildSecurityTile(
-                  context,
-                  'Profile visibility',
-                  'Decide who sees your workspace',
-                  Icons.visibility_rounded,
-                  () =>
-                      Navigator.pushNamed(context, AppRoutes.profileVisibility),
-                  isSmallScreen,
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-                const SizedBox(height: 12),
-                _buildSecurityTile(
-                  context,
-                  'Personal Data Export',
-                  'Download all your account activity',
-                  Icons.data_exploration_rounded,
-                  () => Navigator.pushNamed(context, AppRoutes.dataExport),
-                  isSmallScreen,
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-                const SizedBox(height: 12),
-                _buildSecurityTile(
-                  context,
-                  'Policy Agreements',
-                  'Review our privacy commitments',
-                  Icons.policy_rounded,
-                  () => Navigator.pushNamed(context, AppRoutes.privacyPolicy),
-                  isSmallScreen,
-                  showTrailing: true,
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-                const SizedBox(height: 100),
-              ],
-            ),
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 32),
+              _buildSectionHeader('SECURITY PROTOCOLS'),
+              const SizedBox(height: 20),
+              _buildSecurityTile(
+                context,
+                'Credential Management',
+                'Rotate your access keys',
+                Icons.vpn_key_rounded,
+                () => Navigator.pushNamed(context, AppRoutes.changePassword),
+                isDark,
+                borderColor,
+                textColor,
+                mutedTextColor,
+                null,
+                0,
+              ),
+              const SizedBox(height: 16),
+              _buildSecurityTile(
+                context,
+                'Multi-Factor Auth',
+                'Dual-layer verification status',
+                Icons.verified_user_rounded,
+                () => Navigator.pushNamed(context, AppRoutes.twoFactorAuth),
+                isDark,
+                borderColor,
+                textColor,
+                mutedTextColor,
+                AppColors.success,
+                1,
+              ),
+              const SizedBox(height: 16),
+              _buildSecurityTile(
+                context,
+                'Biometric Gateway',
+                'Face ID & Fingerprint access',
+                Icons.fingerprint_rounded,
+                () => Navigator.pushNamed(context, AppRoutes.faceIdBiometric),
+                isDark,
+                borderColor,
+                textColor,
+                mutedTextColor,
+                AppColors.info,
+                2,
+              ),
+
+              const SizedBox(height: 48),
+              _buildSectionHeader('PRIVACY & INTEL'),
+              const SizedBox(height: 20),
+              _buildSecurityTile(
+                context,
+                'Profile Visibility',
+                'Manage your public presence',
+                Icons.visibility_rounded,
+                () => Navigator.pushNamed(context, AppRoutes.profileVisibility),
+                isDark,
+                borderColor,
+                textColor,
+                mutedTextColor,
+                null,
+                3,
+              ),
+              const SizedBox(height: 16),
+              _buildSecurityTile(
+                context,
+                'Intelligence Export',
+                'Package your account data',
+                Icons.document_scanner_rounded,
+                () => Navigator.pushNamed(context, AppRoutes.dataExport),
+                isDark,
+                borderColor,
+                textColor,
+                mutedTextColor,
+                null,
+                4,
+              ),
+              const SizedBox(height: 16),
+              _buildSecurityTile(
+                context,
+                'Policy Archives',
+                'Review legal commitments',
+                Icons.account_balance_rounded,
+                () => Navigator.pushNamed(context, AppRoutes.privacyPolicy),
+                isDark,
+                borderColor,
+                textColor,
+                mutedTextColor,
+                null,
+                5,
+                showTrailing: true,
+              ),
+              const SizedBox(height: 100),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(
-    BuildContext context,
-    String title,
-    bool isSmallScreen,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        title.toUpperCase(),
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: isSmallScreen ? 11 : 12,
-          fontWeight: FontWeight.w800,
-          color: AppColors.primaryBlue,
-          letterSpacing: 1.5,
+  Widget _buildSectionHeader(String title) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 16,
+          decoration: BoxDecoration(
+            color: AppColors.primaryBlue,
+            borderRadius: BorderRadius.circular(2),
+          ),
         ),
-      ),
+        const SizedBox(width: 12),
+        Text(
+          title.toUpperCase(),
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+            color: AppColors.primaryBlue,
+            letterSpacing: 1.5,
+          ),
+        ),
+      ],
     );
   }
 
@@ -185,71 +190,84 @@ class SecurityPrivacyView extends StatelessWidget {
     String subtitle,
     IconData icon,
     VoidCallback onTap,
-    bool isSmallScreen, {
-    bool showTrailing = false,
-    required Color textColor,
-    required Color mutedTextColor,
-    required Color cardColor,
-    required Color borderColor,
+    bool isDark,
+    Color borderColor,
+    Color textColor,
+    Color mutedTextColor,
     Color? iconColor,
+    int index, {
+    bool showTrailing = false,
   }) {
     final color = iconColor ?? AppColors.primaryBlue;
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: Theme.of(context).brightness == Brightness.dark
-                  ? 0.2
-                  : 0.03,
+    return InkWell(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onTap();
+          },
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: borderColor, width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          color: mutedTextColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  showTrailing
+                      ? Icons.open_in_new_rounded
+                      : Icons.chevron_right_rounded,
+                  color: mutedTextColor.withValues(alpha: 0.4),
+                  size: 20,
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-      child: ListTile(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onTap();
-        },
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        leading: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(icon, color: color, size: isSmallScreen ? 20 : 24),
-        ),
-        title: Text(
-          title,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: isSmallScreen ? 14 : 15,
-            fontWeight: FontWeight.w700,
-            color: textColor,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: isSmallScreen ? 11 : 12,
-            color: mutedTextColor,
-          ),
-        ),
-        trailing: Icon(
-          showTrailing
-              ? Icons.arrow_outward_rounded
-              : Icons.chevron_right_rounded,
-          color: mutedTextColor.withValues(alpha: 0.5),
-          size: 20,
-        ),
-      ),
-    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.05, end: 0);
+        )
+        .animate(delay: Duration(milliseconds: 200 + (index * 80)))
+        .fadeIn()
+        .slideY(begin: 0.1, end: 0);
   }
 }

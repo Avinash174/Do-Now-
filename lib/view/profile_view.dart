@@ -21,324 +21,388 @@ class ProfileView extends ConsumerWidget {
     final userAsync = ref.watch(userProfileProvider);
     final stats = ref.watch(taskStatsProvider);
     final user = ref.watch(authStateProvider).value;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        children: [
-          // Premium Dynamic Header
-          Stack(
-            children: [
-              Container(
-                width: double.infinity,
-                height: size.height * 0.48,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primaryBlue,
-                      AppColors.secondaryBlue,
-                      AppColors.primaryBlue,
+    // Standardized theme colors
+    final textColor = isDark ? Colors.white : AppColors.textDark;
+    final mutedTextColor = isDark ? Colors.white70 : AppColors.textLight;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarColor: theme.scaffoldBackgroundColor,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
+      ),
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          children: [
+            // Premium Dynamic Header
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: size.height * 0.48,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primaryBlue,
+                        AppColors.primaryBlue.withValues(alpha: 0.8),
+                        AppColors.primaryAccent,
+                      ],
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(50),
+                      bottomRight: Radius.circular(50),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(50),
-                    bottomRight: Radius.circular(50),
+                ),
+                // Decorative Bubbles
+                Positioned(
+                  top: -60,
+                  right: -60,
+                  child: _buildHeaderCircle(
+                    240,
+                    AppColors.white.withValues(alpha: 0.08),
                   ),
                 ),
-              ),
-              // Decorative Bubbles
-              Positioned(
-                top: -60,
-                right: -60,
-                child: _buildHeaderCircle(
-                  240,
-                  AppColors.white.withValues(alpha: 0.1),
+                Positioned(
+                  bottom: 40,
+                  left: -40,
+                  child: _buildHeaderCircle(
+                    140,
+                    AppColors.white.withValues(alpha: 0.05),
+                  ),
                 ),
-              ),
-              Positioned(
-                bottom: 40,
-                left: -40,
-                child: _buildHeaderCircle(
-                  140,
-                  AppColors.white.withValues(alpha: 0.05),
-                ),
-              ),
-              SafeArea(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 5),
-                      Text(
-                        'Profile',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: isSmallScreen ? 20 : 22,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.white,
-                          letterSpacing: 0.5,
+                SafeArea(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 10),
+                        Text(
+                          'Profile Center',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: isSmallScreen ? 20 : 22,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.white,
+                            letterSpacing: -0.5,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      userAsync.when(
-                        loading: () => ShimmerLoading(
-                          width: isSmallScreen ? 112 : 132,
-                          height: isSmallScreen ? 112 : 132,
-                          borderRadius: 100,
-                        ),
-                        error: (err, _) => const Icon(
-                          Icons.error_outline_rounded,
-                          color: AppColors.white,
-                          size: 40,
-                        ),
-                        data: (profile) {
-                          final name =
-                              (profile?['name'] != null &&
-                                  profile!['name'].toString().isNotEmpty)
-                              ? profile['name']
-                              : (user?.displayName ?? 'User');
-                          final email =
-                              (profile?['email'] != null &&
-                                  profile!['email'].toString().isNotEmpty)
-                              ? profile['email']
-                              : (user?.email ?? '');
-                          return Column(
-                            children: [
-                              Stack(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: AppColors.white.withValues(
-                                          alpha: 0.25,
-                                        ),
-                                        width: 3,
-                                      ),
-                                    ),
-                                    child: CircleAvatar(
-                                      radius: isSmallScreen ? 50 : 60,
-                                      backgroundColor: AppColors.white,
-                                      backgroundImage:
-                                          profile?['photoUrl'] != null
-                                          ? NetworkImage(profile!['photoUrl'])
-                                          : null,
-                                      child: profile?['photoUrl'] == null
-                                          ? Text(
-                                              name.isNotEmpty
-                                                  ? name[0].toUpperCase()
-                                                  : 'U',
-                                              style:
-                                                  GoogleFonts.plusJakartaSans(
-                                                    fontSize: isSmallScreen
-                                                        ? 32
-                                                        : 40,
-                                                    fontWeight: FontWeight.w900,
-                                                    color:
-                                                        AppColors.primaryBlue,
-                                                  ),
-                                            )
-                                          : null,
-                                    ),
-                                  ).animate().scale(
-                                    duration: 600.ms,
-                                    curve: Curves.easeOutBack,
-                                  ),
-                                  Positioned(
-                                    bottom: 4,
-                                    right: 4,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          AppRoutes.editProfile,
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.white,
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: AppColors.black.withValues(
-                                                alpha: 0.1,
-                                              ),
-                                              blurRadius: 10,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        child: const Icon(
-                                          Icons.camera_alt_rounded,
-                                          size: 20,
-                                          color: AppColors.primaryBlue,
-                                        ),
-                                      ),
-                                    ),
-                                  ).animate().fadeIn(delay: 400.ms).scale(),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                    name,
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: isSmallScreen ? 24 : 28,
-                                      fontWeight: FontWeight.w900,
-                                      color: AppColors.white,
-                                      letterSpacing: -0.5,
-                                    ),
-                                  )
-                                  .animate()
-                                  .fadeIn(delay: 200.ms)
-                                  .slideY(begin: 0.2, end: 0),
-                              const SizedBox(height: 6),
-                              if (email.isNotEmpty)
-                                Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 6,
-                                      ),
+                        const SizedBox(height: 20),
+                        userAsync.when(
+                          loading: () => ShimmerLoading(
+                            width: isSmallScreen ? 112 : 132,
+                            height: isSmallScreen ? 112 : 132,
+                            borderRadius: 100,
+                          ),
+                          error: (err, _) => const Icon(
+                            Icons.error_outline_rounded,
+                            color: AppColors.white,
+                            size: 40,
+                          ),
+                          data: (profile) {
+                            final name =
+                                (profile?['name'] != null &&
+                                    profile!['name'].toString().isNotEmpty)
+                                ? profile['name']
+                                : (user?.displayName ?? 'Welcome Back');
+                            final email =
+                                (profile?['email'] != null &&
+                                    profile!['email'].toString().isNotEmpty)
+                                ? profile['email']
+                                : (user?.email ?? '');
+                            return Column(
+                              children: [
+                                Stack(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
                                       decoration: BoxDecoration(
-                                        color: AppColors.white.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        email,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 14,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
                                           color: AppColors.white.withValues(
-                                            alpha: 0.9,
+                                            alpha: 0.3,
                                           ),
-                                          fontWeight: FontWeight.w600,
+                                          width: 3,
                                         ),
+                                      ),
+                                      child: Hero(
+                                        tag: 'profile_pic',
+                                        child: CircleAvatar(
+                                          radius: isSmallScreen ? 50 : 60,
+                                          backgroundColor: AppColors.white,
+                                          backgroundImage:
+                                              profile?['photoUrl'] != null
+                                              ? NetworkImage(
+                                                  profile!['photoUrl'],
+                                                )
+                                              : null,
+                                          child: profile?['photoUrl'] == null
+                                              ? Text(
+                                                  name.isNotEmpty
+                                                      ? name[0].toUpperCase()
+                                                      : 'U',
+                                                  style:
+                                                      GoogleFonts.plusJakartaSans(
+                                                        fontSize: isSmallScreen
+                                                            ? 32
+                                                            : 40,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        color: AppColors
+                                                            .primaryBlue,
+                                                      ),
+                                                )
+                                              : null,
+                                        ),
+                                      ),
+                                    ).animate().scale(
+                                      duration: 600.ms,
+                                      curve: Curves.easeOutBack,
+                                    ),
+                                    Positioned(
+                                      bottom: 4,
+                                      right: 4,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          HapticFeedback.mediumImpact();
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.editProfile,
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.white,
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: AppColors.black
+                                                    .withValues(alpha: 0.15),
+                                                blurRadius: 10,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ],
+                                          ),
+                                          child: const Icon(
+                                            Icons.camera_alt_rounded,
+                                            size: 20,
+                                            color: AppColors.primaryBlue,
+                                          ),
+                                        ),
+                                      ),
+                                    ).animate().fadeIn(delay: 400.ms).scale(),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                      name,
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: isSmallScreen ? 24 : 28,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppColors.white,
+                                        letterSpacing: -1,
                                       ),
                                     )
                                     .animate()
-                                    .fadeIn(delay: 300.ms)
+                                    .fadeIn(delay: 200.ms)
                                     .slideY(begin: 0.2, end: 0),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
+                                const SizedBox(height: 8),
+                                if (email.isNotEmpty)
+                                  Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.white.withValues(
+                                            alpha: 0.15,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          email,
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 13,
+                                            color: AppColors.white.withValues(
+                                              alpha: 0.9,
+                                            ),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      )
+                                      .animate()
+                                      .fadeIn(delay: 300.ms)
+                                      .slideY(begin: 0.2, end: 0),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          // Content Body with Overlapping Stats Card
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Transform.translate(
-              offset: const Offset(0, -60),
-              child: Column(
-                children: [
-                  // Premium Stats Row
-                  _buildGlassStatsCard(context, stats),
-
-                  const SizedBox(height: 32),
-
-                  // Menu Section - Account
-                  _buildMenuSection(context, 'Account Settings', [
-                    _buildMenuTile(
+            // Content Body with Overlapping Stats Card
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Transform.translate(
+                offset: const Offset(0, -60),
+                child: Column(
+                  children: [
+                    // Premium Stats Row
+                    _buildGlassStatsCard(
                       context,
-                      Icons.person_outline_rounded,
-                      'Edit Profile',
-                      AppColors.primaryBlue,
-                      () => Navigator.pushNamed(context, AppRoutes.editProfile),
+                      stats,
+                      textColor,
+                      mutedTextColor,
                     ),
-                    _buildMenuTile(
-                      context,
-                      Icons.notifications_none_rounded,
-                      'Notifications',
-                      AppColors.warning,
-                      () =>
-                          Navigator.pushNamed(context, AppRoutes.notifications),
-                    ),
-                    _buildMenuTile(
-                      context,
-                      Icons.security_rounded,
-                      'Security & Privacy',
-                      AppColors.success,
-                      () => Navigator.pushNamed(context, AppRoutes.security),
-                    ),
-                    _buildThemeTile(context, ref),
-                  ]),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
-                  // Menu Section - Support
-                  _buildMenuSection(context, 'Support', [
-                    _buildMenuTile(
-                      context,
-                      Icons.help_outline_rounded,
-                      'Help Center',
-                      AppColors.primaryAccent,
-                      () => Navigator.pushNamed(context, AppRoutes.helpCenter),
-                    ),
-                    _buildMenuTile(
-                      context,
-                      Icons.info_outline_rounded,
-                      'About Do Now',
-                      AppColors.primaryBlue,
-                      () => Navigator.pushNamed(context, AppRoutes.about),
-                    ),
-                  ]),
-
-                  const SizedBox(height: 32),
-
-                  // Logout Button - Refined
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => _handleLogout(context, ref),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.danger.withValues(
-                          alpha: 0.08,
-                        ),
-                        foregroundColor: AppColors.danger,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          side: BorderSide(
-                            color: AppColors.danger.withValues(alpha: 0.1),
-                            width: 1,
-                          ),
-                        ),
+                    // Menu Section - Account
+                    _buildMenuSection(context, 'PERSONAL SETTINGS', [
+                      _buildMenuTile(
+                        context,
+                        Icons.person_rounded,
+                        'Profile Management',
+                        AppColors.primaryBlue,
+                        () =>
+                            Navigator.pushNamed(context, AppRoutes.editProfile),
+                        textColor,
+                        mutedTextColor,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.logout_rounded, size: 20),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Sign Out',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                              letterSpacing: 0.5,
+                      _buildMenuTile(
+                        context,
+                        Icons.notifications_active_rounded,
+                        'Notification Control',
+                        AppColors.warning,
+                        () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.notifications,
+                        ),
+                        textColor,
+                        mutedTextColor,
+                      ),
+                      _buildMenuTile(
+                        context,
+                        Icons.verified_user_rounded,
+                        'Security & Access',
+                        AppColors.success,
+                        () => Navigator.pushNamed(context, AppRoutes.security),
+                        textColor,
+                        mutedTextColor,
+                      ),
+                      _buildThemeTile(context, ref, textColor, mutedTextColor),
+                    ], textColor),
+
+                    const SizedBox(height: 24),
+
+                    // Menu Section - Support
+                    _buildMenuSection(context, 'SUPPORT & INFO', [
+                      _buildMenuTile(
+                        context,
+                        Icons.help_center_rounded,
+                        'Knowledge Base',
+                        AppColors.primaryAccent,
+                        () =>
+                            Navigator.pushNamed(context, AppRoutes.helpCenter),
+                        textColor,
+                        mutedTextColor,
+                      ),
+                      _buildMenuTile(
+                        context,
+                        Icons.error_rounded,
+                        'About Application',
+                        AppColors.primaryBlue,
+                        () => Navigator.pushNamed(context, AppRoutes.about),
+                        textColor,
+                        mutedTextColor,
+                      ),
+                    ], textColor),
+
+                    const SizedBox(height: 32),
+
+                    // Logout Button - Refined
+                    SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => _handleLogout(
+                              context,
+                              ref,
+                              textColor,
+                              mutedTextColor,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.danger.withValues(
+                                alpha: isDark ? 0.15 : 0.08,
+                              ),
+                              foregroundColor: AppColors.danger,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                side: BorderSide(
+                                  color: AppColors.danger.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.power_settings_new_rounded,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Terminate Session',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ).animate(delay: 800.ms).fadeIn().slideY(begin: 0.2, end: 0),
-                  const SizedBox(height: 100),
-                ],
+                        )
+                        .animate(delay: 800.ms)
+                        .fadeIn()
+                        .slideY(begin: 0.2, end: 0),
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -354,15 +418,23 @@ class ProfileView extends ConsumerWidget {
   Widget _buildGlassStatsCard(
     BuildContext context,
     Map<String, dynamic> stats,
+    Color textColor,
+    Color mutedTextColor,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.transparent,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
             blurRadius: 30,
             offset: const Offset(0, 15),
           ),
@@ -373,26 +445,32 @@ class ProfileView extends ConsumerWidget {
         children: [
           _buildStatItem(
             context,
-            'Total Tasks',
+            'Total',
             '${stats['total']}',
-            Icons.list_alt_rounded,
+            Icons.dashboard_rounded,
             AppColors.primaryBlue,
+            textColor,
+            mutedTextColor,
           ),
           _buildDivider(context),
           _buildStatItem(
             context,
-            'Completed',
+            'Done',
             '${stats['done']}',
-            Icons.check_circle_rounded,
+            Icons.task_alt_rounded,
             AppColors.success,
+            textColor,
+            mutedTextColor,
           ),
           _buildDivider(context),
           _buildStatItem(
             context,
             'Pending',
             '${stats['pending']}',
-            Icons.pending_rounded,
+            Icons.hourglass_bottom_rounded,
             AppColors.warning,
+            textColor,
+            mutedTextColor,
           ),
         ],
       ),
@@ -405,26 +483,27 @@ class ProfileView extends ConsumerWidget {
     String value,
     IconData icon,
     Color color,
+    Color textColor,
+    Color mutedTextColor,
   ) {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: color, size: 20),
+          child: Icon(icon, color: color, size: 22),
         ),
         const SizedBox(height: 12),
         Text(
           value,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: FontWeight.w900,
-            color:
-                Theme.of(context).textTheme.bodyLarge?.color ??
-                AppColors.textDark,
+            color: textColor,
+            letterSpacing: -0.5,
           ),
         ),
         const SizedBox(height: 2),
@@ -432,8 +511,8 @@ class ProfileView extends ConsumerWidget {
           label,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12,
-            color: Theme.of(context).textTheme.bodySmall?.color,
-            fontWeight: FontWeight.w600,
+            color: mutedTextColor,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -442,26 +521,38 @@ class ProfileView extends ConsumerWidget {
 
   Widget _buildDivider(BuildContext context) {
     return Container(
-      height: 40,
-      width: 1,
-      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+      height: 48,
+      width: 1.5,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).dividerColor.withValues(alpha: 0),
+            Theme.of(context).dividerColor.withValues(alpha: 0.2),
+            Theme.of(context).dividerColor.withValues(alpha: 0),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
     );
   }
 
-  Widget _buildThemeTile(BuildContext context, WidgetRef ref) {
+  Widget _buildThemeTile(
+    BuildContext context,
+    WidgetRef ref,
+    Color textColor,
+    Color mutedTextColor,
+  ) {
     final themeModeAsync = ref.watch(themeModeProvider);
     final themeMode = themeModeAsync.value ?? ThemeMode.system;
     final isDark = Theme.of(ref.context).brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 0),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
-          ),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -484,24 +575,24 @@ class ProfileView extends ConsumerWidget {
                   ),
                   const SizedBox(width: 14),
                   Text(
-                    'App Theme',
+                    'Application Aesthetic',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      fontWeight: FontWeight.w700,
+                      color: textColor,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 18),
               Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).scaffoldBackgroundColor.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(16),
+                  color: isDark
+                      ? Colors.black26
+                      : Colors.black.withValues(alpha: 0.04),
+                  borderRadius: BorderRadius.circular(18),
                 ),
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(6),
                 child: Row(
                   children: [
                     _buildThemeOption(
@@ -514,8 +605,8 @@ class ProfileView extends ConsumerWidget {
                     ),
                     _buildThemeOption(
                       ref,
-                      label: 'System',
-                      icon: Icons.phone_android_rounded,
+                      label: 'Adaptive',
+                      icon: Icons.auto_mode_rounded,
                       mode: ThemeMode.system,
                       current: themeMode,
                       isDark: isDark,
@@ -554,16 +645,16 @@ class ProfileView extends ConsumerWidget {
           ref.read(themeModeProvider.notifier).setMode(mode);
         },
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          duration: const Duration(milliseconds: 300),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.primaryBlue : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
                       color: AppColors.primaryBlue.withValues(alpha: 0.3),
-                      blurRadius: 8,
+                      blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
                   ]
@@ -577,17 +668,17 @@ class ProfileView extends ConsumerWidget {
                 size: 20,
                 color: isSelected
                     ? Colors.white
-                    : (isDark ? const Color(0xFF94A3B8) : AppColors.textMuted),
+                    : (isDark ? Colors.white54 : AppColors.textMuted),
               ),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                   color: isSelected
                       ? Colors.white
-                      : Theme.of(ref.context).textTheme.bodySmall?.color,
+                      : (isDark ? Colors.white54 : AppColors.textLight),
                 ),
               ),
             ],
@@ -601,7 +692,9 @@ class ProfileView extends ConsumerWidget {
     BuildContext context,
     String title,
     List<Widget> tiles,
+    Color textColor,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -610,22 +703,27 @@ class ProfileView extends ConsumerWidget {
           child: Text(
             title,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w800,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-              letterSpacing: 0.5,
+              color: AppColors.primaryBlue,
+              letterSpacing: 1.5,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.transparent,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
@@ -641,84 +739,113 @@ class ProfileView extends ConsumerWidget {
     String title,
     Color iconColor,
     VoidCallback onTap,
+    Color textColor,
+    Color mutedTextColor,
   ) {
     return ListTile(
       onTap: () {
         HapticFeedback.lightImpact();
         onTap();
       },
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
       leading: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: iconColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: Icon(icon, color: iconColor, size: 22),
+        child: Icon(icon, color: iconColor, size: 24),
       ),
       title: Text(
         title,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           fontWeight: FontWeight.w700,
-          color: Theme.of(context).textTheme.bodyLarge?.color,
+          color: textColor,
         ),
       ),
       trailing: Icon(
-        Icons.arrow_forward_ios_rounded,
-        size: 14,
-        color: Theme.of(
-          context,
-        ).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+        Icons.chevron_right_rounded,
+        size: 22,
+        color: mutedTextColor.withValues(alpha: 0.4),
       ),
     );
   }
 
-  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+  Future<void> _handleLogout(
+    BuildContext context,
+    WidgetRef ref,
+    Color textColor,
+    Color mutedTextColor,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         title: Text(
-          'Sign Out',
+          'Terminate Session',
           style: GoogleFonts.plusJakartaSans(
-            fontWeight: FontWeight.w800,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
+            fontWeight: FontWeight.w900,
+            fontSize: 22,
+            color: textColor,
           ),
         ),
         content: Text(
-          'Are you sure you want to sign out?',
+          'Are you sure you want to end your current session? You will need to re-authenticate.',
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.w500,
-            color: Theme.of(context).textTheme.bodyMedium?.color,
+            color: mutedTextColor,
+            fontSize: 15,
           ),
         ),
+        actionsPadding: const EdgeInsets.all(20),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.plusJakartaSans(
-                color: Theme.of(context).textTheme.bodySmall?.color,
-                fontWeight: FontWeight.w700,
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    'Keep Active',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: mutedTextColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.danger,
-              foregroundColor: AppColors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.danger,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    'Sign Out',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
               ),
-            ),
-            child: Text(
-              'Sign Out',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
-            ),
+            ],
           ),
         ],
       ),
@@ -729,7 +856,7 @@ class ProfileView extends ConsumerWidget {
       if (context.mounted) {
         SnackbarUtils.showSuccess(
           context,
-          'Signed Out',
+          'Session Terminated',
           'You have been successfully signed out.',
         );
         Navigator.pushReplacementNamed(context, AppRoutes.login);

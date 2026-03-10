@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:io';
 
 import '../const/app_colors.dart';
@@ -52,7 +53,12 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final pickedFile = await _imagePicker.pickImage(source: source);
+      HapticFeedback.mediumImpact();
+      final pickedFile = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 70,
+        maxWidth: 1000,
+      );
       if (pickedFile != null) {
         setState(() {
           _selectedImage = File(pickedFile.path);
@@ -66,67 +72,58 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   }
 
   void _showImageSourceDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppColors.textDark;
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
       backgroundColor: Theme.of(context).cardColor,
+      elevation: 0,
       builder: (BuildContext context) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white24 : Colors.black12,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Text(
-                  'Choose Image Source',
+                  'Update Profile Media',
                   style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.w800,
-                    fontSize: 18,
-                    color: Theme.of(context).textTheme.titleLarge?.color,
+                    fontSize: 20,
+                    color: textColor,
+                    letterSpacing: -0.5,
                   ),
+                ),
+                const SizedBox(height: 24),
+                _buildSourceOption(
+                  context,
+                  Icons.camera_alt_rounded,
+                  'Capture from Camera',
+                  () => _pickImage(ImageSource.camera),
+                  AppColors.primaryBlue,
+                ),
+                const SizedBox(height: 12),
+                _buildSourceOption(
+                  context,
+                  Icons.photo_library_rounded,
+                  'Choose from Gallery',
+                  () => _pickImage(ImageSource.gallery),
+                  AppColors.primaryAccent,
                 ),
                 const SizedBox(height: 20),
-                ListTile(
-                  leading: const Icon(
-                    Icons.camera_alt_rounded,
-                    color: AppColors.primaryBlue,
-                  ),
-                  title: Text(
-                    'Camera',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w600,
-                      color:
-                          Theme.of(context).textTheme.bodyLarge?.color ??
-                          AppColors.textDark,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.camera);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(
-                    Icons.photo_library_rounded,
-                    color: AppColors.primaryBlue,
-                  ),
-                  title: Text(
-                    'Gallery',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w600,
-                      color:
-                          Theme.of(context).textTheme.bodyLarge?.color ??
-                          AppColors.textDark,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.gallery);
-                  },
-                ),
-                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -135,13 +132,73 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     );
   }
 
+  Widget _buildSourceOption(
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+    Color color,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        decoration: BoxDecoration(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.black.withValues(alpha: 0.03),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.transparent,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Text(
+              title,
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                color: isDark ? Colors.white : AppColors.textDark,
+              ),
+            ),
+            const Spacer(),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: isDark
+                  ? Colors.white38
+                  : AppColors.textLight.withValues(alpha: 0.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _updateProfile() async {
     if (_nameController.text.trim().isEmpty) {
+      HapticFeedback.vibrate();
       SnackbarUtils.showError(context, 'Error', 'Name cannot be empty');
       return;
     }
 
     setState(() => _isLoading = true);
+    HapticFeedback.mediumImpact();
     final user = ref.read(authStateProvider).value;
     if (user == null) return;
 
@@ -155,28 +212,22 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       if (_selectedImage != null) {
         final profileService = ref.read(databaseServiceProvider);
         await profileService.uploadProfilePhoto(user.uid, _selectedImage!);
-        SnackbarUtils.showSuccess(
-          context,
-          'Success',
-          'Profile and photo updated successfully',
-        );
-      } else {
-        SnackbarUtils.showSuccess(
-          context,
-          'Success',
-          'Profile updated successfully',
-        );
       }
 
       if (mounted) {
+        SnackbarUtils.showSuccess(
+          context,
+          'Profile Updated',
+          'Your profile information has been synchronized.',
+        );
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         SnackbarUtils.showError(
           context,
-          'Error',
-          'Failed to update profile: $e',
+          'Operation Failed',
+          'An error occurred while updating your profile.',
         );
       }
     } finally {
@@ -190,218 +241,334 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
     final userAsync = ref.watch(userProfileProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
-        leading: PlatformBackButton(
-          color:
-              Theme.of(context).textTheme.bodyLarge?.color ??
-              AppColors.textDark,
-        ),
-        title: Text(
-          'Edit Profile',
-          style: GoogleFonts.plusJakartaSans(
-            color: Theme.of(context).textTheme.titleLarge?.color,
-            fontWeight: FontWeight.w800,
-            fontSize: isSmallScreen ? 18 : 20,
-          ),
-        ),
-        centerTitle: true,
+    final textColor = isDark ? Colors.white : AppColors.textDark;
+    final mutedTextColor = isDark ? Colors.white70 : AppColors.textLight;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: theme.scaffoldBackgroundColor,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: size.width * 0.06,
-            vertical: 24,
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: PlatformBackButton(color: textColor),
           ),
-          child: Column(
-            children: [
-              SizedBox(height: size.height * 0.02),
-              // Profile Picture
-              Center(
-                child: Stack(
-                  children: [
-                    userAsync.when(
-                      data: (profile) {
-                        final photoUrl = profile?['photoUrl'];
-                        return Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.primaryBlue.withValues(
-                                alpha: 0.1,
-                              ),
-                              width: 4,
-                            ),
-                          ),
-                          child: CircleAvatar(
-                            radius: size.width * 0.15,
-                            backgroundColor: AppColors.primaryBlue.withValues(
-                              alpha: 0.1,
-                            ),
-                            backgroundImage: _selectedImage != null
-                                ? FileImage(_selectedImage!)
-                                : (photoUrl != null
-                                      ? NetworkImage(photoUrl)
-                                      : null),
-                            child: _selectedImage == null && photoUrl == null
-                                ? Icon(
-                                    Icons.person_rounded,
-                                    size: size.width * 0.15,
-                                    color: AppColors.primaryBlue,
-                                  )
-                                : null,
-                          ),
-                        );
-                      },
-                      loading: () => ShimmerLoading(
-                        width: size.width * 0.3,
-                        height: size.width * 0.3,
-                        borderRadius: 100,
-                      ),
-                      error: (err, _) => const Icon(
-                        Icons.error_outline_rounded,
-                        color: AppColors.danger,
-                        size: 40,
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: _showImageSourceDialog,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryBlue,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Theme.of(context).cardColor,
-                              width: 3,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.camera_alt_rounded,
-                            color: Colors.white,
-                            size: isSmallScreen ? 16 : 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: size.height * 0.05),
-
-              // Name Input
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'FULL NAME',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: isSmallScreen ? 11 : 12,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textLight,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    decoration: BoxDecoration(
-                      color: _nameFocus.hasFocus
-                          ? theme.cardColor
-                          : theme.cardColor.withValues(
-                              alpha: isDark ? 0.3 : 0.5,
-                            ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: _nameFocus.hasFocus
-                            ? AppColors.primaryBlue
-                            : theme.dividerColor.withValues(
-                                alpha: isDark ? 0.3 : 0.1,
-                              ),
-                        width: _nameFocus.hasFocus ? 1.5 : 1.0,
-                      ),
-                      boxShadow: _nameFocus.hasFocus
-                          ? [
-                              BoxShadow(
+          title: Text(
+            'Personal Information',
+            style: GoogleFonts.plusJakartaSans(
+              color: textColor,
+              fontWeight: FontWeight.w900,
+              fontSize: isSmallScreen ? 18 : 20,
+              letterSpacing: -0.5,
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.symmetric(
+              horizontal: size.width * 0.06,
+              vertical: 20,
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                // Profile Picture Section
+                Center(
+                  child: Stack(
+                    children: [
+                      userAsync.when(
+                        data: (profile) {
+                          final photoUrl = profile?['photoUrl'];
+                          return Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
                                 color: AppColors.primaryBlue.withValues(
-                                  alpha: 0.1,
+                                  alpha: 0.2,
                                 ),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
+                                width: 2,
                               ),
-                            ]
-                          : [],
-                    ),
-                    child: TextField(
-                      controller: _nameController,
-                      focusNode: _nameFocus,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Enter your name',
-                        hintStyle: GoogleFonts.plusJakartaSans(
-                          color: AppColors.textLight.withValues(alpha: 0.4),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryBlue.withValues(
+                                    alpha: isDark ? 0.2 : 0.1,
+                                  ),
+                                  blurRadius: 30,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Hero(
+                              tag: 'profile_pic',
+                              child: CircleAvatar(
+                                radius: size.width * 0.18,
+                                backgroundColor: isDark
+                                    ? Colors.white10
+                                    : Colors.black.withValues(alpha: 0.05),
+                                backgroundImage: _selectedImage != null
+                                    ? FileImage(_selectedImage!)
+                                    : (photoUrl != null
+                                          ? NetworkImage(photoUrl)
+                                          : null),
+                                child:
+                                    _selectedImage == null && photoUrl == null
+                                    ? Icon(
+                                        Icons.person_rounded,
+                                        size: size.width * 0.18,
+                                        color: AppColors.primaryBlue.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                            ),
+                          ).animate().scale(
+                            duration: 600.ms,
+                            curve: Curves.easeOutBack,
+                          );
+                        },
+                        loading: () => ShimmerLoading(
+                          width: size.width * 0.4,
+                          height: size.width * 0.4,
+                          borderRadius: 100,
                         ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: size.height * 0.1),
-
-              // Save Button
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _updateProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                    foregroundColor: AppColors.white,
-                    elevation: 8,
-                    shadowColor: AppColors.primaryBlue.withValues(alpha: 0.4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const ShimmerLoading(
-                          width: double.infinity,
-                          height: 60,
-                          borderRadius: 20,
-                        )
-                      : Text(
-                          'Save Changes',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
+                        error: (err, _) => Container(
+                          width: size.width * 0.4,
+                          height: size.width * 0.4,
+                          decoration: const BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.error_outline_rounded,
+                            color: Colors.white,
+                            size: 40,
                           ),
                         ),
+                      ),
+                      Positioned(
+                        bottom: 8,
+                        right: 8,
+                        child:
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                _showImageSourceDialog();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryBlue,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: theme.scaffoldBackgroundColor,
+                                    width: 4,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 5),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.camera_enhance_rounded,
+                                  color: Colors.white,
+                                  size: isSmallScreen ? 18 : 22,
+                                ),
+                              ),
+                            ).animate().scale(
+                              delay: 400.ms,
+                              duration: 400.ms,
+                              curve: Curves.elasticOut,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 100),
-            ],
+                const SizedBox(height: 48),
+
+                // Inputs Section
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : Colors.transparent,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.2 : 0.04,
+                        ),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'FULL IDENTIFICATION',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryBlue,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildTextField(
+                        controller: _nameController,
+                        focusNode: _nameFocus,
+                        hint: 'Your official name',
+                        icon: Icons.badge_rounded,
+                        isDark: isDark,
+                        textColor: textColor,
+                      ),
+                    ],
+                  ),
+                ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.1, end: 0),
+
+                const SizedBox(height: 40),
+
+                // Save Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 64,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _updateProfile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryBlue,
+                      foregroundColor: AppColors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      shadowColor: AppColors.primaryBlue.withValues(alpha: 0.5),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.check_circle_rounded, size: 20),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Synchronize Profile',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ).animate(delay: 200.ms).fadeIn().slideY(begin: 0.2, end: 0),
+
+                const SizedBox(height: 32),
+
+                Text(
+                  'This information is visible to other users\ndepending on your privacy settings.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    color: mutedTextColor.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                  ),
+                ).animate(delay: 400.ms).fadeIn(),
+
+                const SizedBox(height: 100),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String hint,
+    required IconData icon,
+    required bool isDark,
+    required Color textColor,
+  }) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: BoxDecoration(
+        color: focusNode.hasFocus
+            ? (isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.02))
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: focusNode.hasFocus
+              ? AppColors.primaryBlue
+              : (isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.05)),
+          width: focusNode.hasFocus ? 2 : 1.5,
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: textColor,
+        ),
+        decoration: InputDecoration(
+          prefixIcon: Icon(
+            icon,
+            color: focusNode.hasFocus
+                ? AppColors.primaryBlue
+                : AppColors.textLight.withValues(alpha: 0.5),
+            size: 22,
+          ),
+          hintText: hint,
+          hintStyle: GoogleFonts.plusJakartaSans(
+            color: AppColors.textLight.withValues(alpha: 0.4),
+            fontWeight: FontWeight.w500,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 18,
           ),
         ),
       ),

@@ -8,8 +8,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../const/app_colors.dart';
 import '../services/auth_service.dart';
 import '../routes/app_routes.dart';
-import '../utils/app_utils.dart';
-import '../utils/shimmer_utils.dart';
+import '../utils/snackbar_utils.dart';
 
 class LoginView extends ConsumerStatefulWidget {
   const LoginView({super.key});
@@ -21,91 +20,127 @@ class LoginView extends ConsumerStatefulWidget {
 class _LoginViewState extends ConsumerState<LoginView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
   bool _obscurePassword = true;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailFocus.addListener(() => setState(() {}));
+    _passwordFocus.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
   Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
+
     if (email.isEmpty || password.isEmpty) {
-      _showSnackBar('Please fill in all fields');
+      HapticFeedback.vibrate();
+      SnackbarUtils.showError(
+        context,
+        'Missing Fields',
+        'Please fill in all authentication details.',
+      );
       return;
     }
+
     setState(() => _isLoading = true);
+    HapticFeedback.mediumImpact();
+
     try {
       await ref
           .read(authServiceProvider)
           .signInWithEmailPassword(email, password);
-      if (mounted) Navigator.pushReplacementNamed(context, AppRoutes.home);
+      if (mounted) {
+        HapticFeedback.heavyImpact();
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
+      }
     } catch (e) {
-      String errorMessage = 'Login failed';
+      String errorMessage = 'Authentication failed';
       if (e is FirebaseAuthException) {
         errorMessage = e.message ?? errorMessage;
-      } else {
-        errorMessage = e.toString();
       }
-      _showSnackBar(errorMessage);
+      if (mounted) {
+        SnackbarUtils.showError(context, 'Login Error', errorMessage);
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _showSnackBar(String msg, {bool isError = true}) {
-    AppUtils.showSnackBar(context, msg, isError: isError);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: Theme.of(context).brightness == Brightness.dark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
-        child: SafeArea(
+    final textColor = isDark ? Colors.white : AppColors.textDark;
+    final mutedTextColor = isDark ? Colors.white70 : AppColors.textLight;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: theme.scaffoldBackgroundColor,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: SafeArea(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: size.height * 0.05),
+                SizedBox(height: size.height * 0.04),
                 _buildLogo(size),
                 const SizedBox(height: 32),
-                _buildWelcomeText(isSmallScreen),
+                _buildWelcomeText(isSmallScreen, textColor, mutedTextColor),
                 SizedBox(height: size.height * 0.06),
 
                 _buildInputField(
-                  label: 'Email Address',
-                  hint: 'Enter your email',
+                  label: 'IDENTITY GATEWAY',
+                  hint: 'Enter your email address',
                   controller: _emailController,
-                  icon: Icons.email_outlined,
+                  focusNode: _emailFocus,
+                  icon: Icons.alternate_email_rounded,
                   keyboardType: TextInputType.emailAddress,
-                  isSmallScreen: isSmallScreen,
+                  isDark: isDark,
+                  textColor: textColor,
                 ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.1, end: 0),
 
                 const SizedBox(height: 24),
 
                 _buildInputField(
-                  label: 'Password',
+                  label: 'SECURE KEY',
                   hint: 'Enter your password',
                   controller: _passwordController,
-                  icon: Icons.lock_outline_rounded,
+                  focusNode: _passwordFocus,
+                  icon: Icons.lock_open_rounded,
                   isPassword: true,
+                  isDark: isDark,
+                  textColor: textColor,
                   obscureText: _obscurePassword,
-                  isSmallScreen: isSmallScreen,
-                  onSuffixIconTap: () =>
-                      setState(() => _obscurePassword = !_obscurePassword),
+                  onSuffixIconTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() => _obscurePassword = !_obscurePassword);
+                  },
                 ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1, end: 0),
 
                 _buildForgotPassword(isSmallScreen),
@@ -116,7 +151,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
                 SizedBox(height: size.height * 0.06),
 
-                _buildSignUpLink(isSmallScreen),
+                _buildSignUpLink(isSmallScreen, mutedTextColor),
 
                 const SizedBox(height: 40),
               ],
@@ -128,53 +163,65 @@ class _LoginViewState extends ConsumerState<LoginView> {
   }
 
   Widget _buildLogo(Size size) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.transparent,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
+                  color: AppColors.primaryBlue.withValues(
+                    alpha: isDark ? 0.2 : 0.12,
+                  ),
+                  blurRadius: 30,
+                  offset: const Offset(0, 15),
                 ),
               ],
             ),
             child: Image.asset(
               'assets/images/app_logo.png',
-              width: size.width * 0.14,
-              height: size.width * 0.14,
+              width: size.width * 0.16,
+              height: size.width * 0.16,
             ),
           ),
         )
         .animate()
-        .scale(duration: 500.ms, curve: Curves.easeOutBack)
+        .scale(duration: 700.ms, curve: Curves.easeOutBack)
         .rotate(begin: -0.1, end: 0);
   }
 
-  Widget _buildWelcomeText(bool isSmallScreen) {
+  Widget _buildWelcomeText(
+    bool isSmallScreen,
+    Color textColor,
+    Color mutedTextColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Sign In',
+          'Digital Access',
           style: GoogleFonts.plusJakartaSans(
             fontSize: isSmallScreen ? 28 : 34,
-            fontWeight: FontWeight.w800,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
-            letterSpacing: -1,
+            fontWeight: FontWeight.w900,
+            color: textColor,
+            letterSpacing: -1.5,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Text(
-          'Welcome back! Please enter your details.',
+          'Welcome back. Provide your credentials to synchronize with your workspace.',
           style: GoogleFonts.plusJakartaSans(
-            color: Theme.of(
-              context,
-            ).textTheme.bodySmall?.color?.withValues(alpha: 0.8),
+            color: mutedTextColor,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
+            height: 1.5,
           ),
         ),
       ],
@@ -185,91 +232,98 @@ class _LoginViewState extends ConsumerState<LoginView> {
     required String label,
     required String hint,
     required TextEditingController controller,
+    required FocusNode focusNode,
     required IconData icon,
     bool isPassword = false,
     bool obscureText = false,
     VoidCallback? onSuffixIconTap,
     TextInputType? keyboardType,
-    required bool isSmallScreen,
+    required bool isDark,
+    required Color textColor,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: isSmallScreen ? 13 : 14,
-            fontWeight: FontWeight.w700,
-            color: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.color?.withValues(alpha: 0.9),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primaryBlue,
+              letterSpacing: 1.5,
+            ),
           ),
         ),
-        const SizedBox(height: 10),
-        Container(
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.black.withValues(alpha: 0.2)
-                    : Colors.black.withValues(alpha: 0.02),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: focusNode.hasFocus
+                ? (isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.02))
+                : Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: focusNode.hasFocus
+                  ? AppColors.primaryBlue
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.black.withValues(alpha: 0.05)),
+              width: focusNode.hasFocus ? 2 : 1.5,
+            ),
+            boxShadow: focusNode.hasFocus
+                ? [
+                    BoxShadow(
+                      color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : [],
           ),
           child: TextFormField(
             controller: controller,
+            focusNode: focusNode,
             obscureText: obscureText,
             keyboardType: keyboardType,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: isSmallScreen ? 14 : 15,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: textColor,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.plusJakartaSans(
-                color: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
-                fontSize: 14,
+                color: AppColors.textLight.withValues(alpha: 0.4),
+                fontSize: 15,
                 fontWeight: FontWeight.w500,
               ),
-              prefixIcon: Icon(icon, color: AppColors.primaryBlue, size: 20),
+              prefixIcon: Icon(
+                icon,
+                color: focusNode.hasFocus
+                    ? AppColors.primaryBlue
+                    : AppColors.textLight.withValues(alpha: 0.5),
+                size: 22,
+              ),
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
                         obscureText
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        color: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
-                        size: 20,
+                            ? Icons.visibility_off_rounded
+                            : Icons.visibility_rounded,
+                        color: focusNode.hasFocus
+                            ? AppColors.primaryBlue
+                            : AppColors.textLight.withValues(alpha: 0.5),
+                        size: 22,
                       ),
                       onPressed: onSuffixIconTap,
                     )
                   : null,
-              filled: true,
-              fillColor: Theme.of(context).cardColor,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: const BorderSide(
-                  color: AppColors.primaryBlue,
-                  width: 1.5,
-                ),
-              ),
+              border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
-                vertical: 18,
+                vertical: 20,
                 horizontal: 16,
               ),
             ),
@@ -283,16 +337,22 @@ class _LoginViewState extends ConsumerState<LoginView> {
     return Align(
       alignment: Alignment.centerRight,
       child: TextButton(
-        onPressed: () => Navigator.pushNamed(context, AppRoutes.forgetPassword),
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          Navigator.pushNamed(context, AppRoutes.forgetPassword);
+        },
         style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 0),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: Text(
-          'Forgot Password?',
+          'Recovery Access?',
           style: GoogleFonts.plusJakartaSans(
             color: AppColors.primaryBlue,
-            fontWeight: FontWeight.w700,
-            fontSize: isSmallScreen ? 12 : 13,
+            fontWeight: FontWeight.w800,
+            fontSize: isSmallScreen ? 13 : 14,
           ),
         ),
       ),
@@ -302,29 +362,29 @@ class _LoginViewState extends ConsumerState<LoginView> {
   Widget _buildLoginButton(Size size, bool isSmallScreen) {
     return SizedBox(
       width: double.infinity,
-      height: isSmallScreen ? 56 : 60,
+      height: 64,
       child: _isLoading
-          ? ShimmerLoading(
-              width: double.infinity,
-              height: isSmallScreen ? 56 : 60,
-              borderRadius: 18,
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primaryBlue,
+                strokeWidth: 3,
+              ),
             )
           : ElevatedButton(
               onPressed: _login,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
                 foregroundColor: AppColors.white,
-                elevation: 8,
-                shadowColor: AppColors.primaryBlue.withValues(alpha: 0.4),
+                elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(24),
                 ),
               ),
               child: Text(
-                'Sign In',
+                'Authorize Entry',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: isSmallScreen ? 15 : 16,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -332,30 +392,37 @@ class _LoginViewState extends ConsumerState<LoginView> {
     ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2, end: 0);
   }
 
-  Widget _buildSignUpLink(bool isSmallScreen) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Don\'t have an account? ',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: isSmallScreen ? 13 : 14,
-            color: Theme.of(context).textTheme.bodySmall?.color,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        GestureDetector(
-          onTap: () => Navigator.pushNamed(context, AppRoutes.signup),
-          child: Text(
-            'Sign Up',
+  Widget _buildSignUpLink(bool isSmallScreen, Color mutedTextColor) {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'New to the platform? ',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: isSmallScreen ? 13 : 14,
-              color: AppColors.primaryBlue,
-              fontWeight: FontWeight.w800,
+              fontSize: 14,
+              color: mutedTextColor,
+              fontWeight: FontWeight.w500,
             ),
           ),
-        ),
-      ],
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.pushNamed(context, AppRoutes.signup);
+            },
+            child: Text(
+              'Register Now',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                color: AppColors.primaryBlue,
+                fontWeight: FontWeight.w900,
+                decoration: TextDecoration.underline,
+                decorationColor: AppColors.primaryBlue.withValues(alpha: 0.3),
+              ),
+            ),
+          ),
+        ],
+      ),
     ).animate().fadeIn(delay: 900.ms);
   }
 }

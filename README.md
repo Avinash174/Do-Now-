@@ -4,7 +4,6 @@
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue?style=for-the-badge&logo=flutter)](https://flutter.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Realtime%20DB-orange?style=for-the-badge&logo=firebase)](https://firebase.google.com)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 ---
 
@@ -34,6 +33,7 @@ Whether you're managing personal projects, work tasks, or daily habits, Do Now p
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework**: Flutter 3.0+
 - **State Management**: flutter_riverpod (reactive provider pattern)
 - **UI Library**: Material 3 Design System
@@ -41,6 +41,7 @@ Whether you're managing personal projects, work tasks, or daily habits, Do Now p
 - **Fonts**: Google Fonts (Plus Jakarta Sans)
 
 ### Backend & Services
+
 - **Authentication**: Firebase Auth (Email/Password)
 - **Database**: Firebase Realtime Database
 - **Storage**: Firebase Cloud Storage (Profile photos)
@@ -48,6 +49,7 @@ Whether you're managing personal projects, work tasks, or daily habits, Do Now p
 - **Local Caching**: SharedPreferences
 
 ### Additional Packages
+
 - **firebase_auth** - Authentication
 - **firebase_database** - Real-time data sync
 - **firebase_storage** - File storage
@@ -62,6 +64,7 @@ Whether you're managing personal projects, work tasks, or daily habits, Do Now p
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Flutter 3.0 or higher
 - Dart 2.17+
 - Firebase project setup
@@ -70,12 +73,14 @@ Whether you're managing personal projects, work tasks, or daily habits, Do Now p
 ### Installation
 
 1. **Clone the Repository**
+
    ```bash
    git clone https://github.com/Avinash174/do_now.git
    cd do_now
    ```
 
 2. **Install Dependencies**
+
    ```bash
    flutter pub get
    ```
@@ -143,25 +148,28 @@ lib/
 
 ## 📸 Screenshots
 
-| Dashboard | Statistics | Profile |
-|-----------|-----------|---------|
-| 📋 Task Overview | 📊 Productivity Insights | 👤 User Profile |
-| Manage all tasks | Track your progress | Customize settings |
+| Dashboard        | Statistics               | Profile            |
+| ---------------- | ------------------------ | ------------------ |
+| 📋 Task Overview | 📊 Productivity Insights | 👤 User Profile    |
+| Manage all tasks | Track your progress      | Customize settings |
 
 ---
 
 ## 🐛 Troubleshooting
 
 ### Firebase Connection Issues
+
 - Ensure Firebase project is properly configured
 - Check Firebase Security Rules
 - Verify network permissions in AndroidManifest.xml
 
 ### Theme Not Changing
+
 - Rebuild the app: `flutter clean && flutter pub get`
 - Restart the development server
 
 ### Notification Issues
+
 - Check Firebase Cloud Messaging setup
 - Verify notification permissions are granted
 - Review FCM debug messages in logs
@@ -186,8 +194,6 @@ We'd love your contributions! Here's how:
 - [Firebase Documentation](https://firebase.google.com/docs)
 - [Riverpod Documentation](https://riverpod.dev)
 - [Material Design 3](https://m3.material.io)
-
-
 
 ## 👨‍💻 Author
 

@@ -27,13 +27,14 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Standardized theme colors
     final textColor = isDark ? Colors.white : AppColors.textDark;
-    final mutedTextColor = isDark ? Colors.white70 : AppColors.textLight;
-    final cardColor = isDark ? theme.cardColor : Colors.white;
+    final mutedTextColor = isDark
+        ? Colors.white.withValues(alpha: 0.6)
+        : AppColors.textLight;
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final borderColor = isDark
-        ? theme.dividerColor.withValues(alpha: 0.15)
-        : AppColors.borderColor;
+        ? Colors.white.withValues(alpha: 0.08)
+        : AppColors.borderColor.withValues(alpha: 0.5);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -47,244 +48,264 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
       ),
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
-          leading: PlatformBackButton(color: textColor),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: PlatformBackButton(color: textColor),
+          ),
           title: Text(
-            'Profile Visibility',
+            'Privacy Protocols',
             style: GoogleFonts.plusJakartaSans(
               color: textColor,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               fontSize: isSmallScreen ? 18 : 20,
+              letterSpacing: -0.5,
             ),
           ),
           centerTitle: true,
         ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              horizontal: size.width * 0.06,
-              vertical: 20,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
+        body: Stack(
+          children: [
+            // Decorative background elements
+            if (isDark)
+              Positioned(
+                top: -100,
+                right: -100,
+                child: Container(
+                  width: 300,
+                  height: 300,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.primaryAccent.withValues(
-                          alpha: isDark ? 0.2 : 0.1,
+                    shape: BoxShape.circle,
+                    color: AppColors.primaryBlue.withValues(alpha: 0.05),
+                  ),
+                ),
+              ),
+
+            SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(isDark, textColor, mutedTextColor, borderColor),
+
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 40, 24, 120),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionLabel('TERMINAL DISCOVERY'),
+                        const SizedBox(height: 20),
+
+                        _buildVisibilityOption(
+                          title: 'GLOBAL BROADCAST',
+                          subtitle:
+                              'Terminal identifier visible to all operators',
+                          icon: Icons.public_rounded,
+                          value: 'public',
+                          textColor: textColor,
+                          mutedTextColor: mutedTextColor,
+                          cardColor: cardColor,
+                          borderColor: borderColor,
+                          index: 0,
                         ),
-                        AppColors.primaryBlue.withValues(
-                          alpha: isDark ? 0.2 : 0.1,
+                        _buildVisibilityOption(
+                          title: 'TRUSTED CONNECT',
+                          subtitle: 'Only verified connections can identify',
+                          icon: Icons.diversity_3_rounded,
+                          value: 'friends_only',
+                          textColor: textColor,
+                          mutedTextColor: mutedTextColor,
+                          cardColor: cardColor,
+                          borderColor: borderColor,
+                          index: 1,
+                        ),
+                        _buildVisibilityOption(
+                          title: 'STEALTH MODE',
+                          subtitle: 'Maximum encryption. Invisible to scouts',
+                          icon: Icons.lock_rounded,
+                          value: 'private',
+                          textColor: textColor,
+                          mutedTextColor: mutedTextColor,
+                          cardColor: cardColor,
+                          borderColor: borderColor,
+                          index: 2,
+                        ),
+
+                        const SizedBox(height: 40),
+                        _buildSectionLabel('SENSITIVE DATA BROADCAST'),
+                        const SizedBox(height: 20),
+
+                        _buildToggleTile(
+                          icon: Icons.alternate_email_rounded,
+                          title: 'Identity Email',
+                          subtitle: 'Reveal secure contact address',
+                          value: _showEmail,
+                          onChanged: (v) => setState(() => _showEmail = v),
+                          color: AppColors.info,
+                          textColor: textColor,
+                          mutedTextColor: mutedTextColor,
+                          cardColor: cardColor,
+                          borderColor: borderColor,
+                          index: 3,
+                        ),
+                        _buildToggleTile(
+                          icon: Icons.phone_iphone_rounded,
+                          title: 'Biometric Contact',
+                          subtitle: 'Reveal satellite uplink number',
+                          value: _showPhone,
+                          onChanged: (v) => setState(() => _showPhone = v),
+                          color: AppColors.warning,
+                          textColor: textColor,
+                          mutedTextColor: mutedTextColor,
+                          cardColor: cardColor,
+                          borderColor: borderColor,
+                          index: 4,
+                        ),
+
+                        const SizedBox(height: 40),
+                        _buildSectionLabel('OPERATIONAL STATUS'),
+                        const SizedBox(height: 20),
+
+                        _buildToggleTile(
+                          icon: Icons.chat_bubble_outline_rounded,
+                          title: 'Signal Reception',
+                          subtitle: 'Allow direct encrypted messaging',
+                          value: _allowMessages,
+                          onChanged: (v) => setState(() => _allowMessages = v),
+                          color: AppColors.success,
+                          textColor: textColor,
+                          mutedTextColor: mutedTextColor,
+                          cardColor: cardColor,
+                          borderColor: borderColor,
+                          index: 5,
+                        ),
+                        _buildToggleTile(
+                          icon: Icons.wifi_tethering_rounded,
+                          title: 'Active Uplink',
+                          subtitle: 'Broadcast current online status',
+                          value: _showActivity,
+                          onChanged: (v) => setState(() => _showActivity = v),
+                          color: AppColors.primaryBlue,
+                          textColor: textColor,
+                          mutedTextColor: mutedTextColor,
+                          cardColor: cardColor,
+                          borderColor: borderColor,
+                          index: 6,
                         ),
                       ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: AppColors.primaryBlue.withValues(
-                        alpha: isDark ? 0.3 : 0.15,
-                      ),
                     ),
                   ),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              AppColors.primaryBlue,
-                              AppColors.primaryAccent,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primaryBlue.withValues(
-                                alpha: 0.3,
-                              ),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.visibility_rounded,
-                          size: 40,
-                          color: Colors.white,
-                        ),
-                      ).animate().scale(
-                        duration: 500.ms,
-                        curve: Curves.easeOut,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Privacy Control Center',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: textColor,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Customize how you appear to others In the workspace',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: mutedTextColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Visibility Options
-                _buildSectionHeader('PROFILE SCOPE'),
-                const SizedBox(height: 16),
-                _buildVisibilityOption(
-                  context: context,
-                  title: 'Public Access',
-                  subtitle: 'Visible to everyone on the platform',
-                  icon: Icons.public_rounded,
-                  value: 'public',
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-                const SizedBox(height: 12),
-                _buildVisibilityOption(
-                  context: context,
-                  title: 'Connections Only',
-                  subtitle: 'Only your direct friends can view',
-                  icon: Icons.group_rounded,
-                  value: 'friends_only',
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-                const SizedBox(height: 12),
-                _buildVisibilityOption(
-                  context: context,
-                  title: 'Encrypted Private',
-                  subtitle: 'HIDDEN from everyone but yourself',
-                  icon: Icons.lock_rounded,
-                  value: 'private',
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-
-                const SizedBox(height: 32),
-
-                // Personal Info Visibility
-                _buildSectionHeader('SENSITIVE INFORMATION'),
-                const SizedBox(height: 16),
-                _buildInfoVisibilityTile(
-                  context: context,
-                  icon: Icons.mail_outline_rounded,
-                  title: 'Display Email',
-                  subtitle: 'Show your registered email address',
-                  value: _showEmail,
-                  onChanged: (value) => setState(() => _showEmail = value),
-                  color: AppColors.info,
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-                const SizedBox(height: 12),
-                _buildInfoVisibilityTile(
-                  context: context,
-                  icon: Icons.phone_outlined,
-                  title: 'Display Contact',
-                  subtitle: 'Show your connected phone number',
-                  value: _showPhone,
-                  onChanged: (value) => setState(() => _showPhone = value),
-                  color: AppColors.warning,
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-
-                const SizedBox(height: 32),
-
-                // Activity & Interactions
-                _buildSectionHeader('DYNAMIC INTERACTIONS'),
-                const SizedBox(height: 16),
-                _buildInfoVisibilityTile(
-                  context: context,
-                  icon: Icons.message_outlined,
-                  title: 'Direct Messaging',
-                  subtitle: 'Allow users to reach out to you',
-                  value: _allowMessages,
-                  onChanged: (value) => setState(() => _allowMessages = value),
-                  color: AppColors.success,
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-                const SizedBox(height: 12),
-                _buildInfoVisibilityTile(
-                  context: context,
-                  icon: Icons.timeline_rounded,
-                  title: 'Activity Status',
-                  subtitle: 'Broadcast when you are currently online',
-                  value: _showActivity,
-                  onChanged: (value) => setState(() => _showActivity = value),
-                  color: AppColors.primaryBlue,
-                  textColor: textColor,
-                  mutedTextColor: mutedTextColor,
-                  cardColor: cardColor,
-                  borderColor: borderColor,
-                ),
-                const SizedBox(height: 100),
-              ],
+                ],
+              ),
             ),
-          ),
+          ],
         ),
+        bottomNavigationBar: _buildBottomActions(isDark, theme),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildHeader(
+    bool isDark,
+    Color textColor,
+    Color mutedTextColor,
+    Color borderColor,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 120, 24, 40),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+              : [Colors.white, const Color(0xFFF8FAFC)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.05),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primaryBlue, Color(0xFF1E3A8A)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.visibility_off_rounded,
+                  size: 48,
+                  color: Colors.white,
+                ),
+              )
+              .animate()
+              .scale(duration: 600.ms, curve: Curves.easeOutBack)
+              .shimmer(delay: 800.ms, duration: 1500.ms),
+          const SizedBox(height: 24),
+          Text(
+            'Visibility Shield',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: textColor,
+              letterSpacing: -1,
+            ),
+          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
+          const SizedBox(height: 8),
+          Text(
+            'Manage your terminal presence and data broadcast settings across the network.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: mutedTextColor,
+              height: 1.5,
+            ),
+          ).animate().fadeIn(delay: 400.ms),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(left: 4),
       child: Text(
-        title.toUpperCase(),
+        label,
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
           color: AppColors.primaryBlue,
-          letterSpacing: 1.5,
+          letterSpacing: 2,
         ),
       ),
-    );
+    ).animate().fadeIn().slideX(begin: -0.2, end: 0);
   }
 
   Widget _buildVisibilityOption({
-    required BuildContext context,
     required String title,
     required String subtitle,
     required IconData icon,
@@ -293,116 +314,103 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
     required Color mutedTextColor,
     required Color cardColor,
     required Color borderColor,
+    required int index,
   }) {
     final isSelected = _profileVisibility == value;
 
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        setState(() => _profileVisibility = value);
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryBlue : borderColor,
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(
-                alpha: Theme.of(context).brightness == Brightness.dark
-                    ? 0.2
-                    : 0.03,
-              ),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
+    return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              setState(() => _profileVisibility = value);
+            },
+            child: AnimatedContainer(
+              duration: 300.ms,
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primaryBlue.withValues(
-                      alpha: isSelected ? 1.0 : 0.1,
-                    ),
-                    AppColors.primaryAccent.withValues(
-                      alpha: isSelected ? 1.0 : 0.1,
-                    ),
-                  ],
+                color: isSelected
+                    ? AppColors.primaryBlue.withValues(alpha: 0.1)
+                    : cardColor,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: isSelected ? AppColors.primaryBlue : borderColor,
+                  width: isSelected ? 2 : 1.5,
                 ),
-                borderRadius: BorderRadius.circular(14),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.15),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ]
+                    : [],
               ),
-              child: Icon(
-                icon,
-                color: isSelected ? Colors.white : AppColors.primaryBlue,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: isSelected ? AppColors.primaryBlue : textColor,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primaryBlue.withValues(alpha: 0.7)
-                          : mutedTextColor,
+                          ? AppColors.primaryBlue
+                          : AppColors.primaryBlue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: isSelected ? Colors.white : AppColors.primaryBlue,
+                      size: 26,
                     ),
                   ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: isSelected
+                                ? AppColors.primaryBlue
+                                : textColor,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isSelected
+                                ? AppColors.primaryBlue.withValues(alpha: 0.7)
+                                : mutedTextColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isSelected)
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      color: AppColors.primaryBlue,
+                      size: 24,
+                    ).animate().scale(curve: Curves.easeOutBack),
                 ],
               ),
             ),
-            AnimatedContainer(
-              duration: 200.ms,
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.primaryBlue
-                      : mutedTextColor.withValues(alpha: 0.3),
-                  width: 2,
-                ),
-                color: isSelected ? AppColors.primaryBlue : Colors.transparent,
-              ),
-              child: isSelected
-                  ? const Icon(
-                      Icons.check_rounded,
-                      color: Colors.white,
-                      size: 14,
-                    )
-                  : null,
-            ),
-          ],
-        ),
-      ),
-    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.05, end: 0);
+          ),
+        )
+        .animate()
+        .fadeIn(delay: Duration(milliseconds: 100 * index))
+        .slideX(begin: 0.1, end: 0);
   }
 
-  Widget _buildInfoVisibilityTile({
-    required BuildContext context,
+  Widget _buildToggleTile({
     required IconData icon,
     required String title,
     required String subtitle,
@@ -413,81 +421,138 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
     required Color mutedTextColor,
     required Color cardColor,
     required Color borderColor,
+    required int index,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: value ? color.withValues(alpha: 0.3) : borderColor,
-          width: value ? 2 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: Theme.of(context).brightness == Brightness.dark
-                  ? 0.2
-                  : 0.03,
-            ),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  color.withValues(alpha: 0.1),
-                  color.withValues(alpha: 0.2),
+    return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              onChanged(!value);
+            },
+            child: AnimatedContainer(
+              duration: 300.ms,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: value ? color.withValues(alpha: 0.5) : borderColor,
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(icon, color: color, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: mutedTextColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Transform.scale(
+                    scale: 0.9,
+                    child: Switch.adaptive(
+                      value: value,
+                      onChanged: (v) {
+                        HapticFeedback.mediumImpact();
+                        onChanged(v);
+                      },
+                      activeThumbColor: color,
+                      activeTrackColor: color.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: mutedTextColor,
-                  ),
-                ),
-              ],
             ),
           ),
-          const SizedBox(width: 12),
-          Switch.adaptive(
-            value: value,
-            onChanged: (v) {
-              HapticFeedback.lightImpact();
-              onChanged(v);
-            },
-            activeColor: color,
-            activeTrackColor: color.withValues(alpha: 0.4),
-          ),
-        ],
+        )
+        .animate()
+        .fadeIn(delay: Duration(milliseconds: 100 * (index + 3)))
+        .slideX(begin: 0.1, end: 0);
+  }
+
+  Widget _buildBottomActions(bool isDark, ThemeData theme) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        24,
+        16,
+        24,
+        16 + MediaQuery.of(context).padding.bottom,
       ),
-    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.05, end: 0);
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A) : Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : AppColors.borderColor.withValues(alpha: 0.5),
+          ),
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          // Logic for applying profile
+        },
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          height: 60,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primaryBlue, Color(0xFF1E3A8A)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              'Apply Privacy Protocol',
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

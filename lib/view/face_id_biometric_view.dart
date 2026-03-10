@@ -26,16 +26,14 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Enhanced theme-based colors for consistency
     final textColor = isDark ? Colors.white : AppColors.textDark;
     final mutedTextColor = isDark
-        ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ??
-              Colors.white70
-        : AppColors.textMuted;
-    final cardColor = isDark ? theme.cardColor : Colors.white;
+        ? Colors.white.withValues(alpha: 0.6)
+        : AppColors.textLight;
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final borderColor = isDark
-        ? theme.dividerColor.withValues(alpha: 0.2)
-        : AppColors.borderColor;
+        ? Colors.white.withValues(alpha: 0.08)
+        : AppColors.borderColor.withValues(alpha: 0.5);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -46,344 +44,465 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
         systemNavigationBarIconBrightness: isDark
             ? Brightness.light
             : Brightness.dark,
-        systemNavigationBarDividerColor: Colors.transparent,
       ),
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
-          leading: PlatformBackButton(color: textColor),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: PlatformBackButton(color: textColor),
+          ),
           title: Text(
-            'Face ID & Biometrics',
+            'Biometric Protocols',
             style: GoogleFonts.plusJakartaSans(
               color: textColor,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               fontSize: isSmallScreen ? 18 : 20,
+              letterSpacing: -0.5,
             ),
           ),
           centerTitle: true,
         ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              horizontal: size.width * 0.06,
-              vertical: 20,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Biometric Animation Card - Enhanced for visibility
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(32),
+        body: Stack(
+          children: [
+            // Decorative background elements
+            if (isDark)
+              Positioned(
+                top: -100,
+                right: -100,
+                child: Container(
+                  width: 300,
+                  height: 300,
                   decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: borderColor,
-                      width: isDark ? 1.5 : 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(
-                          alpha: isDark ? 0.4 : 0.05,
-                        ),
-                        blurRadius: 30,
-                        offset: const Offset(0, 15),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // Face Icon Animation
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                                width: 120,
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      AppColors.primaryBlue,
-                                      AppColors.primaryAccent,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primaryBlue.withValues(
-                                        alpha: 0.4,
-                                      ),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 10),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.face_unlock_rounded,
-                                  size: 60,
-                                  color: Colors.white,
-                                ),
-                              )
-                              .animate(onComplete: (c) => c.repeat())
-                              .scaleXY(
-                                duration: 1500.ms,
-                                begin: 0.95,
-                                end: 1.05,
-                                curve: Curves.easeInOut,
-                              ),
-
-                          // Scan line animation
-                          Positioned(
-                            child:
-                                Container(
-                                      width: 80,
-                                      height: 3,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Colors.white.withValues(alpha: 0),
-                                            Colors.white.withValues(alpha: 0.8),
-                                            Colors.white.withValues(alpha: 0),
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                    )
-                                    .animate(onComplete: (c) => c.repeat())
-                                    .moveY(
-                                      duration: 2000.ms,
-                                      begin: -45,
-                                      end: 45,
-                                      curve: Curves.easeInOut,
-                                    ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Secure Biometrics',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: textColor,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Enable biometric authentication for faster and more secure access to your account.',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          color: mutedTextColor,
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
+                    shape: BoxShape.circle,
+                    color: AppColors.primaryBlue.withValues(alpha: 0.05),
                   ),
                 ),
-                const SizedBox(height: 32),
+              ),
 
-                Padding(
-                  padding: const EdgeInsets.only(left: 4, bottom: 16),
-                  child: Text(
-                    'BIOMETRIC METHODS',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: isDark
-                          ? AppColors.primaryBlue.withValues(alpha: 0.9)
-                          : AppColors.primaryBlue,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                ),
+            SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(isDark, textColor, mutedTextColor, borderColor),
 
-                _buildBiometricTile(
-                  icon: Icons.face_unlock_rounded,
-                  title: 'Face Unlock',
-                  subtitle: 'Use face recognition to unlock',
-                  value: _faceIDEnabled,
-                  color: AppColors.primaryBlue,
-                  onChanged: (value) => setState(() => _faceIDEnabled = value),
-                ),
-                const SizedBox(height: 12),
-                _buildBiometricTile(
-                  icon: Icons.fingerprint_rounded,
-                  title: 'Fingerprint ID',
-                  subtitle: 'Use registered fingerprints',
-                  value: _fingerprintEnabled,
-                  color: AppColors.primaryAccent,
-                  onChanged: (value) =>
-                      setState(() => _fingerprintEnabled = value),
-                ),
-
-                if (_faceIDEnabled || _fingerprintEnabled) ...[
-                  const SizedBox(height: 32),
                   Padding(
-                    padding: const EdgeInsets.only(left: 4, bottom: 16),
-                    child: Text(
-                      'SECURE USE CASES',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: isDark
-                            ? AppColors.primaryBlue.withValues(alpha: 0.9)
-                            : AppColors.primaryBlue,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  ),
-                  _buildBiometricTile(
-                    icon: Icons.phonelink_lock_rounded,
-                    title: 'Unlock Application',
-                    subtitle: 'Require biometric when opening',
-                    value: _unlockApp,
-                    color: AppColors.success,
-                    onChanged: (value) => setState(() => _unlockApp = value),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildBiometricTile(
-                    icon: Icons.credit_card_rounded,
-                    title: 'Payment Security',
-                    subtitle: 'Confirm payments with biometrics',
-                    value: _unlockPayments,
-                    color: AppColors.warning,
-                    onChanged: (value) =>
-                        setState(() => _unlockPayments = value),
-                  ),
-
-                  const SizedBox(height: 24),
-                  // Info card - Highly visible
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(
-                        alpha: isDark ? 0.15 : 0.08,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.success.withValues(
-                          alpha: isDark ? 0.3 : 0.15,
-                        ),
-                      ),
-                    ),
-                    child: Row(
+                    padding: const EdgeInsets.fromLTRB(24, 40, 24, 120),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.verified_user_rounded,
-                          color: AppColors.success,
-                          size: 24,
+                        _buildSectionLabel('BIOMETRIC INFRASTRUCTURE'),
+                        const SizedBox(height: 20),
+
+                        _buildPremiumBiometricTile(
+                          icon: Icons.face_unlock_rounded,
+                          title: 'Face Recognition',
+                          subtitle: 'Initialize ocular identification',
+                          value: _faceIDEnabled,
+                          color: AppColors.primaryBlue,
+                          onChanged: (value) =>
+                              setState(() => _faceIDEnabled = value),
+                          index: 0,
+                          isDark: isDark,
+                          textColor: textColor,
+                          mutedTextColor: mutedTextColor,
+                          cardColor: cardColor,
+                          borderColor: borderColor,
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            'Your biometric data remains on your device and is never uploaded to any server.',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              color: textColor,
-                              fontWeight: FontWeight.w600,
-                              height: 1.4,
-                            ),
+                        _buildPremiumBiometricTile(
+                          icon: Icons.fingerprint_rounded,
+                          title: 'Fingerprint Matrix',
+                          subtitle: 'Initialize tactile verify index',
+                          value: _fingerprintEnabled,
+                          color: AppColors.primaryAccent,
+                          onChanged: (value) =>
+                              setState(() => _fingerprintEnabled = value),
+                          index: 1,
+                          isDark: isDark,
+                          textColor: textColor,
+                          mutedTextColor: mutedTextColor,
+                          cardColor: cardColor,
+                          borderColor: borderColor,
+                        ),
+
+                        if (_faceIDEnabled || _fingerprintEnabled) ...[
+                          const SizedBox(height: 40),
+                          _buildSectionLabel('OPERATIONAL USE CASES'),
+                          const SizedBox(height: 20),
+
+                          _buildPremiumBiometricTile(
+                            icon: Icons.phonelink_lock_rounded,
+                            title: 'Terminal Lockdown',
+                            subtitle: 'Require biometric for entry',
+                            value: _unlockApp,
+                            color: AppColors.success,
+                            onChanged: (value) =>
+                                setState(() => _unlockApp = value),
+                            index: 2,
+                            isDark: isDark,
+                            textColor: textColor,
+                            mutedTextColor: mutedTextColor,
+                            cardColor: cardColor,
+                            borderColor: borderColor,
                           ),
-                        ),
+                          _buildPremiumBiometricTile(
+                            icon: Icons.key_rounded,
+                            title: 'Credential Retrieval',
+                            subtitle: 'Verify for sensitive data',
+                            value: _unlockPayments,
+                            color: AppColors.warning,
+                            onChanged: (value) =>
+                                setState(() => _unlockPayments = value),
+                            index: 3,
+                            isDark: isDark,
+                            textColor: textColor,
+                            mutedTextColor: mutedTextColor,
+                            cardColor: cardColor,
+                            borderColor: borderColor,
+                          ),
+
+                          const SizedBox(height: 32),
+                          _buildInfoCard(isDark, textColor),
+                        ],
                       ],
                     ),
                   ),
                 ],
-                const SizedBox(height: 120),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
+        bottomNavigationBar: _buildBottomActions(isDark, theme),
       ),
     );
   }
 
-  Widget _buildBiometricTile({
+  Widget _buildHeader(
+    bool isDark,
+    Color textColor,
+    Color mutedTextColor,
+    Color borderColor,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 120, 24, 40),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+              : [Colors.white, const Color(0xFFF8FAFC)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.05),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.primaryBlue, Color(0xFF1E3A8A)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(32),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.face_unlock_rounded,
+                      size: 48,
+                      color: Colors.white,
+                    ),
+                  )
+                  .animate(onComplete: (c) => c.repeat())
+                  .scale(
+                    duration: 1500.ms,
+                    begin: const Offset(1, 1),
+                    end: const Offset(1.08, 1.08),
+                    curve: Curves.easeInOut,
+                  ),
+
+              // Scanning Radar Effect
+              Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                        width: 2,
+                      ),
+                    ),
+                  )
+                  .animate(onComplete: (c) => c.repeat())
+                  .scale(
+                    duration: 2000.ms,
+                    begin: const Offset(0.8, 0.8),
+                    end: const Offset(1.3, 1.3),
+                    curve: Curves.easeOut,
+                  )
+                  .fadeOut(),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Sanctuary Auth',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: textColor,
+              letterSpacing: -1,
+            ),
+          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
+          const SizedBox(height: 8),
+          Text(
+            'Advanced cryptographic verification using your unique biometric signatures.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: mutedTextColor,
+              height: 1.5,
+            ),
+          ).animate().fadeIn(delay: 400.ms),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        label,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
+          color: AppColors.primaryBlue,
+          letterSpacing: 2,
+        ),
+      ),
+    ).animate().fadeIn().slideX(begin: -0.2, end: 0);
+  }
+
+  Widget _buildPremiumBiometricTile({
     required IconData icon,
     required String title,
     required String subtitle,
     required bool value,
     required Color color,
     required Function(bool) onChanged,
+    required int index,
+    required bool isDark,
+    required Color textColor,
+    required Color mutedTextColor,
+    required Color cardColor,
+    required Color borderColor,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : AppColors.textDark;
-    final mutedTextColor = isDark ? Colors.white70 : AppColors.textMuted;
-    final cardColor = isDark ? Theme.of(context).cardColor : Colors.white;
-    final borderColor = isDark
-        ? Colors.white.withValues(alpha: 0.1)
-        : AppColors.borderColor;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: value ? color.withValues(alpha: 0.6) : borderColor,
-          width: value ? 2 : 1,
-        ),
-        boxShadow: value
-            ? [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.2),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ]
-            : [],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onChanged(!value);
-        },
-        leading: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(icon, color: color, size: 24),
-        ),
-        title: Text(
-          title,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: textColor,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 12,
-            color: mutedTextColor,
-          ),
-        ),
-        trailing: Transform.scale(
-          scale: 0.85,
-          child: Switch.adaptive(
-            value: value,
-            activeColor: color,
-            activeTrackColor: color.withValues(alpha: 0.4),
-            onChanged: (val) {
-              HapticFeedback.mediumImpact();
-              onChanged(val);
+    return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              onChanged(!value);
             },
+            child: AnimatedContainer(
+              duration: 300.ms,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: value ? color.withValues(alpha: 0.08) : cardColor,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: value ? color.withValues(alpha: 0.5) : borderColor,
+                  width: 1.5,
+                ),
+                boxShadow: value
+                    ? [
+                        BoxShadow(
+                          color: color.withValues(alpha: 0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ]
+                    : [],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(icon, color: color, size: 26),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: mutedTextColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Transform.scale(
+                    scale: 0.9,
+                    child: Switch.adaptive(
+                      value: value,
+                      activeThumbColor: color,
+                      activeTrackColor: color.withValues(alpha: 0.35),
+                      onChanged: (val) {
+                        HapticFeedback.mediumImpact();
+                        onChanged(val);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
+        .animate()
+        .fadeIn(delay: Duration(milliseconds: 100 * index))
+        .slideX(begin: 0.1, end: 0);
+  }
+
+  Widget _buildInfoCard(bool isDark, Color textColor) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: AppColors.success.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.verified_user_rounded,
+              color: AppColors.success,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              'Verified secure hardware storage active. Encryption tokens are handled exclusively by the enclave.',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                color: textColor,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 600.ms);
+  }
+
+  Widget _buildBottomActions(bool isDark, ThemeData theme) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        24,
+        16,
+        24,
+        16 + MediaQuery.of(context).padding.bottom,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A) : Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : AppColors.borderColor.withValues(alpha: 0.5),
           ),
         ),
       ),
-    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0);
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          // Logic for applying profile
+        },
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          height: 60,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primaryBlue, Color(0xFF1E3A8A)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              'Apply Biometric Protocol',
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

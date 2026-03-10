@@ -101,11 +101,13 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                   onPrimary: AppColors.white,
                   surface: Color(0xFF1E293B),
                   onSurface: AppColors.white,
+                  secondary: AppColors.primaryBlue,
                 )
               : const ColorScheme.light(
                   primary: AppColors.primaryBlue,
                   onPrimary: AppColors.white,
                   onSurface: AppColors.textDark,
+                  secondary: AppColors.primaryBlue,
                 ),
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
@@ -120,6 +122,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       ),
     );
     if (picked != null) {
+      HapticFeedback.lightImpact();
       setState(
         () => _selectedDate = DateTime(
           picked.year,
@@ -144,11 +147,13 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                   onPrimary: AppColors.white,
                   surface: Color(0xFF1E293B),
                   onSurface: AppColors.white,
+                  secondary: AppColors.primaryBlue,
                 )
               : const ColorScheme.light(
                   primary: AppColors.primaryBlue,
                   onPrimary: AppColors.white,
                   onSurface: AppColors.textDark,
+                  secondary: AppColors.primaryBlue,
                 ),
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
@@ -163,6 +168,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       ),
     );
     if (picked != null) {
+      HapticFeedback.lightImpact();
       setState(
         () => _selectedDate = DateTime(
           _selectedDate.year,
@@ -178,6 +184,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
   Future<void> _saveTask() async {
     final title = _titleController.text.trim();
     if (title.isEmpty) {
+      HapticFeedback.heavyImpact();
       SnackbarUtils.showWarning(
         context,
         'Hold on!',
@@ -254,41 +261,88 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // Background Gradient Header
+          // Background Gradient Header (Sanctuary Style)
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            height: 240,
+            height: 280,
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: Theme.of(context).brightness == Brightness.dark
+                  colors: isDark
                       ? [
-                          AppColors.primaryBlue.withValues(alpha: 0.8),
-                          AppColors.primaryBlue.withValues(alpha: 0.6),
+                          AppColors.primaryBlue.withValues(alpha: 0.15),
+                          AppColors.primaryBlue.withValues(alpha: 0.05),
                           Theme.of(context).scaffoldBackgroundColor,
                         ]
                       : [
                           AppColors.primaryBlue,
                           AppColors.primaryBlue.withValues(alpha: 0.8),
                           AppColors.primaryBlue.withValues(alpha: 0.6),
+                          Theme.of(context).scaffoldBackgroundColor,
                         ],
                 ),
               ),
-              child: Opacity(
-                opacity: 0.1,
-                child: Center(
-                  child: Icon(
-                    widget.task != null
-                        ? Icons.edit_note_rounded
-                        : Icons.add_task_rounded,
-                    size: 200,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
+              child: Stack(
+                children: [
+                  // Decorative Circles
+                  Positioned(
+                    top: -50,
+                    right: -50,
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primaryBlue.withValues(
+                          alpha: isDark ? 0.05 : 0.1,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  Positioned(
+                    bottom: 40,
+                    left: -30,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primaryBlue.withValues(
+                          alpha: isDark ? 0.03 : 0.05,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Opacity(
+                    opacity: isDark ? 0.05 : 0.1,
+                    child: Center(
+                      child:
+                          Icon(
+                                widget.task != null
+                                    ? Icons.edit_note_rounded
+                                    : Icons.add_task_rounded,
+                                size: 220,
+                                color: isDark
+                                    ? AppColors.white
+                                    : AppColors.white,
+                              )
+                              .animate(
+                                onPlay: (controller) =>
+                                    controller.repeat(reverse: true),
+                              )
+                              .scale(
+                                duration: 3.seconds,
+                                begin: const Offset(1, 1),
+                                end: const Offset(1.1, 1.1),
+                              )
+                              .fadeIn(duration: 1.seconds),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -296,7 +350,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
           SafeArea(
             child: Column(
               children: [
-                // Custom App Bar
+                // Custom App Bar (Sanctuary Style)
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -307,21 +361,27 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                     children: [
                       _buildHeaderButton(
                         icon: Icons.close_rounded,
-                        onTap: () => Navigator.pop(context),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                        },
                         isSmallScreen: isSmallScreen,
+                        isDark: isDark,
                       ),
                       Text(
                         widget.task != null ? 'Edit Task' : 'New Task',
                         style: GoogleFonts.plusJakartaSans(
-                          color: AppColors.white,
-                          fontSize: isSmallScreen ? 18 : 20,
+                          color: isDark ? AppColors.white : AppColors.white,
+                          fontSize: isSmallScreen ? 18 : 22,
                           fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
                         ),
                       ),
                       _buildHeaderButton(
                         icon: Icons.more_horiz_rounded,
-                        onTap: () {},
+                        onTap: () => HapticFeedback.lightImpact(),
                         isSmallScreen: isSmallScreen,
+                        isDark: isDark,
                       ),
                     ],
                   ),
@@ -329,194 +389,88 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
 
                 Expanded(
                   child: Container(
-                    margin: const EdgeInsets.only(top: 20),
+                    margin: const EdgeInsets.only(top: 15),
                     decoration: BoxDecoration(
                       color: Theme.of(context).scaffoldBackgroundColor,
                       borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(36),
-                        topRight: Radius.circular(36),
+                        topLeft: Radius.circular(40),
+                        topRight: Radius.circular(40),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.3 : 0.05,
+                          ),
+                          blurRadius: 20,
+                          offset: const Offset(0, -10),
+                        ),
+                      ],
                     ),
                     child: ClipRRect(
                       borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(36),
-                        topRight: Radius.circular(36),
+                        topLeft: Radius.circular(40),
+                        topRight: Radius.circular(40),
                       ),
                       child: SingleChildScrollView(
                         controller: _scrollController,
                         physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(28, 36, 28, 120),
+                        padding: const EdgeInsets.fromLTRB(24, 32, 24, 120),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Title Input
+                            // Title Input Section
                             _buildSectionLabel(
-                              'Task Title',
+                              'TASK INFORMATION',
                               Icons.edit_note_rounded,
+                              isDark,
                             ),
-                            const SizedBox(height: 12),
-                            AnimatedContainer(
-                                  duration: 300.ms,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _titleFocus.hasFocus
-                                        ? Theme.of(context).cardColor
-                                        : Theme.of(context).brightness ==
-                                              Brightness.dark
-                                        ? Colors.white.withValues(alpha: 0.05)
-                                        : AppColors.background,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: _titleFocus.hasFocus
-                                          ? AppColors.primaryBlue
-                                          : Theme.of(context).dividerColor,
-                                      width: _titleFocus.hasFocus ? 1.5 : 1.0,
-                                    ),
-                                    boxShadow: _titleFocus.hasFocus
-                                        ? [
-                                            BoxShadow(
-                                              color: AppColors.primaryBlue
-                                                  .withValues(
-                                                    alpha: isDark ? 0.4 : 0.2,
-                                                  ),
-                                              blurRadius: 15,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ]
-                                        : [],
-                                  ),
-                                  child: TextFormField(
-                                    controller: _titleController,
-                                    focusNode: _titleFocus,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge?.color,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: 'What needs to be done?',
-                                      hintStyle: GoogleFonts.plusJakartaSans(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.color
-                                            ?.withValues(alpha: 0.4),
-                                      ),
-                                      border: InputBorder.none,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 20,
-                                          ),
-                                    ),
-                                    maxLines: null,
-                                  ),
-                                )
-                                .animate()
-                                .fadeIn(duration: 500.ms)
-                                .slideY(begin: 0.2, end: 0),
-
-                            const SizedBox(height: 32),
-
-                            // Description Input
-                            _buildSectionLabel(
-                              'Description',
-                              Icons.description_outlined,
+                            const SizedBox(height: 16),
+                            _buildInputField(
+                              controller: _titleController,
+                              focusNode: _titleFocus,
+                              hintText: 'What needs to be done?',
+                              label: 'Task Title',
+                              maxLines: 1,
+                              isDark: isDark,
+                              icon: Icons.title_rounded,
                             ),
-                            const SizedBox(height: 12),
-                            AnimatedContainer(
-                                  duration: 300.ms,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _descFocus.hasFocus
-                                        ? Theme.of(context).cardColor
-                                        : Theme.of(context).brightness ==
-                                              Brightness.dark
-                                        ? Colors.white.withValues(alpha: 0.05)
-                                        : AppColors.background,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: _descFocus.hasFocus
-                                          ? AppColors.primaryBlue
-                                          : Theme.of(context).dividerColor,
-                                      width: _descFocus.hasFocus ? 1.5 : 1.0,
-                                    ),
-                                    boxShadow: _descFocus.hasFocus
-                                        ? [
-                                            BoxShadow(
-                                              color: AppColors.primaryBlue
-                                                  .withValues(alpha: 0.2),
-                                              blurRadius: 15,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ]
-                                        : [],
-                                  ),
-                                  child: TextFormField(
-                                    controller: _descController,
-                                    focusNode: _descFocus,
-                                    maxLines: 5,
-                                    minLines: 3,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 15,
-                                      color: Theme.of(
-                                        context,
-                                      ).textTheme.bodyMedium?.color,
-                                      height: 1.5,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: 'Add some more details...',
-                                      hintStyle: GoogleFonts.plusJakartaSans(
-                                        color: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.color
-                                            ?.withValues(alpha: 0.5),
-                                        fontSize: 14,
-                                      ),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 16,
-                                          ),
-                                      border: InputBorder.none,
-                                    ),
-                                  ),
-                                )
-                                .animate()
-                                .fadeIn(delay: 100.ms)
-                                .slideY(begin: 0.2, end: 0),
+
+                            const SizedBox(height: 24),
+
+                            // Description Input Section
+                            _buildInputField(
+                              controller: _descController,
+                              focusNode: _descFocus,
+                              hintText:
+                                  'Add some more details about this task...',
+                              label: 'Description',
+                              maxLines: 4,
+                              isDark: isDark,
+                              icon: Icons.description_outlined,
+                            ),
 
                             const SizedBox(height: 32),
 
                             // Schedule Section
                             _buildSectionLabel(
-                              'Schedule',
+                              'PLANNING & SCHEDULE',
                               Icons.calendar_today_rounded,
+                              isDark,
                             ),
                             const SizedBox(height: 16),
                             Row(
                                   children: [
                                     Expanded(
                                       child: _buildPickerCard(
-                                        title: 'Date',
+                                        title: 'Due Date',
                                         value: _formattedDate(),
-                                        icon: Icons.event_note_rounded,
+                                        icon: Icons.event_rounded,
                                         color: AppColors.primaryBlue,
                                         onTap: _pickDate,
+                                        isDark: isDark,
                                       ),
                                     ),
-                                    const SizedBox(width: 16),
+                                    const SizedBox(width: 12),
                                     Expanded(
                                       child: _buildPickerCard(
                                         title: 'Time',
@@ -524,67 +478,77 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                         icon: Icons.access_time_filled_rounded,
                                         color: AppColors.warning,
                                         onTap: _pickTime,
+                                        isDark: isDark,
                                       ),
                                     ),
                                   ],
                                 )
                                 .animate()
                                 .fadeIn(delay: 200.ms)
-                                .slideY(begin: 0.2, end: 0),
+                                .slideX(begin: 0.1, end: 0),
 
                             const SizedBox(height: 32),
 
                             // Category Section
                             _buildSectionLabel(
-                              'Category',
+                              'CATEGORY & CONTEXT',
                               Icons.grid_view_rounded,
+                              isDark,
                             ),
                             const SizedBox(height: 16),
                             GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: size.width > 600
-                                            ? 4
-                                            : 3,
-                                        crossAxisSpacing: 10,
-                                        mainAxisSpacing: 10,
-                                        childAspectRatio: 2.2,
-                                      ),
-                                  itemCount: _categories.length,
-                                  itemBuilder: (context, index) {
-                                    final cat = _categories[index];
-                                    final isSelected = _category == cat['name'];
-                                    final Color color = cat['color'];
-                                    return GestureDetector(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: size.width > 600 ? 4 : 3,
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                    childAspectRatio: 2.1,
+                                  ),
+                              itemCount: _categories.length,
+                              itemBuilder: (context, index) {
+                                final cat = _categories[index];
+                                final isSelected = _category == cat['name'];
+                                final Color color = cat['color'];
+                                return GestureDetector(
                                       onTap: () {
                                         HapticFeedback.selectionClick();
                                         setState(() => _category = cat['name']);
                                       },
                                       child: AnimatedContainer(
-                                        duration: 400.ms,
-                                        curve: Curves.easeOutQuint,
+                                        duration: 300.ms,
+                                        curve: Curves.easeOutCubic,
                                         decoration: BoxDecoration(
                                           color: isSelected
-                                              ? color
-                                              : color.withValues(alpha: 0.05),
+                                              ? color.withValues(alpha: 1.0)
+                                              : isDark
+                                              ? Colors.white.withValues(
+                                                  alpha: 0.04,
+                                                )
+                                              : AppColors.white,
                                           borderRadius: BorderRadius.circular(
                                             16,
                                           ),
                                           border: Border.all(
                                             color: isSelected
                                                 ? color
-                                                : color.withValues(alpha: 0.1),
+                                                : isDark
+                                                ? Colors.white.withValues(
+                                                    alpha: 0.08,
+                                                  )
+                                                : Theme.of(
+                                                    context,
+                                                  ).dividerColor,
                                             width: 1.5,
                                           ),
                                           boxShadow: isSelected
                                               ? [
                                                   BoxShadow(
                                                     color: color.withValues(
-                                                      alpha: 0.2,
+                                                      alpha: 0.3,
                                                     ),
-                                                    blurRadius: 8,
+                                                    blurRadius: 10,
                                                     offset: const Offset(0, 4),
                                                   ),
                                                 ]
@@ -597,14 +561,18 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                             children: [
                                               Icon(
                                                 isSelected
-                                                    ? Icons.check_circle_rounded
+                                                    ? Icons.check_rounded
                                                     : cat['icon'],
                                                 size: 16,
                                                 color: isSelected
                                                     ? AppColors.white
+                                                    : isDark
+                                                    ? color.withValues(
+                                                        alpha: 0.8,
+                                                      )
                                                     : color,
                                               ),
-                                              const SizedBox(width: 8),
+                                              const SizedBox(width: 6),
                                               Flexible(
                                                 child: Text(
                                                   cat['name'],
@@ -618,7 +586,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                                                   ?.color,
                                                         fontWeight: isSelected
                                                             ? FontWeight.w800
-                                                            : FontWeight.w700,
+                                                            : FontWeight.w600,
                                                         fontSize: 12,
                                                         letterSpacing: -0.2,
                                                       ),
@@ -630,91 +598,22 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                           ),
                                         ),
                                       ),
+                                    )
+                                    .animate()
+                                    .fadeIn(delay: (100 * (index / 3)).ms)
+                                    .scale(
+                                      begin: const Offset(0.9, 0.9),
+                                      end: const Offset(1, 1),
                                     );
-                                  },
-                                )
-                                .animate()
-                                .fadeIn(delay: 300.ms)
-                                .slideY(begin: 0.2, end: 0),
+                              },
+                            ),
 
                             const SizedBox(height: 32),
 
-                            // Reminder Switch
-                            Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.white.withValues(alpha: 0.05)
-                                        : AppColors.background,
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                      color: Theme.of(context).dividerColor,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.success.withValues(
-                                            alpha: 0.1,
-                                          ),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.notifications_active_rounded,
-                                          color: AppColors.success,
-                                          size: 22,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Notifications',
-                                              style:
-                                                  GoogleFonts.plusJakartaSans(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w800,
-                                                    color: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyLarge
-                                                        ?.color,
-                                                  ),
-                                            ),
-                                            Text(
-                                              'Remind me when time hits',
-                                              style:
-                                                  GoogleFonts.plusJakartaSans(
-                                                    fontSize: 12,
-                                                    color: Theme.of(context)
-                                                        .textTheme
-                                                        .bodySmall
-                                                        ?.color,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Switch.adaptive(
-                                        value: _reminder,
-                                        onChanged: (v) =>
-                                            setState(() => _reminder = v),
-                                        activeTrackColor: AppColors.success,
-                                        activeColor: AppColors.white,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                                .animate()
-                                .fadeIn(delay: 400.ms)
-                                .slideY(begin: 0.2, end: 0),
+                            // Notifications Section
+                            _buildNotificationCard(isDark),
+
+                            const SizedBox(height: 40),
                           ],
                         ),
                       ),
@@ -725,17 +624,17 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
             ),
           ),
 
-          // Bottom Action Bar
+          // Bottom Action Bar (Sanctuary Style)
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Container(
               padding: EdgeInsets.fromLTRB(
-                28,
                 24,
-                28,
-                MediaQuery.of(context).padding.bottom + 20,
+                24,
+                24,
+                MediaQuery.of(context).padding.bottom + 16,
               ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -747,8 +646,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                     ).scaffoldBackgroundColor.withValues(alpha: 0),
                     Theme.of(
                       context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.8),
-                    Theme.of(context).scaffoldBackgroundColor,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.9),
                     Theme.of(context).scaffoldBackgroundColor,
                   ],
                 ),
@@ -756,73 +654,76 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
               child: _isLoading
                   ? const ShimmerLoading(
                       width: double.infinity,
-                      height: 60,
-                      borderRadius: 20,
+                      height: 58,
+                      borderRadius: 18,
                     )
                   : Hero(
-                          tag: 'task_button',
-                          child: Container(
-                            height: 60,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(22),
-                              gradient: const LinearGradient(
-                                colors: [
-                                  AppColors.primaryBlue,
-                                  AppColors.primaryAccent,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
+                      tag: 'task_button',
+                      child: Container(
+                        height: 58,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          gradient: const LinearGradient(
+                            colors: [
+                              AppColors.primaryBlue,
+                              AppColors.primaryAccent,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryBlue.withValues(
+                                alpha: 0.35,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primaryBlue.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 8),
-                                  spreadRadius: 0,
-                                ),
-                              ],
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
                             ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  HapticFeedback.mediumImpact();
-                                  _saveTask();
-                                },
-                                borderRadius: BorderRadius.circular(22),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      widget.task != null
-                                          ? Icons.published_with_changes_rounded
-                                          : Icons.add_task_rounded,
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              HapticFeedback.heavyImpact();
+                              _saveTask();
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    widget.task != null
+                                        ? Icons.save_rounded
+                                        : Icons.add_rounded,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    widget.task != null
+                                        ? 'Update Task'
+                                        : 'Create Task',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
                                       color: Colors.white,
-                                      size: 24,
+                                      letterSpacing: 0.5,
                                     ),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      widget.task != null
-                                          ? 'Update Task'
-                                          : 'Create Task',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.white,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        )
-                        .animate()
-                        .fadeIn(delay: 400.ms)
-                        .slideY(begin: 0.5, end: 0),
+                        ),
+                      ),
+                    ).animate().slideY(
+                      begin: 0.5,
+                      end: 0,
+                      curve: Curves.easeOutBack,
+                      duration: 600.ms,
+                    ),
             ),
           ),
         ],
@@ -830,49 +731,166 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
     );
   }
 
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String hintText,
+    required String label,
+    required int maxLines,
+    required bool isDark,
+    required IconData icon,
+  }) {
+    return AnimatedContainer(
+      duration: 300.ms,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: focusNode.hasFocus
+            ? (isDark
+                  ? Colors.white.withValues(alpha: 0.02)
+                  : AppColors.background.withValues(alpha: 0.5))
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: focusNode.hasFocus
+              ? AppColors.primaryBlue
+              : isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Theme.of(context).dividerColor,
+          width: focusNode.hasFocus ? 1.5 : 1.0,
+        ),
+        boxShadow: focusNode.hasFocus
+            ? [
+                BoxShadow(
+                  color: AppColors.primaryBlue.withValues(
+                    alpha: isDark ? 0.2 : 0.1,
+                  ),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16, top: 12),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 14,
+                  color: focusNode.hasFocus
+                      ? AppColors.primaryBlue
+                      : Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label.toUpperCase(),
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.0,
+                    color: focusNode.hasFocus
+                        ? AppColors.primaryBlue
+                        : Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextFormField(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: maxLines,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: GoogleFonts.plusJakartaSans(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1, end: 0);
+  }
+
   Widget _buildHeaderButton({
     required IconData icon,
     required VoidCallback onTap,
-    bool isSmallScreen = false,
+    required bool isSmallScreen,
+    required bool isDark,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: EdgeInsets.all(isSmallScreen ? 8 : 10),
-        decoration: BoxDecoration(
-          color: AppColors.white.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.1)
+            : AppColors.white.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : AppColors.white.withValues(alpha: 0.3),
         ),
-        child: Icon(
-          icon,
-          color: AppColors.white,
-          size: isSmallScreen ? 18 : 20,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: EdgeInsets.all(isSmallScreen ? 10 : 12),
+            child: Icon(
+              icon,
+              color: isDark ? AppColors.white : AppColors.white,
+              size: isSmallScreen ? 20 : 24,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSectionLabel(String label, IconData icon) {
+  Widget _buildSectionLabel(String label, IconData icon, bool isDark) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: Theme.of(context).textTheme.bodySmall?.color,
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AppColors.primaryBlue.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 14, color: AppColors.primaryBlue),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Text(
-          label.toUpperCase(),
+          label,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12,
-            color: Theme.of(context).textTheme.bodySmall?.color,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
+            color: Theme.of(
+              context,
+            ).textTheme.bodySmall?.color?.withValues(alpha: 0.8),
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.0,
           ),
         ),
       ],
-    );
+    ).animate().fadeIn().slideX(begin: -0.1, end: 0);
   }
 
   Widget _buildPickerCard({
@@ -881,60 +899,136 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
+    required bool isDark,
   }) {
     return GestureDetector(
       onTap: () {
-        HapticFeedback.lightImpact();
+        HapticFeedback.selectionClick();
         onTap();
       },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withValues(alpha: 0.05)
-              : AppColors.background,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.04)
+              : AppColors.white,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Theme.of(context).dividerColor),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Theme.of(context).dividerColor,
+          ),
+          boxShadow: [
+            if (!isDark)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+          ],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: color, size: 20),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 14),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                    ),
-                  ),
-                  Text(
-                    value,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+            const SizedBox(height: 10),
+            Text(
+              value,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildNotificationCard(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Theme.of(context).dividerColor,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.notifications_active_rounded,
+              color: AppColors.success,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Notifications',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+                Text(
+                  'Get reminded about this task',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch.adaptive(
+            value: _reminder,
+            onChanged: (v) {
+              HapticFeedback.lightImpact();
+              setState(() => _reminder = v);
+            },
+            activeThumbColor: AppColors.success,
+            activeTrackColor: AppColors.success.withValues(alpha: 0.3),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1, end: 0);
   }
 }

@@ -14,10 +14,10 @@ class DataExportView extends StatefulWidget {
 }
 
 class _DataExportViewState extends State<DataExportView> {
-  bool _include_tasks = true;
-  bool _include_notes = true;
-  bool _include_analytics = true;
-  bool _include_settings = true;
+  bool _includeTasks = true;
+  bool _includeNotes = true;
+  bool _includeAnalytics = true;
+  bool _includeSettings = true;
   String _format = 'json'; // json or csv
   bool _isExporting = false;
 
@@ -168,8 +168,8 @@ class _DataExportViewState extends State<DataExportView> {
                 icon: Icons.task_alt_rounded,
                 title: 'Tasks',
                 subtitle: 'All your tasks and reminders',
-                value: _include_tasks,
-                onChanged: (value) => setState(() => _include_tasks = value),
+                value: _includeTasks,
+                onChanged: (value) => setState(() => _includeTasks = value),
                 size: '~2.3 MB',
               ),
               const SizedBox(height: 12),
@@ -177,8 +177,8 @@ class _DataExportViewState extends State<DataExportView> {
                 icon: Icons.note_outlined,
                 title: 'Notes',
                 subtitle: 'Task notes and descriptions',
-                value: _include_notes,
-                onChanged: (value) => setState(() => _include_notes = value),
+                value: _includeNotes,
+                onChanged: (value) => setState(() => _includeNotes = value),
                 size: '~0.8 MB',
               ),
               const SizedBox(height: 12),
@@ -186,9 +186,8 @@ class _DataExportViewState extends State<DataExportView> {
                 icon: Icons.analytics_outlined,
                 title: 'Analytics',
                 subtitle: 'Your productivity statistics',
-                value: _include_analytics,
-                onChanged: (value) =>
-                    setState(() => _include_analytics = value),
+                value: _includeAnalytics,
+                onChanged: (value) => setState(() => _includeAnalytics = value),
                 size: '~0.5 MB',
               ),
               const SizedBox(height: 12),
@@ -196,8 +195,8 @@ class _DataExportViewState extends State<DataExportView> {
                 icon: Icons.settings_rounded,
                 title: 'Settings',
                 subtitle: 'App preferences and configurations',
-                value: _include_settings,
-                onChanged: (value) => setState(() => _include_settings = value),
+                value: _includeSettings,
+                onChanged: (value) => setState(() => _includeSettings = value),
                 size: '~0.1 MB',
               ),
               const SizedBox(height: 24),

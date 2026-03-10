@@ -27,7 +27,6 @@ class AppTheme {
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textDark,
-        onBackground: AppColors.textDark,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -145,7 +144,6 @@ class AppTheme {
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: darkText,
-        onBackground: darkText,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,

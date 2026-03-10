@@ -700,7 +700,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.dark,
+        value: _selectedIndex == 2
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         child: IndexedStack(
           index: _selectedIndex,
           children: [

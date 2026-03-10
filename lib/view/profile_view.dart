@@ -95,8 +95,15 @@ class ProfileView extends ConsumerWidget {
                         ),
                         data: (profile) {
                           final name =
-                              profile?['name'] ?? user?.displayName ?? 'User';
-                          final email = profile?['email'] ?? user?.email ?? '';
+                              (profile?['name'] != null &&
+                                  profile!['name'].toString().isNotEmpty)
+                              ? profile['name']
+                              : (user?.displayName ?? 'User');
+                          final email =
+                              (profile?['email'] != null &&
+                                  profile!['email'].toString().isNotEmpty)
+                              ? profile['email']
+                              : (user?.email ?? '');
                           return Column(
                             children: [
                               Stack(

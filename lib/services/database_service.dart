@@ -172,6 +172,9 @@ class DatabaseService {
           'DatabaseService: Note - object-not-found usually means the upload did not actually create the file or the bucket is not initialized.',
           name: 'database',
         );
+        throw Exception(
+          'Firebase Storage is not initialized. Please click "Get Started" in the Storage section of your Firebase Console.',
+        );
       }
       rethrow;
     } catch (e) {
@@ -300,6 +303,23 @@ class DatabaseService {
         error: e,
       );
       rethrow;
+    }
+  }
+
+  Future<void> saveFCMToken(String uid, String token) async {
+    dev.log('DatabaseService: Saving FCM token for $uid', name: 'database');
+    try {
+      await _db.child('users/$uid/profile').update({
+        'fcmToken': token,
+        'tokenUpdatedAt': ServerValue.timestamp,
+      });
+      dev.log('DatabaseService: FCM token saved', name: 'database');
+    } catch (e) {
+      dev.log(
+        'DatabaseService: Error saving FCM token: $e',
+        name: 'database',
+        error: e,
+      );
     }
   }
 }

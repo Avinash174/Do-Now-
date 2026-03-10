@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/services.dart';
 import 'dart:io';
 
 import '../const/app_colors.dart';
@@ -32,8 +33,11 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     // Load current name from provider
     Future.microtask(() {
       final profile = ref.read(userProfileProvider).value;
+      final user = ref.read(authStateProvider).value;
       if (profile != null) {
-        _nameController.text = profile['name'] ?? '';
+        _nameController.text = profile['name'] ?? user?.displayName ?? '';
+      } else {
+        _nameController.text = user?.displayName ?? '';
       }
     });
   }
@@ -185,6 +189,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: const PlatformBackButton(color: AppColors.textDark),
         title: Text(
           'Edit Profile',

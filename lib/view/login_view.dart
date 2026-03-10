@@ -43,8 +43,14 @@ class _LoginViewState extends ConsumerState<LoginView> {
           .read(authServiceProvider)
           .signInWithEmailPassword(email, password);
       if (mounted) Navigator.pushReplacementNamed(context, AppRoutes.home);
-    } on FirebaseAuthException catch (e) {
-      _showSnackBar(e.message ?? 'Login failed');
+    } catch (e) {
+      String errorMessage = 'Login failed';
+      if (e is FirebaseAuthException) {
+        errorMessage = e.message ?? errorMessage;
+      } else {
+        errorMessage = e.toString();
+      }
+      _showSnackBar(errorMessage);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

@@ -58,8 +58,14 @@ class _SignupViewState extends ConsumerState<SignupView> {
           .read(authServiceProvider)
           .signUpWithEmailPassword(name, email, password);
       if (mounted) Navigator.pushReplacementNamed(context, AppRoutes.home);
-    } on FirebaseAuthException catch (e) {
-      _showSnackBar(e.message ?? 'Sign up failed');
+    } catch (e) {
+      String errorMessage = 'Sign up failed';
+      if (e is FirebaseAuthException) {
+        errorMessage = e.message ?? errorMessage;
+      } else {
+        errorMessage = e.toString();
+      }
+      _showSnackBar(errorMessage);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

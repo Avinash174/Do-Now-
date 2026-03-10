@@ -52,8 +52,8 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Password changed successfully!'),
+          const SnackBar(
+            content: Text('Password changed successfully!'),
             backgroundColor: AppColors.success,
           ),
         );
@@ -68,207 +68,226 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     final isSmallScreen = size.width < 360;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppColors.textDark;
+    final mutedTextColor = isDark ? Colors.white70 : AppColors.textMuted;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        leading: PlatformBackButton(
-          color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
-        ),
-        title: Text(
-          'Change Password',
-          style: GoogleFonts.plusJakartaSans(
-            color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
-            fontWeight: FontWeight.w800,
-            fontSize: isSmallScreen ? 18 : 20,
-          ),
-        ),
-        centerTitle: true,
-        systemOverlayStyle: isDark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: size.width * 0.06,
-            vertical: 24,
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: theme.scaffoldBackgroundColor,
+          elevation: 0,
+          leading: PlatformBackButton(color: textColor),
+          title: Text(
+            'Change Password',
+            style: GoogleFonts.plusJakartaSans(
+              color: textColor,
+              fontWeight: FontWeight.w800,
+              fontSize: isSmallScreen ? 18 : 20,
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header card with icon
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryBlue.withValues(alpha: 0.1),
-                      AppColors.primaryAccent.withValues(alpha: 0.1),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.primaryBlue,
-                            AppColors.primaryAccent,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Icon(
-                        Icons.lock_reset_rounded,
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    ).animate().scale(duration: 500.ms, curve: Curves.easeOut),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Update Your Password',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color:
-                            theme.textTheme.titleMedium?.color ??
-                            AppColors.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Keep your account secure with a strong password',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        color:
-                            theme.textTheme.bodySmall?.color ??
-                            AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-              // Form
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    _buildPasswordField(
-                      context: context,
-                      label: 'Current Password',
-                      controller: _currentPasswordController,
-                      isVisible: _showCurrentPassword,
-                      onToggle: () => setState(
-                        () => _showCurrentPassword = !_showCurrentPassword,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildPasswordField(
-                      context: context,
-                      label: 'New Password',
-                      controller: _newPasswordController,
-                      isVisible: _showNewPassword,
-                      onToggle: () =>
-                          setState(() => _showNewPassword = !_showNewPassword),
-                      isNew: true,
-                    ),
-                    const SizedBox(height: 20),
-                    _buildPasswordField(
-                      context: context,
-                      label: 'Confirm New Password',
-                      controller: _confirmPasswordController,
-                      isVisible: _showConfirmPassword,
-                      onToggle: () => setState(
-                        () => _showConfirmPassword = !_showConfirmPassword,
-                      ),
-                      validator: (value) {
-                        if (value != _newPasswordController.text) {
-                          return 'Passwords do not match';
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-              // Save button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: Container(
+          centerTitle: true,
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: size.width * 0.06,
+              vertical: 24,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header card with icon
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
                     gradient: LinearGradient(
-                      colors: [AppColors.primaryBlue, AppColors.primaryAccent],
+                      colors: [
+                        AppColors.primaryBlue.withValues(
+                          alpha: isDark ? 0.2 : 0.1,
+                        ),
+                        AppColors.primaryAccent.withValues(
+                          alpha: isDark ? 0.2 : 0.1,
+                        ),
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primaryBlue.withValues(alpha: 0.5),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                        spreadRadius: 2,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: AppColors.primaryBlue.withValues(
+                        alpha: isDark ? 0.4 : 0.2,
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.primaryBlue,
+                              AppColors.primaryAccent,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.lock_reset_rounded,
+                          size: 40,
+                          color: Colors.white,
+                        ),
+                      ).animate().scale(
+                        duration: 500.ms,
+                        curve: Curves.easeOut,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Update Your Password',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Keep your account secure with a strong password',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          color: mutedTextColor,
+                        ),
                       ),
                     ],
                   ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _isLoading ? null : _changePassword,
+                ),
+                const SizedBox(height: 32),
+                // Form
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      _buildPasswordField(
+                        context: context,
+                        label: 'Current Password',
+                        controller: _currentPasswordController,
+                        isVisible: _showCurrentPassword,
+                        onToggle: () => setState(
+                          () => _showCurrentPassword = !_showCurrentPassword,
+                        ),
+                        textColor: textColor,
+                        mutedTextColor: mutedTextColor,
+                      ),
+                      const SizedBox(height: 20),
+                      _buildPasswordField(
+                        context: context,
+                        label: 'New Password',
+                        controller: _newPasswordController,
+                        isVisible: _showNewPassword,
+                        onToggle: () => setState(
+                          () => _showNewPassword = !_showNewPassword,
+                        ),
+                        isNew: true,
+                        textColor: textColor,
+                        mutedTextColor: mutedTextColor,
+                      ),
+                      const SizedBox(height: 20),
+                      _buildPasswordField(
+                        context: context,
+                        label: 'Confirm New Password',
+                        controller: _confirmPasswordController,
+                        isVisible: _showConfirmPassword,
+                        onToggle: () => setState(
+                          () => _showConfirmPassword = !_showConfirmPassword,
+                        ),
+                        validator: (value) {
+                          if (value != _newPasswordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                        textColor: textColor,
+                        mutedTextColor: mutedTextColor,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                // Save button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: Container(
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      child: Center(
-                        child: _isLoading
-                            ? const ShimmerLoading(
-                                width: double.infinity,
-                                height: 56,
-                                borderRadius: 24,
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.check_circle_rounded,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Update Password',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800,
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppColors.primaryBlue,
+                          AppColors.primaryAccent,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.5),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _isLoading ? null : _changePassword,
+                        borderRadius: BorderRadius.circular(24),
+                        child: Center(
+                          child: _isLoading
+                              ? const ShimmerLoading(
+                                  width: double.infinity,
+                                  height: 56,
+                                  borderRadius: 24,
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.check_circle_rounded,
                                       color: Colors.white,
-                                      letterSpacing: 0.5,
+                                      size: 24,
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Update Password',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 100),
-            ],
+                const SizedBox(height: 100),
+              ],
+            ),
           ),
         ),
       ),
@@ -281,17 +300,18 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     required TextEditingController controller,
     required bool isVisible,
     required VoidCallback onToggle,
+    required Color textColor,
+    required Color mutedTextColor,
     String? Function(String?)? validator,
     bool isNew = false,
   }) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return TextFormField(
       controller: controller,
       obscureText: !isVisible,
       style: GoogleFonts.plusJakartaSans(
-        color: theme.textTheme.bodyLarge?.color,
+        color: textColor,
         fontWeight: FontWeight.w600,
       ),
       validator:
@@ -307,9 +327,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
           },
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.plusJakartaSans(
-          color: theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
-        ),
+        labelStyle: GoogleFonts.plusJakartaSans(color: mutedTextColor),
         filled: true,
         fillColor: theme.cardColor,
         contentPadding: const EdgeInsets.symmetric(
@@ -339,7 +357,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
         suffixIcon: IconButton(
           icon: Icon(
             isVisible ? Icons.visibility_rounded : Icons.visibility_off_rounded,
-            color: theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
+            color: mutedTextColor,
           ),
           onPressed: onToggle,
         ),

@@ -187,13 +187,7 @@ We'd love your contributions! Here's how:
 - [Riverpod Documentation](https://riverpod.dev)
 - [Material Design 3](https://m3.material.io)
 
----
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
 
 ## 👨‍💻 Author
 

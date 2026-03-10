@@ -173,6 +173,9 @@ class NotificationService {
 
         // Listen for token refresh
         _firebaseMessaging.onTokenRefresh.listen((newToken) {
+          print(
+            '\\n🔄 FCM TOKEN REFRESHED: ${newToken.substring(0, 20)}...\\n',
+          );
           dev.log(
             'NotificationService: Token refreshed: ${newToken.substring(0, 20)}...',
             name: 'fcm',
@@ -274,12 +277,16 @@ class NotificationService {
       final finalToken = token ?? await _firebaseMessaging.getToken();
 
       if (finalToken == null) {
+        print('❌ FCM Token is NULL - Firebase Messaging not ready');
         dev.log(
           'NotificationService: FCM token is null - Firebase Messaging may not be initialized',
           name: 'fcm',
         );
         return;
       }
+
+      // Print to console for visibility
+      print('\\n🔔 FCM TOKEN: ${finalToken.substring(0, 20)}...\\n');
 
       dev.log(
         'NotificationService: Saving FCM token for ${user.uid}: ${finalToken.substring(0, 20)}...',
@@ -291,6 +298,7 @@ class NotificationService {
           .saveFCMToken(user.uid, finalToken);
 
       dev.log('NotificationService: FCM token saved successfully', name: 'fcm');
+      print('✅ FCM token saved to Firebase!\\n');
     } catch (e) {
       dev.log(
         'NotificationService: Token update error: $e',

@@ -23,22 +23,29 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
+        ),
         title: Text(
           'Profile Visibility',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
         ),
         centerTitle: true,
+        systemOverlayStyle: isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -95,7 +102,9 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textDark,
+                        color:
+                            theme.textTheme.titleMedium?.color ??
+                            AppColors.textDark,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -104,7 +113,9 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
-                        color: AppColors.textMuted,
+                        color:
+                            theme.textTheme.bodySmall?.color ??
+                            AppColors.textMuted,
                       ),
                     ),
                   ],
@@ -117,12 +128,14 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textMuted,
+                  color:
+                      theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
                   letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 16),
               _buildVisibilityOption(
+                context: context,
                 title: 'Public',
                 subtitle: 'Anyone can view your profile',
                 icon: Icons.public_rounded,
@@ -130,6 +143,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
               ),
               const SizedBox(height: 12),
               _buildVisibilityOption(
+                context: context,
                 title: 'Friends Only',
                 subtitle: 'Only your friends can view',
                 icon: Icons.group_rounded,
@@ -137,6 +151,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
               ),
               const SizedBox(height: 12),
               _buildVisibilityOption(
+                context: context,
                 title: 'Private',
                 subtitle: 'Only you can see your profile',
                 icon: Icons.lock_rounded,
@@ -149,12 +164,14 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textMuted,
+                  color:
+                      theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
                   letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 16),
               _buildInfoVisibilityTile(
+                context: context,
                 icon: Icons.mail_outline_rounded,
                 title: 'Show Email Address',
                 subtitle: 'Allow others to see your email',
@@ -164,6 +181,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
               ),
               const SizedBox(height: 12),
               _buildInfoVisibilityTile(
+                context: context,
                 icon: Icons.phone_outlined,
                 title: 'Show Phone Number',
                 subtitle: 'Allow others to see your phone',
@@ -178,12 +196,14 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textMuted,
+                  color:
+                      theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
                   letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 16),
               _buildInfoVisibilityTile(
+                context: context,
                 icon: Icons.message_outlined,
                 title: 'Allow Messages',
                 subtitle: 'Others can send you messages',
@@ -193,6 +213,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
               ),
               const SizedBox(height: 12),
               _buildInfoVisibilityTile(
+                context: context,
                 icon: Icons.timeline_rounded,
                 title: 'Show Activity Status',
                 subtitle: 'Let others see when you\'re active',
@@ -209,23 +230,27 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
   }
 
   Widget _buildVisibilityOption({
+    required BuildContext context,
     required String title,
     required String subtitle,
     required IconData icon,
     required String value,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSelected = _profileVisibility == value;
+
     return GestureDetector(
       onTap: () => setState(() => _profileVisibility = value),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? AppColors.primaryBlue.withValues(alpha: 0.5)
-                : AppColors.borderColor,
+                : theme.dividerColor.withValues(alpha: isDark ? 0.3 : 0.1),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -264,7 +289,9 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
+                      color:
+                          theme.textTheme.bodyLarge?.color ??
+                          AppColors.textDark,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -272,7 +299,9 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                     subtitle,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
-                      color: AppColors.textMuted,
+                      color:
+                          theme.textTheme.bodySmall?.color ??
+                          AppColors.textMuted,
                     ),
                   ),
                 ],
@@ -286,7 +315,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 border: Border.all(
                   color: isSelected
                       ? AppColors.primaryBlue
-                      : AppColors.borderColor,
+                      : theme.dividerColor.withValues(alpha: 0.2),
                   width: 2,
                 ),
                 color: isSelected ? AppColors.primaryBlue : Colors.transparent,
@@ -306,6 +335,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
   }
 
   Widget _buildInfoVisibilityTile({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -313,13 +343,18 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
     required Function(bool) onChanged,
     required Color color,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: value ? color.withValues(alpha: 0.3) : AppColors.borderColor,
+          color: value
+              ? color.withValues(alpha: 0.3)
+              : theme.dividerColor.withValues(alpha: isDark ? 0.3 : 0.1),
           width: value ? 2 : 1,
         ),
         boxShadow: value
@@ -355,7 +390,8 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
+                    color:
+                        theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -363,7 +399,8 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                   subtitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
-                    color: AppColors.textMuted,
+                    color:
+                        theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
                   ),
                 ),
               ],
@@ -377,7 +414,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
               onChanged: onChanged,
               activeColor: color,
               inactiveThumbColor: AppColors.textMuted,
-              inactiveTrackColor: AppColors.borderColor,
+              inactiveTrackColor: theme.dividerColor.withValues(alpha: 0.2),
             ),
           ),
         ],

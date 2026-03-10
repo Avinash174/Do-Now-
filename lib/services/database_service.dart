@@ -120,7 +120,13 @@ class DatabaseService {
 
     try {
       final storage = FirebaseStorage.instance;
-      // Use the default bucket. If this fails, we might need to specify it explicitly.
+
+      // Get the bucket name for debugging
+      dev.log(
+        'DatabaseService: Storage bucket: ${storage.bucket ?? "default"}',
+        name: 'database',
+      );
+
       final storageRef = storage.ref();
       final profilePhotoRef = storageRef.child(
         'profile_photos/$uid/profile.jpg',
@@ -139,7 +145,7 @@ class DatabaseService {
       // Listen to progress for better debugging
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
         dev.log(
-          'DatabaseService: Progress: ${snapshot.bytesTransferred}/${snapshot.totalBytes} (${snapshot.state})',
+          'DatabaseService: Upload Progress: ${snapshot.bytesTransferred}/${snapshot.totalBytes} bytes (${snapshot.state})',
           name: 'database',
         );
       });
@@ -154,7 +160,7 @@ class DatabaseService {
         dev.log('DatabaseService: Fetching download URL...', name: 'database');
         final downloadUrl = await profilePhotoRef.getDownloadURL();
         dev.log(
-          'DatabaseService: Download URL: $downloadUrl',
+          'DatabaseService: Download URL obtained successfully',
           name: 'database',
         );
 
@@ -177,15 +183,43 @@ class DatabaseService {
         name: 'database',
         error: e,
       );
+
       if (e.code == 'object-not-found') {
         dev.log(
-          'DatabaseService: Note - object-not-found usually means the upload did not actually create the file or the bucket is not initialized.',
+          'DatabaseService: CRITICAL - object-not-found error detected. This means:',
+          name: 'database',
+        );
+        dev.log(
+          '1. Firebase Storage bucket may not be initialized in Firebase Console',
+          name: 'database',
+        );
+        dev.log(
+          '2. Storage bucket reference path may be incorrect',
+          name: 'database',
+        );
+        dev.log(
+          '3. Bucket may not have proper CORS/access rules configured',
+          name: 'database',
+        );
+        dev.log(
+          'SOLUTION: Go to Firebase Console > Storage > "Get Started" to initialize the bucket',
           name: 'database',
         );
         throw Exception(
-          'Firebase Storage is not initialized. Please click "Get Started" in the Storage section of your Firebase Console.',
+          'Firebase Storage bucket not initialized. Solution: Open Firebase Console > Storage tab > Click "Get Started" button to initialize Cloud Storage.',
         );
       }
+
+      if (e.code == 'permission-denied') {
+        dev.log(
+          'DatabaseService: Storage permission denied. Check Firebase Storage rules in Console.',
+          name: 'database',
+        );
+        throw Exception(
+          'Firebase Storage permission denied. Check your storage rules in Firebase Console.',
+        );
+      }
+
       rethrow;
     } catch (e) {
       dev.log(

@@ -243,19 +243,21 @@ class ProfileView extends ConsumerWidget {
               child: Column(
                 children: [
                   // Premium Stats Row
-                  _buildGlassStatsCard(stats),
+                  _buildGlassStatsCard(context, stats),
 
                   const SizedBox(height: 32),
 
                   // Menu Section - Account
-                  _buildMenuSection('Account Settings', [
+                  _buildMenuSection(context, 'Account Settings', [
                     _buildMenuTile(
+                      context,
                       Icons.person_outline_rounded,
                       'Edit Profile',
                       AppColors.primaryBlue,
                       () => Navigator.pushNamed(context, AppRoutes.editProfile),
                     ),
                     _buildMenuTile(
+                      context,
                       Icons.notifications_none_rounded,
                       'Notifications',
                       AppColors.warning,
@@ -263,25 +265,28 @@ class ProfileView extends ConsumerWidget {
                           Navigator.pushNamed(context, AppRoutes.notifications),
                     ),
                     _buildMenuTile(
+                      context,
                       Icons.security_rounded,
                       'Security & Privacy',
                       AppColors.success,
                       () => Navigator.pushNamed(context, AppRoutes.security),
                     ),
-                    _buildThemeTile(ref),
+                    _buildThemeTile(context, ref),
                   ]),
 
                   const SizedBox(height: 24),
 
                   // Menu Section - Support
-                  _buildMenuSection('Support', [
+                  _buildMenuSection(context, 'Support', [
                     _buildMenuTile(
+                      context,
                       Icons.help_outline_rounded,
                       'Help Center',
                       AppColors.primaryAccent,
                       () => Navigator.pushNamed(context, AppRoutes.helpCenter),
                     ),
                     _buildMenuTile(
+                      context,
                       Icons.info_outline_rounded,
                       'About Do Now',
                       AppColors.primaryBlue,
@@ -346,15 +351,18 @@ class ProfileView extends ConsumerWidget {
     );
   }
 
-  Widget _buildGlassStatsCard(Map<String, dynamic> stats) {
+  Widget _buildGlassStatsCard(
+    BuildContext context,
+    Map<String, dynamic> stats,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 30,
             offset: const Offset(0, 15),
           ),
@@ -364,6 +372,7 @@ class ProfileView extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildStatItem(
+            context,
             'Total Tasks',
             '${stats['total']}',
             Icons.list_alt_rounded,
@@ -371,6 +380,7 @@ class ProfileView extends ConsumerWidget {
           ),
           _buildDivider(),
           _buildStatItem(
+            context,
             'Completed',
             '${stats['done']}',
             Icons.check_circle_rounded,
@@ -378,6 +388,7 @@ class ProfileView extends ConsumerWidget {
           ),
           _buildDivider(),
           _buildStatItem(
+            context,
             'Pending',
             '${stats['pending']}',
             Icons.pending_rounded,
@@ -389,6 +400,7 @@ class ProfileView extends ConsumerWidget {
   }
 
   Widget _buildStatItem(
+    BuildContext context,
     String label,
     String value,
     IconData icon,
@@ -410,7 +422,9 @@ class ProfileView extends ConsumerWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 22,
             fontWeight: FontWeight.w900,
-            color: AppColors.textDark,
+            color:
+                Theme.of(context).textTheme.bodyLarge?.color ??
+                AppColors.textDark,
           ),
         ),
         const SizedBox(height: 2),
@@ -434,7 +448,7 @@ class ProfileView extends ConsumerWidget {
     );
   }
 
-  Widget _buildThemeTile(WidgetRef ref) {
+  Widget _buildThemeTile(BuildContext context, WidgetRef ref) {
     final themeModeAsync = ref.watch(themeModeProvider);
     final themeMode = themeModeAsync.value ?? ThemeMode.system;
     final isDark = Theme.of(ref.context).brightness == Brightness.dark;
@@ -585,7 +599,11 @@ class ProfileView extends ConsumerWidget {
     );
   }
 
-  Widget _buildMenuSection(String title, List<Widget> tiles) {
+  Widget _buildMenuSection(
+    BuildContext context,
+    String title,
+    List<Widget> tiles,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -596,7 +614,7 @@ class ProfileView extends ConsumerWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
               fontWeight: FontWeight.w800,
-              color: AppColors.textDark,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               letterSpacing: 0.5,
             ),
           ),
@@ -620,6 +638,7 @@ class ProfileView extends ConsumerWidget {
   }
 
   Widget _buildMenuTile(
+    BuildContext context,
     IconData icon,
     String title,
     Color iconColor,
@@ -644,13 +663,15 @@ class ProfileView extends ConsumerWidget {
         style: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           fontWeight: FontWeight.w700,
-          color: AppColors.textDark,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
       ),
-      trailing: const Icon(
-        Icons.chevron_right_rounded,
-        color: AppColors.textLight,
-        size: 24,
+      trailing: Icon(
+        Icons.arrow_forward_ios_rounded,
+        size: 14,
+        color: Theme.of(
+          context,
+        ).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
       ),
     );
   }
@@ -659,15 +680,21 @@ class ProfileView extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.white,
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           'Sign Out',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w800,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
         ),
         content: Text(
           'Are you sure you want to sign out?',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w500),
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
         ),
         actions: [
           TextButton(
@@ -675,7 +702,7 @@ class ProfileView extends ConsumerWidget {
             child: Text(
               'Cancel',
               style: GoogleFonts.plusJakartaSans(
-                color: AppColors.textLight,
+                color: Theme.of(context).textTheme.bodySmall?.color,
                 fontWeight: FontWeight.w700,
               ),
             ),

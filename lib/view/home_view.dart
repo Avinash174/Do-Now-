@@ -102,17 +102,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: EdgeInsets.all(isSmallScreen ? 14 : 18),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: task.isCompleted
-                  ? AppColors.transparent
-                  : AppColors.cardBorder,
+                  ? Colors.transparent
+                  : Theme.of(context).dividerColor,
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.black.withValues(
+                color: Colors.black.withValues(
                   alpha: task.isCompleted ? 0.01 : 0.02,
                 ),
                 blurRadius: 12,
@@ -146,8 +146,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         fontSize: isSmallScreen ? 14 : 16,
                         fontWeight: FontWeight.w700,
                         color: task.isCompleted
-                            ? AppColors.textLight.withValues(alpha: 0.5)
-                            : AppColors.textDark,
+                            ? Theme.of(context).textTheme.bodySmall?.color
+                                  ?.withValues(alpha: 0.5)
+                            : Theme.of(context).textTheme.bodyLarge?.color,
                         decoration: task.isCompleted
                             ? TextDecoration.lineThrough
                             : null,
@@ -166,7 +167,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           _formatTaskTime(task.scheduleTime),
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: isSmallScreen ? 11 : 12,
-                            color: AppColors.textLight.withValues(alpha: 0.6),
+                            color: Theme.of(context).textTheme.bodySmall?.color
+                                ?.withValues(alpha: 0.6),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -221,7 +223,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ? Icon(
                           Icons.check,
                           size: isSmallScreen ? 14 : 18,
-                          color: AppColors.white,
+                          color: Colors.white,
                         )
                       : null,
                 ),
@@ -262,10 +264,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
           vertical: isSmallScreen ? 10 : 12,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryBlue : AppColors.white,
+          color: isSelected
+              ? AppColors.primaryBlue
+              : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.primaryBlue : AppColors.cardBorder,
+            color: isSelected
+                ? AppColors.primaryBlue
+                : Theme.of(context).dividerColor,
             width: 1.5,
           ),
           boxShadow: isSelected
@@ -281,7 +287,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
         child: Text(
           label,
           style: GoogleFonts.plusJakartaSans(
-            color: isSelected ? AppColors.white : AppColors.textLight,
+            color: isSelected
+                ? Colors.white
+                : Theme.of(context).textTheme.bodySmall?.color,
             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
             fontSize: isSmallScreen ? 13 : 14,
           ),
@@ -317,7 +325,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       child: RefreshIndicator(
         onRefresh: () async => ref.refresh(tasksProvider),
         color: AppColors.primaryBlue,
-        backgroundColor: AppColors.white,
+        backgroundColor: Theme.of(context).cardColor,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
@@ -400,7 +408,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: isSmallScreen ? 18 : 22,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textDark,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   letterSpacing: -0.5,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -411,7 +419,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: isSmallScreen ? 11 : 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textLight.withValues(alpha: 0.7),
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -428,12 +438,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
               child: Container(
                 padding: EdgeInsets.all(isSmallScreen ? 10 : 12),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: Theme.of(context).cardColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.cardBorder),
+                  border: Border.all(color: Theme.of(context).dividerColor),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: 0.02),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -443,7 +453,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   children: [
                     Icon(
                       Icons.notifications_none_rounded,
-                      color: AppColors.textDark,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                       size: isSmallScreen ? 20 : 24,
                     ),
                     Positioned(
@@ -589,9 +599,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           BoxShadow(
             color: AppColors.black.withValues(alpha: 0.02),
@@ -687,7 +697,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.textDark.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.color?.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -710,7 +722,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
               systemNavigationBarIconBrightness: Brightness.dark,
             ),
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: IndexedStack(
           index: _selectedIndex,
           children: [
@@ -721,22 +733,55 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ),
         bottomNavigationBar: _buildBottomNav(),
         floatingActionButton: _selectedIndex == 0
-            ? FloatingActionButton.extended(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.pushNamed(context, AppRoutes.newTask);
-                },
-                backgroundColor: AppColors.primaryBlue,
-                elevation: 4,
-                icon: const Icon(Icons.add_rounded, color: AppColors.white),
-                label: Text(
-                  'New Task',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.white,
-                  ),
-                ),
-              ).animate().scale(delay: 300.ms, curve: Curves.easeOutBack)
+            ? Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppColors.primaryBlue,
+                          AppColors.primaryAccent,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: FloatingActionButton.extended(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.pushNamed(context, AppRoutes.newTask);
+                      },
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      focusElevation: 0,
+                      highlightElevation: 0,
+                      hoverElevation: 0,
+                      icon: const Icon(
+                        Icons.add_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                      label: Text(
+                        'New Task',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          fontSize: 16,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  )
+                  .animate()
+                  .scale(delay: 300.ms, curve: Curves.easeOutBack)
+                  .fadeIn()
             : null,
       ),
     );
@@ -748,10 +793,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -765,10 +810,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
             HapticFeedback.selectionClick();
             setState(() => _selectedIndex = index);
           },
-          backgroundColor: AppColors.white,
+          backgroundColor: Theme.of(context).cardColor,
           elevation: 0,
           selectedItemColor: AppColors.primaryBlue,
-          unselectedItemColor: AppColors.textLight.withValues(alpha: 0.4),
+          unselectedItemColor: Theme.of(
+            context,
+          ).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
           selectedLabelStyle: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 10 : 12,

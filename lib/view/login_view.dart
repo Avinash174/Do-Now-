@@ -67,7 +67,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
     final isSmallScreen = size.width < 360;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
         child: SafeArea(
@@ -138,7 +138,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
@@ -169,7 +169,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: isSmallScreen ? 28 : 34,
             fontWeight: FontWeight.w800,
-            color: AppColors.textDark,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
             letterSpacing: -1,
           ),
         ),
@@ -205,13 +205,15 @@ class _LoginViewState extends ConsumerState<LoginView> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: isSmallScreen ? 13 : 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.textDark.withValues(alpha: 0.9),
+            color: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.color?.withValues(alpha: 0.9),
           ),
         ),
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
@@ -228,7 +230,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: isSmallScreen ? 14 : 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.textDark,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
             decoration: InputDecoration(
               hintText: hint,
@@ -251,7 +253,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                     )
                   : null,
               filled: true,
-              fillColor: AppColors.white,
+              fillColor: Theme.of(context).cardColor,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
                 borderSide: BorderSide(
@@ -389,9 +391,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
       child: Container(
         height: isSmallScreen ? 50 : 56,
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.black.withValues(alpha: 0.05)),
+          border: Border.all(color: Theme.of(context).dividerColor),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -406,7 +408,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: isSmallScreen ? 13 : 14,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
           ],

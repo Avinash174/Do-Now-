@@ -95,11 +95,18 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(
-            primary: AppColors.primaryBlue,
-            onPrimary: AppColors.white,
-            onSurface: AppColors.textDark,
-          ),
+          colorScheme: Theme.of(ctx).brightness == Brightness.dark
+              ? const ColorScheme.dark(
+                  primary: AppColors.primaryBlue,
+                  onPrimary: AppColors.white,
+                  surface: Color(0xFF1E293B),
+                  onSurface: AppColors.white,
+                )
+              : const ColorScheme.light(
+                  primary: AppColors.primaryBlue,
+                  onPrimary: AppColors.white,
+                  onSurface: AppColors.textDark,
+                ),
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primaryBlue,
@@ -131,11 +138,18 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       initialTime: TimeOfDay.fromDateTime(_selectedDate),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(
-            primary: AppColors.primaryBlue,
-            onPrimary: AppColors.white,
-            onSurface: AppColors.textDark,
-          ),
+          colorScheme: Theme.of(ctx).brightness == Brightness.dark
+              ? const ColorScheme.dark(
+                  primary: AppColors.primaryBlue,
+                  onPrimary: AppColors.white,
+                  surface: Color(0xFF1E293B),
+                  onSurface: AppColors.white,
+                )
+              : const ColorScheme.light(
+                  primary: AppColors.primaryBlue,
+                  onPrimary: AppColors.white,
+                  onSurface: AppColors.textDark,
+                ),
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primaryBlue,
@@ -235,7 +249,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Background Gradient Header
@@ -308,9 +322,9 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.only(top: 20),
-                    decoration: const BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.only(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(36),
                         topRight: Radius.circular(36),
                       ),
@@ -341,21 +355,24 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: _titleFocus.hasFocus
-                                        ? AppColors.white
+                                        ? Theme.of(context).cardColor
+                                        : Theme.of(context).brightness ==
+                                              Brightness.dark
+                                        ? Colors.white.withValues(alpha: 0.05)
                                         : AppColors.background,
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
                                       color: _titleFocus.hasFocus
                                           ? AppColors.primaryBlue
-                                          : AppColors.cardBorder,
+                                          : Theme.of(context).dividerColor,
                                       width: _titleFocus.hasFocus ? 1.5 : 1.0,
                                     ),
                                     boxShadow: _titleFocus.hasFocus
                                         ? [
                                             BoxShadow(
                                               color: AppColors.primaryBlue
-                                                  .withValues(alpha: 0.1),
-                                              blurRadius: 10,
+                                                  .withValues(alpha: 0.2),
+                                              blurRadius: 15,
                                               offset: const Offset(0, 4),
                                             ),
                                           ]
@@ -367,7 +384,9 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.textDark,
+                                      color: Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge?.color,
                                     ),
                                     decoration: InputDecoration(
                                       hintText: 'What needs to be done?',
@@ -408,21 +427,24 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: _descFocus.hasFocus
-                                        ? AppColors.white
+                                        ? Theme.of(context).cardColor
+                                        : Theme.of(context).brightness ==
+                                              Brightness.dark
+                                        ? Colors.white.withValues(alpha: 0.05)
                                         : AppColors.background,
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
                                       color: _descFocus.hasFocus
                                           ? AppColors.primaryBlue
-                                          : AppColors.cardBorder,
+                                          : Theme.of(context).dividerColor,
                                       width: _descFocus.hasFocus ? 1.5 : 1.0,
                                     ),
                                     boxShadow: _descFocus.hasFocus
                                         ? [
                                             BoxShadow(
                                               color: AppColors.primaryBlue
-                                                  .withValues(alpha: 0.1),
-                                              blurRadius: 10,
+                                                  .withValues(alpha: 0.2),
+                                              blurRadius: 15,
                                               offset: const Offset(0, 4),
                                             ),
                                           ]
@@ -435,7 +457,9 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                     minLines: 3,
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 15,
-                                      color: AppColors.textDark,
+                                      color: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium?.color,
                                       height: 1.5,
                                     ),
                                     decoration: InputDecoration(
@@ -574,8 +598,10 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                                       GoogleFonts.plusJakartaSans(
                                                         color: isSelected
                                                             ? AppColors.white
-                                                            : AppColors
-                                                                  .textDark,
+                                                            : Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodyMedium
+                                                                  ?.color,
                                                         fontWeight: isSelected
                                                             ? FontWeight.w800
                                                             : FontWeight.w700,
@@ -603,10 +629,14 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                             Container(
                                   padding: const EdgeInsets.all(20),
                                   decoration: BoxDecoration(
-                                    color: AppColors.background,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white.withValues(alpha: 0.05)
+                                        : AppColors.background,
                                     borderRadius: BorderRadius.circular(24),
                                     border: Border.all(
-                                      color: AppColors.cardBorder,
+                                      color: Theme.of(context).dividerColor,
                                     ),
                                   ),
                                   child: Row(
@@ -637,7 +667,10 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                                   GoogleFonts.plusJakartaSans(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.w800,
-                                                    color: AppColors.textDark,
+                                                    color: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyLarge
+                                                        ?.color,
                                                   ),
                                             ),
                                             Text(
@@ -657,6 +690,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                         onChanged: (v) =>
                                             setState(() => _reminder = v),
                                         activeTrackColor: AppColors.success,
+                                        activeColor: AppColors.white,
                                       ),
                                     ],
                                   ),
@@ -674,12 +708,18 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
             ),
           ),
 
-          // Bottom Bar
+          // Bottom Action Bar
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Container(
+              padding: EdgeInsets.fromLTRB(
+                28,
+                24,
+                28,
+                MediaQuery.of(context).padding.bottom + 20,
+              ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -690,34 +730,25 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                     ).scaffoldBackgroundColor.withValues(alpha: 0),
                     Theme.of(
                       context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.9),
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.8),
+                    Theme.of(context).scaffoldBackgroundColor,
                     Theme.of(context).scaffoldBackgroundColor,
                   ],
                 ),
               ),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    28,
-                    12,
-                    28,
-                    MediaQuery.of(context).padding.bottom + 12,
-                  ),
-                  child: _isLoading
-                      ? const ShimmerLoading(
-                          width: double.infinity,
-                          height: 60,
-                          borderRadius: 20,
-                        )
-                      : AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: double.infinity,
-                          height: 60,
+              child: _isLoading
+                  ? const ShimmerLoading(
+                      width: double.infinity,
+                      height: 60,
+                      borderRadius: 20,
+                    )
+                  : Hero(
+                          tag: 'task_button',
                           child: Container(
+                            height: 60,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              gradient: LinearGradient(
+                              borderRadius: BorderRadius.circular(22),
+                              gradient: const LinearGradient(
                                 colors: [
                                   AppColors.primaryBlue,
                                   AppColors.primaryAccent,
@@ -728,9 +759,9 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                               boxShadow: [
                                 BoxShadow(
                                   color: AppColors.primaryBlue.withValues(
-                                    alpha: 0.4,
+                                    alpha: 0.3,
                                   ),
-                                  blurRadius: 15,
+                                  blurRadius: 12,
                                   offset: const Offset(0, 8),
                                   spreadRadius: 0,
                                 ),
@@ -743,7 +774,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                   HapticFeedback.mediumImpact();
                                   _saveTask();
                                 },
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(22),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -760,7 +791,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                           ? 'Update Task'
                                           : 'Create Task',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 18,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.w800,
                                         color: Colors.white,
                                         letterSpacing: 0.5,
@@ -771,11 +802,12 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                               ),
                             ),
                           ),
-                        ),
-                ),
-              ),
+                        )
+                        .animate()
+                        .fadeIn(delay: 400.ms)
+                        .slideY(begin: 0.5, end: 0),
             ),
-          ).animate().fadeIn(delay: 200.ms).slideY(begin: 1, end: 0),
+          ),
         ],
       ),
     );
@@ -837,9 +869,11 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.05)
+              : AppColors.background,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: Theme.of(context).dividerColor),
         ),
         child: Row(
           children: [
@@ -869,7 +903,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textDark,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

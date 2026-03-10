@@ -167,11 +167,16 @@ class NotificationService {
         _setupAuthListener();
 
         // 7. Get and save current token
+        // Add a small delay to ensure Firebase is fully initialized
+        await Future.delayed(const Duration(milliseconds: 500));
         await _updateToken();
 
         // Listen for token refresh
         _firebaseMessaging.onTokenRefresh.listen((newToken) {
-          dev.log('NotificationService: Token refreshed', name: 'fcm');
+          dev.log(
+            'NotificationService: Token refreshed: ${newToken.substring(0, 20)}...',
+            name: 'fcm',
+          );
           _updateToken(token: newToken);
         });
 
@@ -189,6 +194,28 @@ class NotificationService {
           'NotificationService: Permissions NOT granted: ${settings.authorizationStatus}',
           name: 'fcm',
         );
+        // Even without permissions, try to get token on Android
+        if (Platform.isAndroid) {
+          dev.log(
+            'NotificationService: Attempting to get FCM token despite permissions on Android',
+            name: 'fcm',
+          );
+          try {
+            final token = await _firebaseMessaging.getToken();
+            if (token != null) {
+              dev.log(
+                'NotificationService: Got FCM token without explicit permissions: ${token.substring(0, 20)}...',
+                name: 'fcm',
+              );
+            }
+          } catch (e) {
+            dev.log(
+              'NotificationService: Failed to get token on Android: $e',
+              name: 'fcm',
+              error: e,
+            );
+          }
+        }
       }
     } catch (e) {
       dev.log('NotificationService: Init error: $e', name: 'fcm', error: e);
@@ -234,20 +261,42 @@ class NotificationService {
 
   Future<void> _updateToken({String? token}) async {
     try {
-      final finalToken = token ?? await _firebaseMessaging.getToken();
       final user = FirebaseAuth.instance.currentUser;
 
-      if (finalToken != null && user != null) {
+      if (user == null) {
         dev.log(
-          'NotificationService: Saving FCM token for ${user.uid}',
+          'NotificationService: No user logged in, skipping token save',
           name: 'fcm',
         );
-        await _ref
-            .read(databaseServiceProvider)
-            .saveFCMToken(user.uid, finalToken);
+        return;
       }
+
+      final finalToken = token ?? await _firebaseMessaging.getToken();
+
+      if (finalToken == null) {
+        dev.log(
+          'NotificationService: FCM token is null - Firebase Messaging may not be initialized',
+          name: 'fcm',
+        );
+        return;
+      }
+
+      dev.log(
+        'NotificationService: Saving FCM token for ${user.uid}: ${finalToken.substring(0, 20)}...',
+        name: 'fcm',
+      );
+
+      await _ref
+          .read(databaseServiceProvider)
+          .saveFCMToken(user.uid, finalToken);
+
+      dev.log('NotificationService: FCM token saved successfully', name: 'fcm');
     } catch (e) {
-      dev.log('NotificationService: Token update error: $e', name: 'fcm');
+      dev.log(
+        'NotificationService: Token update error: $e',
+        name: 'fcm',
+        error: e,
+      );
     }
   }
 

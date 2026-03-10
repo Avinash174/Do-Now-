@@ -11,16 +11,19 @@ class LegalView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
+        ),
         title: Text(
           title,
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
             fontWeight: FontWeight.w800,
             fontSize: 20,
           ),
@@ -33,7 +36,7 @@ class LegalView extends StatelessWidget {
           content,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 15,
-            color: AppColors.textLight,
+            color: theme.textTheme.bodyMedium?.color ?? AppColors.textLight,
             height: 1.6,
           ),
         ),
@@ -68,7 +71,7 @@ We provide our Services using a commercially reasonable level of skill and care 
   static const String privacyPolicy = """
 Privacy Policy
 
-Last Updated: March 2024
+Last Updated: March 2026
 
 1. Information We Collect
 We collect information to provide better services to all our users.

@@ -14,15 +14,21 @@ class AboutView extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color:
+              Theme.of(context).textTheme.bodyLarge?.color ??
+              AppColors.textDark,
+        ),
         title: Text(
           'About Do Now',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color:
+                Theme.of(context).textTheme.bodyLarge?.color ??
+                AppColors.textDark,
             fontWeight: FontWeight.w800,
             fontSize: 20,
           ),
@@ -41,7 +47,7 @@ class AboutView extends StatelessWidget {
                 height: 120,
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
@@ -66,7 +72,7 @@ class AboutView extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 28,
                 fontWeight: FontWeight.w900,
-                color: AppColors.textDark,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
                 letterSpacing: -0.5,
               ),
             ),
@@ -81,12 +87,14 @@ class AboutView extends StatelessWidget {
             const SizedBox(height: 48),
 
             _buildAboutCard(
+              context,
               'Our Mission',
               'Simplifying productivity one task at a time. We believe that focus is the key to achieving great things.',
               isSmallScreen,
             ),
             const SizedBox(height: 16),
             _buildAboutCard(
+              context,
               'Privacy First',
               'Your data belongs to you. We use end-to-end security to ensure your tasks stay private.',
               isSmallScreen,
@@ -135,10 +143,10 @@ class AboutView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              '© 2024 Do Now Inc.',
+              '© 2026 Do Now Inc.',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
-                color: AppColors.textLight,
+                color: Theme.of(context).textTheme.bodySmall?.color,
               ),
             ),
             const SizedBox(height: 100),
@@ -148,14 +156,21 @@ class AboutView extends StatelessWidget {
     );
   }
 
-  Widget _buildAboutCard(String title, String content, bool isSmallScreen) {
+  Widget _buildAboutCard(
+    BuildContext context,
+    String title,
+    String content,
+    bool isSmallScreen,
+  ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withValues(alpha: 0.05)
+            : AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,7 +180,9 @@ class AboutView extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: AppColors.textDark,
+              color:
+                  Theme.of(context).textTheme.bodyLarge?.color ??
+                  AppColors.textDark,
             ),
           ),
           const SizedBox(height: 12),

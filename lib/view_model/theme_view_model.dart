@@ -20,18 +20,25 @@ class ThemeModeNotifier extends AsyncNotifier<ThemeMode> {
   }
 
   Future<void> setMode(ThemeMode mode) async {
-    state = AsyncValue.data(mode);
-    final prefs = await SharedPreferences.getInstance();
-    switch (mode) {
-      case ThemeMode.dark:
-        await prefs.setString(_themeKey, 'dark');
-        break;
-      case ThemeMode.light:
-        await prefs.setString(_themeKey, 'light');
-        break;
-      case ThemeMode.system:
-        await prefs.remove(_themeKey);
-        break;
+    // Set loading state first
+    state = const AsyncValue.loading();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      switch (mode) {
+        case ThemeMode.dark:
+          await prefs.setString(_themeKey, 'dark');
+          break;
+        case ThemeMode.light:
+          await prefs.setString(_themeKey, 'light');
+          break;
+        case ThemeMode.system:
+          await prefs.remove(_themeKey);
+          break;
+      }
+      // Update state with the new theme mode
+      state = AsyncValue.data(mode);
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 

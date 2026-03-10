@@ -727,7 +727,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final navBarColor = isDark ? const Color(0xFF0F172A) : AppColors.white;
+    final navBarColor = Theme.of(context).cardColor;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(

@@ -26,16 +26,20 @@ class _DataExportViewState extends State<DataExportView> {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
 
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color: theme.textTheme.titleLarge?.color ?? AppColors.textDark,
+        ),
         title: Text(
           'Data Export',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color: theme.textTheme.titleLarge?.color ?? AppColors.textDark,
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
@@ -94,7 +98,9 @@ class _DataExportViewState extends State<DataExportView> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textDark,
+                        color:
+                            theme.textTheme.titleMedium?.color ??
+                            AppColors.textDark,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -103,7 +109,9 @@ class _DataExportViewState extends State<DataExportView> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
-                        color: AppColors.textMuted,
+                        color:
+                            theme.textTheme.bodySmall?.color ??
+                            AppColors.textMuted,
                       ),
                     ),
                   ],
@@ -116,7 +124,8 @@ class _DataExportViewState extends State<DataExportView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textMuted,
+                  color:
+                      theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -149,7 +158,8 @@ class _DataExportViewState extends State<DataExportView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textMuted,
+                  color:
+                      theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -222,7 +232,9 @@ class _DataExportViewState extends State<DataExportView> {
                         'Total size: ~3.7 MB. The export will be sent to your email.',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
-                          color: AppColors.textDark,
+                          color:
+                              theme.textTheme.titleSmall?.color ??
+                              AppColors.textDark,
                         ),
                       ),
                     ),
@@ -322,17 +334,18 @@ class _DataExportViewState extends State<DataExportView> {
     required String value,
     required bool isSelected,
   }) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () => setState(() => _format = value),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? AppColors.info.withValues(alpha: 0.5)
-                : AppColors.borderColor,
+                : theme.dividerColor.withValues(alpha: 0.1),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -373,7 +386,7 @@ class _DataExportViewState extends State<DataExportView> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
+                color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
               ),
             ),
             const SizedBox(height: 4),
@@ -382,7 +395,7 @@ class _DataExportViewState extends State<DataExportView> {
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
-                color: AppColors.textMuted,
+                color: theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
               ),
             ),
           ],
@@ -399,15 +412,16 @@ class _DataExportViewState extends State<DataExportView> {
     required Function(bool) onChanged,
     required String size,
   }) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: value
               ? AppColors.success.withValues(alpha: 0.3)
-              : AppColors.borderColor,
+              : theme.dividerColor.withValues(alpha: 0.1),
           width: value ? 2 : 1,
         ),
         boxShadow: value
@@ -446,7 +460,9 @@ class _DataExportViewState extends State<DataExportView> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
+                    color:
+                        theme.textTheme.titleMedium?.color ??
+                        AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -464,7 +480,9 @@ class _DataExportViewState extends State<DataExportView> {
                             subtitle,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              color: AppColors.textMuted,
+                              color:
+                                  theme.textTheme.bodySmall?.color ??
+                                  AppColors.textMuted,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -474,7 +492,9 @@ class _DataExportViewState extends State<DataExportView> {
                           size,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
-                            color: AppColors.textMuted,
+                            color:
+                                theme.textTheme.bodySmall?.color ??
+                                AppColors.textMuted,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -493,7 +513,7 @@ class _DataExportViewState extends State<DataExportView> {
               onChanged: (v) => onChanged(v ?? false),
               activeColor: AppColors.success,
               side: BorderSide(
-                color: value ? AppColors.success : AppColors.borderColor,
+                color: value ? AppColors.success : theme.dividerColor,
                 width: 2,
               ),
             ),

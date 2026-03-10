@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../const/app_colors.dart';
 
@@ -185,42 +186,48 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Center(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: AppColors.textDark,
-                size: 20,
+                ),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: AppColors.textDark,
+                  size: 20,
+                ),
               ),
             ),
-            onPressed: () => Navigator.pop(context),
           ),
         ),
         title: Text(
           widget.task != null ? 'Edit Task' : 'New Task',
-          style: const TextStyle(
+          style: GoogleFonts.outfit(
             color: AppColors.textDark,
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.5,
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
           ),
         ),
         centerTitle: true,
@@ -228,31 +235,27 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Title
               TextFormField(
                 controller: _titleController,
-                style: const TextStyle(
+                style: GoogleFonts.outfit(
                   fontSize: 32,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
                   height: 1.2,
                 ),
                 decoration: InputDecoration(
                   hintText: 'What needs to be done?',
-                  hintStyle: TextStyle(
+                  hintStyle: GoogleFonts.outfit(
                     fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textLight.withValues(alpha: 0.4),
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textLight.withValues(alpha: 0.3),
                   ),
                   border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  filled: false,
-                  contentPadding: EdgeInsets.zero,
                 ),
                 maxLines: null,
               ),
@@ -263,17 +266,10 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
               const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.primaryBlue.withValues(alpha: 0.03),
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
                   border: Border.all(
-                    color: AppColors.borderColor.withValues(alpha: 0.5),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   ),
                 ),
                 child: TextFormField(
@@ -281,17 +277,17 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                   maxLines: 4,
                   minLines: 3,
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 16,
                     color: AppColors.textDark,
                     height: 1.5,
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Add more details about this task...',
                     hintStyle: TextStyle(
-                      color: AppColors.textLight,
+                      color: AppColors.textLight.withValues(alpha: 0.6),
                       fontSize: 15,
                     ),
-                    contentPadding: EdgeInsets.all(20),
+                    contentPadding: const EdgeInsets.all(20),
                     border: InputBorder.none,
                   ),
                 ),
@@ -303,75 +299,60 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  // Date picker
+                  // Date
                   Expanded(
                     child: GestureDetector(
                       onTap: _pickDate,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 16,
-                        ),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.primaryBlue.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primaryBlue.withValues(
-                                alpha: 0.08,
-                              ),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
                           border: Border.all(
                             color: AppColors.primaryBlue.withValues(alpha: 0.1),
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Text(
-                              'DATE',
-                              style: TextStyle(
-                                color: AppColors.primaryBlue.withValues(
-                                  alpha: 0.8,
-                                ),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.2,
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.calendar_today_rounded,
+                                color: AppColors.primaryBlue,
+                                size: 18,
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryBlue.withValues(
-                                      alpha: 0.1,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Date',
+                                    style: TextStyle(
+                                      color: AppColors.textLight.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: const Icon(
-                                    Icons.calendar_today_rounded,
-                                    color: AppColors.primaryBlue,
-                                    size: 16,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
+                                  const SizedBox(height: 2),
+                                  Text(
                                     _formattedDate(),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 15,
+                                      fontSize: 14,
                                       color: AppColors.textDark,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -379,69 +360,60 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Time picker
+                  // Time
                   Expanded(
                     child: GestureDetector(
                       onTap: _pickTime,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 16,
-                        ),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Colors.orange.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.orange.withValues(alpha: 0.08),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
                           border: Border.all(
                             color: Colors.orange.withValues(alpha: 0.1),
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Text(
-                              'TIME',
-                              style: TextStyle(
-                                color: Colors.orange.withValues(alpha: 0.8),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.2,
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.access_time_filled_rounded,
+                                color: Colors.orange,
+                                size: 18,
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.orange.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(10),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Time',
+                                    style: TextStyle(
+                                      color: AppColors.textLight.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                  child: const Icon(
-                                    Icons.access_time_filled_rounded,
-                                    color: Colors.orange,
-                                    size: 16,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
+                                  const SizedBox(height: 2),
+                                  Text(
                                     _formattedTime(),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 15,
+                                      fontSize: 14,
                                       color: AppColors.textDark,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -450,7 +422,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                   ),
                 ],
               ),
-              const SizedBox(height: 36),
+              const SizedBox(height: 32),
 
               // Category
               _buildSectionTitle(Icons.category_rounded, 'CATEGORY'),
@@ -465,7 +437,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                     onTap: () => setState(() => _category = cat),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOutBack,
+                      curve: Curves.easeOutCubic,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 12,
@@ -497,8 +469,12 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                       child: Text(
                         cat,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.textDark,
-                          fontWeight: FontWeight.w700,
+                          color: isSelected
+                              ? Colors.white
+                              : AppColors.textLight,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w600,
                           fontSize: 14,
                         ),
                       ),
@@ -559,8 +535,8 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                     Switch(
                       value: _reminder,
                       onChanged: (v) => setState(() => _reminder = v),
-                      activeColor: Colors.green,
-                      activeTrackColor: Colors.green.withValues(alpha: 0.2),
+                      activeTrackColor: Colors.green,
+                      activeThumbColor: Colors.white,
                       inactiveThumbColor: AppColors.textLight,
                       inactiveTrackColor: AppColors.borderColor,
                     ),
@@ -576,52 +552,54 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       extendBody: true,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withValues(alpha: 0.9),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: AppColors.primaryBlue.withValues(alpha: 0.05),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
           ],
         ),
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-        child: _isLoading
-            ? const SizedBox(
-                height: 56,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.primaryBlue,
-                  ),
-                ),
-              )
-            : ElevatedButton(
-                onPressed: _saveTask,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.task_alt_rounded, size: 22),
-                    const SizedBox(width: 12),
-                    Text(
-                      widget.task != null ? 'Update Task' : 'Create Task',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
+        child: SafeArea(
+          child: _isLoading
+              ? const SizedBox(
+                  height: 56,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryBlue,
                     ),
-                  ],
+                  ),
+                )
+              : ElevatedButton(
+                  onPressed: _saveTask,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.check_circle_outline_rounded, size: 24),
+                      const SizedBox(width: 12),
+                      Text(
+                        widget.task != null ? 'Update Task' : 'Create Task',
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
@@ -629,15 +607,15 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
   Widget _buildSectionTitle(IconData icon, String title) {
     return Row(
       children: [
-        Icon(icon, color: AppColors.textLight, size: 18),
+        Icon(icon, color: AppColors.textDark, size: 20),
         const SizedBox(width: 8),
         Text(
           title,
-          style: const TextStyle(
-            color: AppColors.textLight,
-            fontWeight: FontWeight.w800,
+          style: GoogleFonts.outfit(
+            color: AppColors.textDark,
+            fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
-            fontSize: 12,
+            fontSize: 14,
           ),
         ),
       ],

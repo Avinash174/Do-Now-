@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../const/app_colors.dart';
+import '../utils/widgets_utils.dart';
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -28,7 +29,7 @@ class _NotificationsViewState extends State<NotificationsView> {
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
-        leading: const BackButton(color: AppColors.textDark),
+        leading: const PlatformBackButton(color: AppColors.textDark),
         title: Text(
           'Notifications',
           style: GoogleFonts.plusJakartaSans(
@@ -88,6 +89,7 @@ class _NotificationsViewState extends State<NotificationsView> {
                 Icons.vibration_rounded,
                 isSmallScreen,
               ),
+              const SizedBox(height: 100),
             ],
           ),
         ),

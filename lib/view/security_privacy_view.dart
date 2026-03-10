@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../const/app_colors.dart';
+import '../utils/widgets_utils.dart';
 
 class SecurityPrivacyView extends StatelessWidget {
   const SecurityPrivacyView({super.key});
@@ -18,7 +19,7 @@ class SecurityPrivacyView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
-        leading: const BackButton(color: AppColors.textDark),
+        leading: const PlatformBackButton(color: AppColors.textDark),
         title: Text(
           'Security & Privacy',
           style: GoogleFonts.plusJakartaSans(

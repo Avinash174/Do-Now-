@@ -6,6 +6,7 @@ import '../const/app_colors.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';
 import '../utils/snackbar_utils.dart';
+import '../utils/widgets_utils.dart';
 
 class EditProfileView extends ConsumerStatefulWidget {
   const EditProfileView({super.key});
@@ -85,7 +86,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
-        leading: const BackButton(color: AppColors.textDark),
+        leading: const PlatformBackButton(color: AppColors.textDark),
         title: Text(
           'Edit Profile',
           style: GoogleFonts.plusJakartaSans(
@@ -247,6 +248,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                         ),
                 ),
               ),
+              const SizedBox(height: 100),
             ],
           ),
         ),

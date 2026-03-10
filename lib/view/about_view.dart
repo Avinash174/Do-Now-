@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../const/app_colors.dart';
+import '../utils/widgets_utils.dart';
 
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
@@ -16,7 +17,7 @@ class AboutView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: const BackButton(color: AppColors.textDark),
+        leading: const PlatformBackButton(color: AppColors.textDark),
         title: Text(
           'About Do Now',
           style: GoogleFonts.plusJakartaSans(
@@ -119,6 +120,7 @@ class AboutView extends StatelessWidget {
                 color: AppColors.textLight,
               ),
             ),
+            const SizedBox(height: 100),
           ],
         ),
       ),

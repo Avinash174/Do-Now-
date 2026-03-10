@@ -1,4 +1,4 @@
-package com.example.do_now
+package com.avinash.do_now
 
 import io.flutter.embedding.android.FlutterActivity
 

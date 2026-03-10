@@ -11,18 +11,18 @@ final databaseServiceProvider = Provider<DatabaseService>((ref) {
   return DatabaseService();
 });
 
-// A provider to fetch user profile details
-final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+// A provider to fetch user profile details in real-time
+final userProfileProvider = StreamProvider<Map<String, dynamic>?>((ref) {
   final user = ref.watch(authStateProvider).value;
   if (user == null) {
     dev.log('userProfileProvider: No logged in user', name: 'database');
-    return null;
+    return Stream.value(null);
   }
   dev.log(
-    'userProfileProvider: Fetching profile for ${user.uid}',
+    'userProfileProvider: Watching profile for ${user.uid}',
     name: 'database',
   );
-  return await ref.read(databaseServiceProvider).getUserProfile(user.uid);
+  return ref.read(databaseServiceProvider).watchUserProfile(user.uid);
 });
 
 class DatabaseService {
@@ -74,6 +74,16 @@ class DatabaseService {
       );
       rethrow;
     }
+  }
+
+  Stream<Map<String, dynamic>?> watchUserProfile(String uid) {
+    return _db.child('users/$uid/profile').onValue.map((event) {
+      final snapshot = event.snapshot;
+      if (snapshot.exists && snapshot.value != null) {
+        return Map<String, dynamic>.from(snapshot.value as Map);
+      }
+      return null;
+    });
   }
 
   Future<void> updateUserName(String uid, String name) async {
@@ -189,7 +199,7 @@ class DatabaseService {
 
   // ----- Tasks Management -----
 
-  Future<void> addTask({
+  Future<String?> addTask({
     required String uid,
     required String title,
     required String description,
@@ -219,6 +229,7 @@ class DatabaseService {
         'DatabaseService: Task added successfully with ID $taskId and saved to SharedPreferences',
         name: 'database',
       );
+      return taskId;
     } catch (e) {
       dev.log(
         'DatabaseService: Error in addTask: $e',

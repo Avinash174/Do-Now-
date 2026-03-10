@@ -2,25 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../const/app_colors.dart';
+import '../services/settings_service.dart';
 import '../utils/widgets_utils.dart';
 
-class NotificationsView extends StatefulWidget {
+class NotificationsView extends ConsumerStatefulWidget {
   const NotificationsView({super.key});
 
   @override
-  State<NotificationsView> createState() => _NotificationsViewState();
+  ConsumerState<NotificationsView> createState() => _NotificationsViewState();
 }
 
-class _NotificationsViewState extends State<NotificationsView> {
-  bool _pushNotifications = true;
-  bool _taskReminders = true;
-  bool _soundEnabled = true;
-  bool _vibrationEnabled = true;
-
+class _NotificationsViewState extends ConsumerState<NotificationsView> {
   @override
   Widget build(BuildContext context) {
+    final settings = ref.watch(settingsServiceProvider);
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
 
@@ -55,8 +53,8 @@ class _NotificationsViewState extends State<NotificationsView> {
               _buildToggleItem(
                 'Allow Notifications',
                 'Receive alerts for your tasks',
-                _pushNotifications,
-                (v) => setState(() => _pushNotifications = v),
+                settings.pushNotificationsEnabled,
+                (v) => settings.setPushNotificationsEnabled(v),
                 Icons.notifications_active_rounded,
                 isSmallScreen,
               ),
@@ -64,8 +62,8 @@ class _NotificationsViewState extends State<NotificationsView> {
               _buildToggleItem(
                 'Task Reminders',
                 'Remind me when tasks are due',
-                _taskReminders,
-                (v) => setState(() => _taskReminders = v),
+                settings.taskRemindersEnabled,
+                (v) => settings.setTaskRemindersEnabled(v),
                 Icons.alarm_rounded,
                 isSmallScreen,
               ),
@@ -75,8 +73,8 @@ class _NotificationsViewState extends State<NotificationsView> {
               _buildToggleItem(
                 'Notification Sound',
                 'Play sound for incoming alerts',
-                _soundEnabled,
-                (v) => setState(() => _soundEnabled = v),
+                settings.soundEnabled,
+                (v) => settings.setSoundEnabled(v),
                 Icons.volume_up_rounded,
                 isSmallScreen,
               ),
@@ -84,8 +82,8 @@ class _NotificationsViewState extends State<NotificationsView> {
               _buildToggleItem(
                 'Vibration',
                 'Vibrate device for notifications',
-                _vibrationEnabled,
-                (v) => setState(() => _vibrationEnabled = v),
+                settings.vibrationEnabled,
+                (v) => settings.setVibrationEnabled(v),
                 Icons.vibration_rounded,
                 isSmallScreen,
               ),

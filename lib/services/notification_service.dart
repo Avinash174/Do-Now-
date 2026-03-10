@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer' as dev;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -5,6 +6,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'database_service.dart';
+import 'settings_service.dart';
+import '../routes/app_routes.dart';
+import '../model/task_model.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(ref);
@@ -20,6 +27,11 @@ class NotificationService {
 
   Future<void> initialize() async {
     dev.log('NotificationService: Initializing', name: 'fcm');
+
+    // Initialize Timezones
+    tz.initializeTimeZones();
+    final timeZoneName = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timeZoneName.toString()));
 
     try {
       // 1. Request Permissions
@@ -46,6 +58,9 @@ class NotificationService {
               'NotificationService: Local notification tapped',
               name: 'fcm',
             );
+            if (details.payload != null) {
+              _handleNotificationPayload(details.payload!);
+            }
           },
         );
 
@@ -96,7 +111,14 @@ class NotificationService {
         'NotificationService: Notification click: ${message.data}',
         name: 'fcm',
       );
+      _handleNotificationPayload(jsonEncode(message.data));
     });
+  }
+
+  void _handleNotificationPayload(String payload) {
+    // Basic navigation logic - can be expanded based on data
+    dev.log('NotificationService: Handling payload: $payload', name: 'fcm');
+    AppRoutes.navigatorKey.currentState?.pushNamed(AppRoutes.notifications);
   }
 
   Future<void> _updateToken({String? token}) async {
@@ -138,7 +160,58 @@ class NotificationService {
       notification.title,
       notification.body,
       platformDetails,
-      payload: message.data.toString(),
+      payload: jsonEncode(message.data),
+    );
+  }
+
+  Future<void> scheduleTaskNotification(TaskModel task) async {
+    final settings = _ref.read(settingsServiceProvider);
+    if (!settings.taskRemindersEnabled) return;
+
+    final scheduleDate = DateTime.fromMillisecondsSinceEpoch(task.scheduleTime);
+    if (scheduleDate.isBefore(DateTime.now())) return;
+
+    final androidDetails = AndroidNotificationDetails(
+      'task_reminders',
+      'Task Reminders',
+      channelDescription: 'Notifications for scheduled tasks',
+      importance: Importance.max,
+      priority: Priority.high,
+      enableVibration: settings.vibrationEnabled,
+      playSound: settings.soundEnabled,
+    );
+
+    final platformDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentSound: true,
+      ),
+    );
+
+    await _localNotifications.zonedSchedule(
+      task.id.hashCode,
+      'Task Reminder: ${task.title}',
+      task.description,
+      tz.TZDateTime.from(scheduleDate, tz.local),
+      platformDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      payload: jsonEncode({'id': task.id, 'type': 'task_reminder'}),
+    );
+
+    dev.log(
+      'NotificationService: Scheduled notification for task ${task.id} at $scheduleDate',
+      name: 'fcm',
+    );
+  }
+
+  Future<void> cancelTaskNotification(String taskId) async {
+    await _localNotifications.cancel(taskId.hashCode);
+    dev.log(
+      'NotificationService: Cancelled notification for task $taskId',
+      name: 'fcm',
     );
   }
 }

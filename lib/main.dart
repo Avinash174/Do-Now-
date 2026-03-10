@@ -9,6 +9,8 @@ import 'const/app_theme.dart';
 import 'firebase_options.dart';
 import 'routes/app_routes.dart';
 import 'services/notification_service.dart';
+import 'services/settings_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'view_model/theme_view_model.dart';
 
 void main() async {
@@ -30,7 +32,13 @@ void main() async {
     ),
   );
 
-  final container = ProviderContainer();
+  final prefs = await SharedPreferences.getInstance();
+
+  final container = ProviderContainer(
+    overrides: [
+      settingsServiceProvider.overrideWithValue(SettingsService(prefs)),
+    ],
+  );
 
   try {
     dev.log('Initializing Firebase...', name: 'app');
@@ -58,6 +66,7 @@ class MyApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp(
+      navigatorKey: AppRoutes.navigatorKey,
       title: 'Do Now',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.getTheme(context, ThemeMode.light),

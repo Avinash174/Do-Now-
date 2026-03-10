@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../model/task_model.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';
+import '../services/notification_service.dart';
 
 enum TaskFilter { all, pending, completed }
 
@@ -105,9 +106,10 @@ final taskStatsProvider = Provider<Map<String, dynamic>>((ref) {
 
 class TaskViewModel {
   final DatabaseService _db;
+  final NotificationService _notifications;
   final String uid;
 
-  TaskViewModel(this._db, this.uid);
+  TaskViewModel(this._db, this._notifications, this.uid);
 
   Future<void> addTask({
     required String title,
@@ -115,7 +117,7 @@ class TaskViewModel {
     required String category,
     required DateTime scheduleDate,
   }) async {
-    await _db.addTask(
+    final taskId = await _db.addTask(
       uid: uid,
       title: title,
       description: description,
@@ -123,18 +125,39 @@ class TaskViewModel {
       isCompleted: false,
       scheduleTime: scheduleDate.millisecondsSinceEpoch,
     );
+
+    if (taskId != null) {
+      final task = TaskModel(
+        id: taskId,
+        title: title,
+        description: description,
+        category: category,
+        isCompleted: false,
+        scheduleTime: scheduleDate.millisecondsSinceEpoch,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+      );
+      await _notifications.scheduleTaskNotification(task);
+    }
   }
 
-  Future<void> toggleTask(String taskId, bool currentValue) async {
-    await _db.updateTaskStatus(
-      uid: uid,
-      taskId: taskId,
-      isCompleted: !currentValue,
-    );
+  Future<void> toggleTask(String taskId, TaskModel task) async {
+    final newValue = !task.isCompleted;
+    await _db.updateTaskStatus(uid: uid, taskId: taskId, isCompleted: newValue);
+
+    if (newValue) {
+      // If completed, cancel notification
+      await _notifications.cancelTaskNotification(taskId);
+    } else {
+      // If uncompleted, reschedule notification
+      await _notifications.scheduleTaskNotification(
+        task.copyWith(isCompleted: false),
+      );
+    }
   }
 
   Future<void> deleteTask(String taskId) async {
     await _db.deleteTask(uid: uid, taskId: taskId);
+    await _notifications.cancelTaskNotification(taskId);
   }
 
   Future<void> updateTaskDetails({
@@ -152,6 +175,18 @@ class TaskViewModel {
       category: category,
       scheduleTime: scheduleDate.millisecondsSinceEpoch,
     );
+
+    // Reschedule
+    final task = TaskModel(
+      id: taskId,
+      title: title,
+      description: description,
+      category: category,
+      isCompleted: false,
+      scheduleTime: scheduleDate.millisecondsSinceEpoch,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    await _notifications.scheduleTaskNotification(task);
   }
 }
 
@@ -159,5 +194,6 @@ final taskViewModelProvider = Provider<TaskViewModel?>((ref) {
   final user = ref.watch(authStateProvider).value;
   if (user == null) return null;
   final db = ref.read(databaseServiceProvider);
-  return TaskViewModel(db, user.uid);
+  final notifications = ref.read(notificationServiceProvider);
+  return TaskViewModel(db, notifications, user.uid);
 });

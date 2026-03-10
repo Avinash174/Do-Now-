@@ -198,7 +198,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
               GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  vm?.toggleTask(task.id, task.isCompleted);
+                  vm?.toggleTask(task.id, task);
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
@@ -697,13 +697,21 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: _selectedIndex == 2
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
-        child: IndexedStack(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: _selectedIndex == 2
+          ? SystemUiOverlayStyle.light.copyWith(
+              statusBarColor: Colors.transparent,
+              systemNavigationBarColor: AppColors.white,
+              systemNavigationBarIconBrightness: Brightness.dark,
+            )
+          : SystemUiOverlayStyle.dark.copyWith(
+              statusBarColor: Colors.transparent,
+              systemNavigationBarColor: AppColors.white,
+              systemNavigationBarIconBrightness: Brightness.dark,
+            ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: IndexedStack(
           index: _selectedIndex,
           children: [
             _buildHomeContent(),
@@ -711,26 +719,26 @@ class _HomeViewState extends ConsumerState<HomeView> {
             const ProfileView(),
           ],
         ),
-      ),
-      bottomNavigationBar: _buildBottomNav(),
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                Navigator.pushNamed(context, AppRoutes.newTask);
-              },
-              backgroundColor: AppColors.primaryBlue,
-              elevation: 4,
-              icon: const Icon(Icons.add_rounded, color: AppColors.white),
-              label: Text(
-                'New Task',
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.white,
+        bottomNavigationBar: _buildBottomNav(),
+        floatingActionButton: _selectedIndex == 0
+            ? FloatingActionButton.extended(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pushNamed(context, AppRoutes.newTask);
+                },
+                backgroundColor: AppColors.primaryBlue,
+                elevation: 4,
+                icon: const Icon(Icons.add_rounded, color: AppColors.white),
+                label: Text(
+                  'New Task',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.white,
+                  ),
                 ),
-              ),
-            ).animate().scale(delay: 300.ms, curve: Curves.easeOutBack)
-          : null,
+              ).animate().scale(delay: 300.ms, curve: Curves.easeOutBack)
+            : null,
+      ),
     );
   }
 

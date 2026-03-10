@@ -25,6 +25,9 @@ import '../view/data_export_view.dart';
 import '../view/privacy_policy_view.dart';
 
 class AppRoutes {
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   static const String splash = '/';
   static const String introduction = '/introduction';
   static const String login = '/login';

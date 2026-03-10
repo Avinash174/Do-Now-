@@ -23,7 +23,6 @@ class NotificationService {
             alert: true,
             announcement: false,
             badge: true,
-            carPlaySecureVideoProfile: false,
             carPlay: false,
             criticalAlert: false,
             provisional: false,

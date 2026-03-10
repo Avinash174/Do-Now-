@@ -137,8 +137,6 @@ class AppRoutes {
           const Scaffold(body: Center(child: Text('Route not found'))),
     );
   }
-}
-  }
 
   static Future<String> getInitialRoute() async {
     dev.log('AppRoutes: Calculating initial route...', name: 'navigation');

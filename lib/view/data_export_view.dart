@@ -456,11 +456,13 @@ class _DataExportViewState extends State<DataExportView> {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        color: AppColors.textMuted,
+                    Expanded(
+                      child: Text(
+                        subtitle,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),

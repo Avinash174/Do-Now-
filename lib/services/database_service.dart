@@ -99,28 +99,84 @@ class DatabaseService {
       'DatabaseService: Uploading profile photo for $uid',
       name: 'database',
     );
+
+    if (!await imageFile.exists()) {
+      dev.log(
+        'DatabaseService: Error - Image file does not exist at ${imageFile.path}',
+        name: 'database',
+      );
+      throw Exception('Image file does not exist');
+    }
+
     try {
-      final storageRef = FirebaseStorage.instance.ref();
+      final storage = FirebaseStorage.instance;
+      // Use the default bucket. If this fails, we might need to specify it explicitly.
+      final storageRef = storage.ref();
       final profilePhotoRef = storageRef.child(
         'profile_photos/$uid/profile.jpg',
       );
 
-      await profilePhotoRef.putFile(imageFile);
-      final downloadUrl = await profilePhotoRef.getDownloadURL();
-
-      // Save the photo URL to database
-      await _db.child('users/$uid/profile').update({
-        'photoUrl': downloadUrl,
-        'photoUpdatedAt': ServerValue.timestamp,
-      });
-
       dev.log(
-        'DatabaseService: Profile photo uploaded successfully',
+        'DatabaseService: Starting profile photo upload to ${profilePhotoRef.fullPath}',
         name: 'database',
       );
+
+      final uploadTask = profilePhotoRef.putFile(
+        imageFile,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+
+      // Listen to progress for better debugging
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        dev.log(
+          'DatabaseService: Progress: ${snapshot.bytesTransferred}/${snapshot.totalBytes} (${snapshot.state})',
+          name: 'database',
+        );
+      });
+
+      final snapshot = await uploadTask;
+      dev.log(
+        'DatabaseService: Upload completed with state: ${snapshot.state}',
+        name: 'database',
+      );
+
+      if (snapshot.state == TaskState.success) {
+        dev.log('DatabaseService: Fetching download URL...', name: 'database');
+        final downloadUrl = await profilePhotoRef.getDownloadURL();
+        dev.log(
+          'DatabaseService: Download URL: $downloadUrl',
+          name: 'database',
+        );
+
+        // Save the photo URL to database
+        await _db.child('users/$uid/profile').update({
+          'photoUrl': downloadUrl,
+          'photoUpdatedAt': ServerValue.timestamp,
+        });
+
+        dev.log(
+          'DatabaseService: Profile photo uploaded and DB updated successfully',
+          name: 'database',
+        );
+      } else {
+        throw Exception('Upload failed with state: ${snapshot.state}');
+      }
+    } on FirebaseException catch (e) {
+      dev.log(
+        'DatabaseService: Firebase Error in uploadProfilePhoto: [${e.code}] ${e.message}',
+        name: 'database',
+        error: e,
+      );
+      if (e.code == 'object-not-found') {
+        dev.log(
+          'DatabaseService: Note - object-not-found usually means the upload did not actually create the file or the bucket is not initialized.',
+          name: 'database',
+        );
+      }
+      rethrow;
     } catch (e) {
       dev.log(
-        'DatabaseService: Error in uploadProfilePhoto: $e',
+        'DatabaseService: Unexpected error in uploadProfilePhoto: $e',
         name: 'database',
         error: e,
       );

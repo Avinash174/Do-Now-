@@ -71,7 +71,7 @@ Whether you're managing personal projects, work tasks, or daily habits, Do Now p
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/do_now.git
+   git clone https://github.com/Avinash174/do_now.git
    cd do_now
    ```
 
@@ -198,9 +198,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Avinash Magar**  
-📧 Email: [your-email@example.com](mailto:your-email@example.com)  
-🐙 GitHub: [@yourusername](https://github.com/yourusername)  
-🔗 LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourusername)
+📧 Email: [avinashmagar15@gmail.com](mailto:avinashmagar15@gmail.com)  
+🐙 GitHub: [@Avinash174](https://github.com/Avinash174)  
+🔗 LinkedIn: [Avinash Magar](https://www.linkedin.com/in/avinash-magar-1ba853168/)
 
 ---
 

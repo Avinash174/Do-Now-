@@ -114,14 +114,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
                 _buildLoginButton(size, isSmallScreen),
 
-                const SizedBox(height: 32),
-
-                _buildDivider(isSmallScreen),
-
-                const SizedBox(height: 32),
-
-                _buildSocialLogins(isSmallScreen),
-
                 SizedBox(height: size.height * 0.06),
 
                 _buildSignUpLink(isSmallScreen),
@@ -338,94 +330,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
               ),
             ),
     ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2, end: 0);
-  }
-
-  Widget _buildDivider(bool isSmallScreen) {
-    return Row(
-      children: [
-        Expanded(child: Divider(color: Theme.of(context).dividerColor)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'Or continue with',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: isSmallScreen ? 12 : 13,
-              color: Theme.of(
-                context,
-              ).textTheme.bodySmall?.color?.withValues(alpha: 0.6),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        Expanded(child: Divider(color: Theme.of(context).dividerColor)),
-      ],
-    ).animate().fadeIn(delay: 700.ms);
-  }
-
-  Widget _buildSocialLogins(bool isSmallScreen) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildSocialButton(
-            'Google',
-            'assets/images/google_logo.png',
-            () {},
-            isSmallScreen: isSmallScreen,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildSocialButton(
-            'Apple',
-            '',
-            () {},
-            useIcon: true,
-            icon: Icons.apple_rounded,
-            isSmallScreen: isSmallScreen,
-          ),
-        ),
-      ],
-    ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.2, end: 0);
-  }
-
-  Widget _buildSocialButton(
-    String label,
-    String imagePath,
-    VoidCallback onTap, {
-    bool useIcon = false,
-    IconData? icon,
-    required bool isSmallScreen,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        height: isSmallScreen ? 50 : 56,
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Theme.of(context).dividerColor),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (useIcon)
-              Icon(icon, size: isSmallScreen ? 20 : 24)
-            else
-              Image.asset(imagePath, width: 20, height: 20),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: isSmallScreen ? 13 : 14,
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildSignUpLink(bool isSmallScreen) {

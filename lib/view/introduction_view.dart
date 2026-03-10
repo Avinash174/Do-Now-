@@ -121,7 +121,7 @@ class _IntroductionViewState extends State<IntroductionView> {
                       decoration: BoxDecoration(
                         color: _currentPage == index
                             ? AppColors.primaryBlue
-                            : AppColors.borderColor,
+                            : Theme.of(context).dividerColor,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),

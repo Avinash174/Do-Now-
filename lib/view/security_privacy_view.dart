@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../const/app_colors.dart';
 import '../utils/widgets_utils.dart';
+import '../routes/app_routes.dart';
 
 class SecurityPrivacyView extends StatelessWidget {
   const SecurityPrivacyView({super.key});
@@ -45,7 +46,7 @@ class SecurityPrivacyView extends StatelessWidget {
                 'Change Password',
                 'Update your account password',
                 Icons.lock_outline_rounded,
-                () {},
+                () => Navigator.pushNamed(context, AppRoutes.changePassword),
                 isSmallScreen,
               ),
               const SizedBox(height: 12),
@@ -53,7 +54,7 @@ class SecurityPrivacyView extends StatelessWidget {
                 'Two-Factor Auth',
                 'Add extra layer of security',
                 Icons.shield_outlined,
-                () {},
+                () => Navigator.pushNamed(context, AppRoutes.twoFactorAuth),
                 isSmallScreen,
               ),
               const SizedBox(height: 12),
@@ -61,7 +62,7 @@ class SecurityPrivacyView extends StatelessWidget {
                 'Face ID / Biometrics',
                 'Use biometrics to unlock',
                 Icons.face_unlock_rounded,
-                () {},
+                () => Navigator.pushNamed(context, AppRoutes.faceIdBiometric),
                 isSmallScreen,
               ),
               const SizedBox(height: 32),
@@ -71,7 +72,7 @@ class SecurityPrivacyView extends StatelessWidget {
                 'Profile Visibility',
                 'Manage who can see your profile',
                 Icons.visibility_outlined,
-                () {},
+                () => Navigator.pushNamed(context, AppRoutes.profileVisibility),
                 isSmallScreen,
               ),
               const SizedBox(height: 12),
@@ -79,7 +80,7 @@ class SecurityPrivacyView extends StatelessWidget {
                 'Data Export',
                 'Download your account data',
                 Icons.download_rounded,
-                () {},
+                () => Navigator.pushNamed(context, AppRoutes.dataExport),
                 isSmallScreen,
               ),
               const SizedBox(height: 12),
@@ -87,7 +88,7 @@ class SecurityPrivacyView extends StatelessWidget {
                 'Privacy Policy',
                 'Read our privacy commitments',
                 Icons.description_outlined,
-                () {},
+                () => Navigator.pushNamed(context, AppRoutes.privacyPolicy),
                 isSmallScreen,
                 showTrailing: true,
               ),

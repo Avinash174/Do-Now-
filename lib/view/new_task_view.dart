@@ -707,26 +707,63 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                       : SizedBox(
                           width: double.infinity,
                           height: 60,
-                          child: ElevatedButton(
-                            onPressed: _saveTask,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryBlue,
-                              foregroundColor: AppColors.white,
-                              elevation: 10,
-                              shadowColor: AppColors.primaryBlue.withValues(
-                                alpha: 0.4,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.primaryBlue,
+                                  AppColors.primaryAccent,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryBlue.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                  spreadRadius: 2,
+                                ),
+                              ],
                             ),
-                            child: Text(
-                              widget.task != null
-                                  ? 'Update Task'
-                                  : 'Create Task',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: _saveTask,
+                                borderRadius: BorderRadius.circular(24),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 16,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        widget.task != null
+                                            ? Icons.check_circle_rounded
+                                            : Icons.add_rounded,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        widget.task != null
+                                            ? 'Update Task'
+                                            : 'Create Task',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           ),

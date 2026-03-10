@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '458445587081',
     projectId: 'do-now-app-12345',
     storageBucket: 'do-now-app-12345.firebasestorage.app',
-    iosBundleId: 'com.example.doNow',
+    iosBundleId: 'com.avinash.do_now',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -72,7 +72,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '458445587081',
     projectId: 'do-now-app-12345',
     storageBucket: 'do-now-app-12345.firebasestorage.app',
-    iosBundleId: 'com.example.doNow',
+    iosBundleId: 'com.avinash.do_now',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

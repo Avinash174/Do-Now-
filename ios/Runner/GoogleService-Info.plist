@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.doNow</string>
+	<string>com.avinash.do_now</string>
 	<key>PROJECT_ID</key>
 	<string>do-now-app-12345</string>
 	<key>STORAGE_BUCKET</key>

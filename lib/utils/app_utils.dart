@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../const/app_colors.dart';
+import 'snackbar_utils.dart';
 
 class AppUtils {
   static void showSnackBar(
@@ -8,56 +8,13 @@ class AppUtils {
     bool isError = false,
     bool isSuccess = false,
   }) {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-    // Clear existing snackbars
-    scaffoldMessenger.removeCurrentSnackBar();
-
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              isError
-                  ? Icons.error_outline
-                  : isSuccess
-                  ? Icons.check_circle_outline
-                  : Icons.info_outline,
-              color: Colors.white,
-              size: 24,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: isError
-            ? Colors.red.shade400
-            : isSuccess
-            ? Colors.green.shade400
-            : AppColors.primaryBlue,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 8,
-        duration: const Duration(milliseconds: 3000),
-        action: SnackBarAction(
-          label: 'OK',
-          textColor: Colors.white,
-          onPressed: () {
-            scaffoldMessenger.hideCurrentSnackBar();
-          },
-        ),
-      ),
-    );
+    if (isError) {
+      SnackbarUtils.showError(context, 'Error', message);
+    } else if (isSuccess) {
+      SnackbarUtils.showSuccess(context, 'Success', message);
+    } else {
+      SnackbarUtils.showHelp(context, 'Info', message);
+    }
   }
 
   static void showToast(BuildContext context, String message) {

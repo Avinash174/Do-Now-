@@ -1,0 +1,262 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../const/app_colors.dart';
+import '../services/auth_service.dart';
+import '../services/database_service.dart';
+import '../utils/snackbar_utils.dart';
+
+class EditProfileView extends ConsumerStatefulWidget {
+  const EditProfileView({super.key});
+
+  @override
+  ConsumerState<EditProfileView> createState() => _EditProfileViewState();
+}
+
+class _EditProfileViewState extends ConsumerState<EditProfileView> {
+  final _nameController = TextEditingController();
+  final _nameFocus = FocusNode();
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameFocus.addListener(() => setState(() {}));
+
+    // Load current name from provider
+    Future.microtask(() {
+      final profile = ref.read(userProfileProvider).value;
+      if (profile != null) {
+        _nameController.text = profile['name'] ?? '';
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _nameFocus.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateProfile() async {
+    if (_nameController.text.trim().isEmpty) {
+      SnackbarUtils.showError(context, 'Error', 'Name cannot be empty');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    final user = ref.read(authStateProvider).value;
+    if (user == null) return;
+
+    try {
+      await ref
+          .read(databaseServiceProvider)
+          .updateUserName(user.uid, _nameController.text.trim());
+      if (mounted) {
+        SnackbarUtils.showSuccess(
+          context,
+          'Success',
+          'Profile updated successfully',
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackbarUtils.showError(
+          context,
+          'Error',
+          'Failed to update profile: $e',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
+
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.textDark,
+          ),
+        ),
+        title: Text(
+          'Edit Profile',
+          style: GoogleFonts.plusJakartaSans(
+            color: AppColors.textDark,
+            fontWeight: FontWeight.w800,
+            fontSize: isSmallScreen ? 18 : 20,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            horizontal: size.width * 0.06,
+            vertical: 24,
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: size.height * 0.02),
+              // Profile Picture
+              Center(
+                child: Stack(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                          width: 4,
+                        ),
+                      ),
+                      child: CircleAvatar(
+                        radius: size.width * 0.15,
+                        backgroundColor: AppColors.primaryBlue.withValues(
+                          alpha: 0.1,
+                        ),
+                        child: Icon(
+                          Icons.person_rounded,
+                          size: size.width * 0.15,
+                          color: AppColors.primaryBlue,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryBlue,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.white, width: 3),
+                        ),
+                        child: Icon(
+                          Icons.camera_alt_rounded,
+                          color: AppColors.white,
+                          size: isSmallScreen ? 16 : 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: size.height * 0.05),
+
+              // Name Input
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'FULL NAME',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: isSmallScreen ? 11 : 12,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textLight,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    decoration: BoxDecoration(
+                      color: _nameFocus.hasFocus
+                          ? AppColors.white
+                          : AppColors.background,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: _nameFocus.hasFocus
+                            ? AppColors.primaryBlue
+                            : AppColors.cardBorder,
+                        width: _nameFocus.hasFocus ? 1.5 : 1.0,
+                      ),
+                      boxShadow: _nameFocus.hasFocus
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primaryBlue.withValues(
+                                  alpha: 0.1,
+                                ),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : [],
+                    ),
+                    child: TextField(
+                      controller: _nameController,
+                      focusNode: _nameFocus,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textDark,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Enter your name',
+                        hintStyle: GoogleFonts.plusJakartaSans(
+                          color: AppColors.textLight.withValues(alpha: 0.4),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: size.height * 0.1),
+
+              // Save Button
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _updateProfile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    foregroundColor: AppColors.white,
+                    elevation: 8,
+                    shadowColor: AppColors.primaryBlue.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.white,
+                          ),
+                        )
+                      : Text(
+                          'Save Changes',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

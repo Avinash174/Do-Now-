@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../const/app_colors.dart';
-
 import '../view_model/task_view_model.dart';
+import '../utils/snackbar_utils.dart';
 import '../model/task_model.dart';
 
 class NewTaskView extends ConsumerStatefulWidget {
@@ -18,6 +20,9 @@ class NewTaskView extends ConsumerStatefulWidget {
 class _NewTaskViewState extends ConsumerState<NewTaskView> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
+  final _scrollController = ScrollController();
+  final _titleFocus = FocusNode();
+  final _descFocus = FocusNode();
   String _category = 'Work';
   bool _reminder = true;
   bool _isLoading = false;
@@ -26,6 +31,8 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
   @override
   void initState() {
     super.initState();
+    _titleFocus.addListener(() => setState(() {}));
+    _descFocus.addListener(() => setState(() {}));
     if (widget.task != null) {
       _titleController.text = widget.task!.title;
       _descController.text = widget.task!.description;
@@ -36,19 +43,46 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
     }
   }
 
-  final List<String> _categories = [
-    'Work',
-    'Personal',
-    'Shopping',
-    'Health',
-    'Finance',
-    'Other',
+  final List<Map<String, dynamic>> _categories = [
+    {
+      'name': 'Work',
+      'icon': Icons.work_outline_rounded,
+      'color': AppColors.catWork,
+    },
+    {
+      'name': 'Personal',
+      'icon': Icons.person_outline_rounded,
+      'color': AppColors.catPersonal,
+    },
+    {
+      'name': 'Shopping',
+      'icon': Icons.shopping_bag_outlined,
+      'color': AppColors.catShopping,
+    },
+    {
+      'name': 'Health',
+      'icon': Icons.favorite_outline_rounded,
+      'color': AppColors.catHealth,
+    },
+    {
+      'name': 'Finance',
+      'icon': Icons.account_balance_wallet_outlined,
+      'color': AppColors.catFinance,
+    },
+    {
+      'name': 'Other',
+      'icon': Icons.more_horiz_rounded,
+      'color': AppColors.primaryBlue,
+    },
   ];
 
   @override
   void dispose() {
     _titleController.dispose();
     _descController.dispose();
+    _scrollController.dispose();
+    _titleFocus.dispose();
+    _descFocus.dispose();
     super.dispose();
   }
 
@@ -60,7 +94,19 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: AppColors.primaryBlue),
+          colorScheme: ColorScheme.light(
+            primary: AppColors.primaryBlue,
+            onPrimary: AppColors.white,
+            onSurface: AppColors.textDark,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryBlue,
+              textStyle: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ),
         child: child!,
       ),
@@ -84,7 +130,19 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       initialTime: TimeOfDay.fromDateTime(_selectedDate),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: AppColors.primaryBlue),
+          colorScheme: ColorScheme.light(
+            primary: AppColors.primaryBlue,
+            onPrimary: AppColors.white,
+            onSurface: AppColors.textDark,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryBlue,
+              textStyle: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ),
         child: child!,
       ),
@@ -105,8 +163,10 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
   Future<void> _saveTask() async {
     final title = _titleController.text.trim();
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a task title')),
+      SnackbarUtils.showWarning(
+        context,
+        'Hold on!',
+        'Please enter a task title before saving.',
       );
       return;
     }
@@ -130,12 +190,13 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
           scheduleDate: _selectedDate,
         );
       }
-      if (mounted) Navigator.pop(context);
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        Navigator.pop(context);
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        SnackbarUtils.showError(context, 'Snap!', 'Could not save task: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -168,457 +229,600 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
     return '$hour:$m $period';
   }
 
-  Color _getCategoryColor(String category) {
-    switch (category) {
-      case 'Work':
-        return Colors.blueAccent;
-      case 'Personal':
-        return Colors.orangeAccent;
-      case 'Shopping':
-        return Colors.pinkAccent;
-      case 'Health':
-        return Colors.greenAccent;
-      default:
-        return AppColors.primaryBlue;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0),
-          child: Center(
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primaryBlue.withValues(alpha: 0.08),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
+      backgroundColor: AppColors.white,
+      body: Stack(
+        children: [
+          // Background Gradient Header
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 240,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primaryBlue,
+                    AppColors.primaryBlue.withValues(alpha: 0.8),
+                    AppColors.primaryBlue.withValues(alpha: 0.6),
                   ],
-                  border: Border.all(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                  ),
                 ),
-                child: const Icon(
-                  Icons.arrow_back_rounded,
-                  color: AppColors.textDark,
-                  size: 20,
+              ),
+              child: Opacity(
+                opacity: 0.1,
+                child: Center(
+                  child: Icon(
+                    widget.task != null
+                        ? Icons.edit_note_rounded
+                        : Icons.add_task_rounded,
+                    size: 200,
+                    color: AppColors.white,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        title: Text(
-          widget.task != null ? 'Edit Task' : 'New Task',
-          style: GoogleFonts.outfit(
-            color: AppColors.textDark,
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title
-              TextFormField(
-                controller: _titleController,
-                style: GoogleFonts.outfit(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                  height: 1.2,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'What needs to be done?',
-                  hintStyle: GoogleFonts.outfit(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textLight.withValues(alpha: 0.3),
-                  ),
-                  border: InputBorder.none,
-                ),
-                maxLines: null,
-              ),
-              const SizedBox(height: 32),
 
-              // Description
-              _buildSectionTitle(Icons.notes_rounded, 'DESCRIPTION'),
-              const SizedBox(height: 16),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.03),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                  ),
-                ),
-                child: TextFormField(
-                  controller: _descController,
-                  maxLines: 4,
-                  minLines: 3,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textDark,
-                    height: 1.5,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Add more details about this task...',
-                    hintStyle: TextStyle(
-                      color: AppColors.textLight.withValues(alpha: 0.6),
-                      fontSize: 15,
-                    ),
-                    contentPadding: const EdgeInsets.all(20),
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Schedule
-              _buildSectionTitle(Icons.calendar_month_rounded, 'SCHEDULE'),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  // Date
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _pickDate,
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.calendar_today_rounded,
-                                color: AppColors.primaryBlue,
-                                size: 18,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Date',
-                                    style: TextStyle(
-                                      color: AppColors.textLight.withValues(
-                                        alpha: 0.8,
-                                      ),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _formattedDate(),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14,
-                                      color: AppColors.textDark,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Time
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _pickTime,
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.orange.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.access_time_filled_rounded,
-                                color: Colors.orange,
-                                size: 18,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Time',
-                                    style: TextStyle(
-                                      color: AppColors.textLight.withValues(
-                                        alpha: 0.8,
-                                      ),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _formattedTime(),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14,
-                                      color: AppColors.textDark,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-
-              // Category
-              _buildSectionTitle(Icons.category_rounded, 'CATEGORY'),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: _categories.map((cat) {
-                  final isSelected = _category == cat;
-                  final catColor = _getCategoryColor(cat);
-                  return GestureDetector(
-                    onTap: () => setState(() => _category = cat),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOutCubic,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected ? catColor : Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: catColor.withValues(alpha: 0.4),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.03),
-                                  blurRadius: 5,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                        border: Border.all(
-                          color: isSelected
-                              ? catColor
-                              : AppColors.borderColor.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Text(
-                        cat,
-                        style: TextStyle(
-                          color: isSelected
-                              ? Colors.white
-                              : AppColors.textLight,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 36),
-
-              // Reminder
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                  border: Border.all(
-                    color: AppColors.borderColor.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.notifications_active_rounded,
-                            color: Colors.green,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        const Text(
-                          'Remind me',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Switch(
-                      value: _reminder,
-                      onChanged: (v) => setState(() => _reminder = v),
-                      activeTrackColor: Colors.green,
-                      activeThumbColor: Colors.white,
-                      inactiveThumbColor: AppColors.textLight,
-                      inactiveTrackColor: AppColors.borderColor,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 120),
-            ],
-          ),
-        ),
-      ),
-      extendBody: true,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryBlue.withValues(alpha: 0.05),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-        child: SafeArea(
-          child: _isLoading
-              ? const SizedBox(
-                  height: 56,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
-                )
-              : ElevatedButton(
-                  onPressed: _saveTask,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+          SafeArea(
+            child: Column(
+              children: [
+                // Custom App Bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Icon(Icons.check_circle_outline_rounded, size: 24),
-                      const SizedBox(width: 12),
+                      _buildHeaderButton(
+                        icon: Icons.close_rounded,
+                        onTap: () => Navigator.pop(context),
+                      ),
                       Text(
-                        widget.task != null ? 'Update Task' : 'Create Task',
-                        style: GoogleFonts.outfit(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
+                        widget.task != null ? 'Edit Task' : 'New Task',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: AppColors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
+                      const SizedBox(width: 44), // To center the title
                     ],
                   ),
                 ),
-        ),
+
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    decoration: const BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(36),
+                        topRight: Radius.circular(36),
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(36),
+                        topRight: Radius.circular(36),
+                      ),
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(28, 36, 28, 120),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title Input
+                            _buildSectionLabel(
+                              'Task Title',
+                              Icons.edit_note_rounded,
+                            ),
+                            const SizedBox(height: 12),
+                            AnimatedContainer(
+                                  duration: 300.ms,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _titleFocus.hasFocus
+                                        ? AppColors.white
+                                        : AppColors.background,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: _titleFocus.hasFocus
+                                          ? AppColors.primaryBlue
+                                          : AppColors.cardBorder,
+                                      width: _titleFocus.hasFocus ? 1.5 : 1.0,
+                                    ),
+                                    boxShadow: _titleFocus.hasFocus
+                                        ? [
+                                            BoxShadow(
+                                              color: AppColors.primaryBlue
+                                                  .withValues(alpha: 0.1),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ]
+                                        : [],
+                                  ),
+                                  child: TextFormField(
+                                    controller: _titleController,
+                                    focusNode: _titleFocus,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textDark,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'What needs to be done?',
+                                      hintStyle: GoogleFonts.plusJakartaSans(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColors.textLight.withValues(
+                                          alpha: 0.4,
+                                        ),
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 16,
+                                          ),
+                                    ),
+                                    maxLines: null,
+                                  ),
+                                )
+                                .animate()
+                                .fadeIn(duration: 500.ms)
+                                .slideY(begin: 0.2, end: 0),
+
+                            const SizedBox(height: 32),
+
+                            // Description Input
+                            _buildSectionLabel(
+                              'Description',
+                              Icons.description_outlined,
+                            ),
+                            const SizedBox(height: 12),
+                            AnimatedContainer(
+                                  duration: 300.ms,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _descFocus.hasFocus
+                                        ? AppColors.white
+                                        : AppColors.background,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: _descFocus.hasFocus
+                                          ? AppColors.primaryBlue
+                                          : AppColors.cardBorder,
+                                      width: _descFocus.hasFocus ? 1.5 : 1.0,
+                                    ),
+                                    boxShadow: _descFocus.hasFocus
+                                        ? [
+                                            BoxShadow(
+                                              color: AppColors.primaryBlue
+                                                  .withValues(alpha: 0.1),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ]
+                                        : [],
+                                  ),
+                                  child: TextFormField(
+                                    controller: _descController,
+                                    focusNode: _descFocus,
+                                    maxLines: 5,
+                                    minLines: 3,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 15,
+                                      color: AppColors.textDark,
+                                      height: 1.5,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'Add some more details...',
+                                      hintStyle: GoogleFonts.plusJakartaSans(
+                                        color: AppColors.textLight.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                        fontSize: 14,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 12,
+                                          ),
+                                      border: InputBorder.none,
+                                    ),
+                                  ),
+                                )
+                                .animate()
+                                .fadeIn(delay: 100.ms)
+                                .slideY(begin: 0.2, end: 0),
+
+                            const SizedBox(height: 32),
+
+                            // Schedule Section
+                            _buildSectionLabel(
+                              'Schedule',
+                              Icons.calendar_today_rounded,
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildPickerCard(
+                                        title: 'Date',
+                                        value: _formattedDate(),
+                                        icon: Icons.event_note_rounded,
+                                        color: AppColors.primaryBlue,
+                                        onTap: _pickDate,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _buildPickerCard(
+                                        title: 'Time',
+                                        value: _formattedTime(),
+                                        icon: Icons.access_time_filled_rounded,
+                                        color: AppColors.warning,
+                                        onTap: _pickTime,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                                .animate()
+                                .fadeIn(delay: 200.ms)
+                                .slideY(begin: 0.2, end: 0),
+
+                            const SizedBox(height: 32),
+
+                            // Category Section
+                            _buildSectionLabel(
+                              'Category',
+                              Icons.grid_view_rounded,
+                            ),
+                            const SizedBox(height: 16),
+                            Wrap(
+                                  spacing: 12,
+                                  runSpacing: 12,
+                                  children: _categories.map((cat) {
+                                    final isSelected = _category == cat['name'];
+                                    final Color color = cat['color'];
+                                    return GestureDetector(
+                                          onTap: () {
+                                            HapticFeedback.selectionClick();
+                                            setState(
+                                              () => _category = cat['name'],
+                                            );
+                                          },
+                                          child: AnimatedContainer(
+                                            duration: 400.ms,
+                                            curve: Curves.easeOutQuint,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 20,
+                                              vertical: 14,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: isSelected
+                                                  ? color
+                                                  : color.withValues(
+                                                      alpha: 0.05,
+                                                    ),
+                                              borderRadius:
+                                                  BorderRadius.circular(22),
+                                              border: Border.all(
+                                                color: isSelected
+                                                    ? color
+                                                    : color.withValues(
+                                                        alpha: 0.1,
+                                                      ),
+                                                width: 1.5,
+                                              ),
+                                              boxShadow: isSelected
+                                                  ? [
+                                                      BoxShadow(
+                                                        color: color.withValues(
+                                                          alpha: 0.25,
+                                                        ),
+                                                        blurRadius: 15,
+                                                        offset: const Offset(
+                                                          0,
+                                                          8,
+                                                        ),
+                                                      ),
+                                                    ]
+                                                  : [],
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  isSelected
+                                                      ? Icons
+                                                            .check_circle_rounded
+                                                      : cat['icon'],
+                                                  size: 20,
+                                                  color: isSelected
+                                                      ? AppColors.white
+                                                      : color,
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Text(
+                                                  cat['name'],
+                                                  style:
+                                                      GoogleFonts.plusJakartaSans(
+                                                        color: isSelected
+                                                            ? AppColors.white
+                                                            : AppColors
+                                                                  .textDark,
+                                                        fontWeight: isSelected
+                                                            ? FontWeight.w800
+                                                            : FontWeight.w700,
+                                                        fontSize: 14,
+                                                        letterSpacing: -0.2,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                        .animate(target: isSelected ? 1 : 0)
+                                        .scale(
+                                          begin: const Offset(1, 1),
+                                          end: const Offset(1.05, 1.05),
+                                          duration: 200.ms,
+                                        );
+                                  }).toList(),
+                                )
+                                .animate()
+                                .fadeIn(delay: 300.ms)
+                                .slideY(begin: 0.2, end: 0),
+
+                            const SizedBox(height: 32),
+
+                            // Reminder Switch
+                            Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.background,
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: AppColors.cardBorder,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.success.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.notifications_active_rounded,
+                                          color: AppColors.success,
+                                          size: 22,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Notifications',
+                                              style:
+                                                  GoogleFonts.plusJakartaSans(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: AppColors.textDark,
+                                                  ),
+                                            ),
+                                            Text(
+                                              'Remind me when time hits',
+                                              style:
+                                                  GoogleFonts.plusJakartaSans(
+                                                    fontSize: 12,
+                                                    color: AppColors.textLight,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Switch.adaptive(
+                                        value: _reminder,
+                                        onChanged: (v) =>
+                                            setState(() => _reminder = v),
+                                        activeTrackColor: AppColors.success,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                                .animate()
+                                .fadeIn(delay: 400.ms)
+                                .slideY(begin: 0.2, end: 0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Bottom Bar
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.white.withValues(alpha: 0),
+                    AppColors.white,
+                    AppColors.white,
+                  ],
+                ),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 20, 28, 20),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 60,
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      : SizedBox(
+                          width: double.infinity,
+                          height: 60,
+                          child: ElevatedButton(
+                            onPressed: _saveTask,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryBlue,
+                              foregroundColor: AppColors.white,
+                              elevation: 10,
+                              shadowColor: AppColors.primaryBlue.withValues(
+                                alpha: 0.4,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            child: Text(
+                              widget.task != null
+                                  ? 'Update Task'
+                                  : 'Create Task',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ).animate().fadeIn(delay: 200.ms).slideY(begin: 1, end: 0),
+        ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(IconData icon, String title) {
+  Widget _buildHeaderButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: AppColors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(icon, color: AppColors.white, size: 24),
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String label, IconData icon) {
     return Row(
       children: [
-        Icon(icon, color: AppColors.textDark, size: 20),
+        Icon(icon, size: 18, color: AppColors.textLight),
         const SizedBox(width: 8),
         Text(
-          title,
-          style: GoogleFonts.outfit(
-            color: AppColors.textDark,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-            fontSize: 14,
+          label.toUpperCase(),
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textLight,
+            letterSpacing: 1.2,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPickerCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.cardBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textLight,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textDark,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

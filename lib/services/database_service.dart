@@ -74,6 +74,24 @@ class DatabaseService {
     }
   }
 
+  Future<void> updateUserName(String uid, String name) async {
+    dev.log(
+      'DatabaseService: Updating name for $uid to $name',
+      name: 'database',
+    );
+    try {
+      await _db.child('users/$uid/profile').update({'name': name});
+      dev.log('DatabaseService: Name updated successfully', name: 'database');
+    } catch (e) {
+      dev.log(
+        'DatabaseService: Error in updateUserName: $e',
+        name: 'database',
+        error: e,
+      );
+      rethrow;
+    }
+  }
+
   // ----- Tasks Management -----
 
   Future<void> addTask({

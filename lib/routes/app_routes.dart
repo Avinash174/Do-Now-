@@ -10,6 +10,11 @@ import '../view/new_task_view.dart';
 import '../view/splash_view.dart';
 import '../view/introduction_view.dart';
 import '../view/forget_password_view.dart';
+import '../view/edit_profile_view.dart';
+import '../view/notifications_view.dart';
+import '../view/security_privacy_view.dart';
+import '../view/help_center_view.dart';
+import '../view/about_view.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -19,6 +24,11 @@ class AppRoutes {
   static const String forgetPassword = '/forget-password';
   static const String home = '/home';
   static const String newTask = '/new_task';
+  static const String editProfile = '/edit_profile';
+  static const String notifications = '/notifications';
+  static const String security = '/security';
+  static const String helpCenter = '/help_center';
+  static const String about = '/about';
 
   static Map<String, WidgetBuilder> get routes => {
     splash: (context) => const SplashView(),
@@ -28,6 +38,11 @@ class AppRoutes {
     forgetPassword: (context) => const ForgetPasswordView(),
     home: (context) => const HomeView(),
     newTask: (context) => const NewTaskView(),
+    editProfile: (context) => const EditProfileView(),
+    notifications: (context) => const NotificationsView(),
+    security: (context) => const SecurityPrivacyView(),
+    helpCenter: (context) => const HelpCenterView(),
+    about: (context) => const AboutView(),
   };
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {

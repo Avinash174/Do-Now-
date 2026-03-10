@@ -65,22 +65,29 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
+        ),
         title: Text(
           'Change Password',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
         ),
         centerTitle: true,
+        systemOverlayStyle: isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -137,7 +144,9 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textDark,
+                        color:
+                            theme.textTheme.titleMedium?.color ??
+                            AppColors.textDark,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -146,7 +155,9 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
-                        color: AppColors.textMuted,
+                        color:
+                            theme.textTheme.bodySmall?.color ??
+                            AppColors.textMuted,
                       ),
                     ),
                   ],
@@ -159,6 +170,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                 child: Column(
                   children: [
                     _buildPasswordField(
+                      context: context,
                       label: 'Current Password',
                       controller: _currentPasswordController,
                       isVisible: _showCurrentPassword,
@@ -168,6 +180,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                     ),
                     const SizedBox(height: 20),
                     _buildPasswordField(
+                      context: context,
                       label: 'New Password',
                       controller: _newPasswordController,
                       isVisible: _showNewPassword,
@@ -177,6 +190,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                     ),
                     const SizedBox(height: 20),
                     _buildPasswordField(
+                      context: context,
                       label: 'Confirm New Password',
                       controller: _confirmPasswordController,
                       isVisible: _showConfirmPassword,
@@ -261,6 +275,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
   }
 
   Widget _buildPasswordField({
+    required BuildContext context,
     required String label,
     required TextEditingController controller,
     required bool isVisible,
@@ -268,9 +283,16 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     String? Function(String?)? validator,
     bool isNew = false,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return TextFormField(
       controller: controller,
       obscureText: !isVisible,
+      style: GoogleFonts.plusJakartaSans(
+        color: theme.textTheme.bodyLarge?.color,
+        fontWeight: FontWeight.w600,
+      ),
       validator:
           validator ??
           (value) {
@@ -284,20 +306,26 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
           },
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: AppColors.textMuted),
+        labelStyle: GoogleFonts.plusJakartaSans(
+          color: theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
+        ),
         filled: true,
-        fillColor: AppColors.white,
+        fillColor: theme.cardColor,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 18,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.borderColor),
+          borderSide: BorderSide(
+            color: theme.dividerColor.withValues(alpha: 0.1),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.borderColor),
+          borderSide: BorderSide(
+            color: theme.dividerColor.withValues(alpha: 0.1),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -310,7 +338,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
         suffixIcon: IconButton(
           icon: Icon(
             isVisible ? Icons.visibility_rounded : Icons.visibility_off_rounded,
-            color: AppColors.textMuted,
+            color: theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
           ),
           onPressed: onToggle,
         ),

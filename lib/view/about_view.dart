@@ -116,7 +116,7 @@ class AboutView extends StatelessWidget {
               child: Text(
                 'Terms of Service',
                 style: GoogleFonts.plusJakartaSans(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).primaryColor,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -136,7 +136,7 @@ class AboutView extends StatelessWidget {
               child: Text(
                 'Privacy Policy',
                 style: GoogleFonts.plusJakartaSans(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).primaryColor,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -170,7 +170,9 @@ class AboutView extends StatelessWidget {
             ? Colors.white.withValues(alpha: 0.05)
             : AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Theme.of(context).dividerColor),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

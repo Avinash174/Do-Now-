@@ -55,7 +55,7 @@ class _IntroductionViewState extends State<IntroductionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           PageView.builder(
@@ -84,16 +84,16 @@ class _IntroductionViewState extends State<IntroductionView> {
                       style: GoogleFonts.outfit(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
                     Text(
                       data.description,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
-                        color: AppColors.textLight,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                         height: 1.5,
                       ),
                       textAlign: TextAlign.center,
@@ -161,9 +161,11 @@ class _IntroductionViewState extends State<IntroductionView> {
                 if (_currentPage != _onboardingPages.length - 1)
                   TextButton(
                     onPressed: _completeOnboarding,
-                    child: const Text(
+                    child: Text(
                       'Skip',
-                      style: TextStyle(color: AppColors.textLight),
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
                     ),
                   ),
               ],

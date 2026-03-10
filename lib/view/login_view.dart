@@ -266,7 +266,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
                 borderSide: BorderSide(
-                  color: AppColors.black.withValues(alpha: 0.05),
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
@@ -436,7 +436,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
           'Don\'t have an account? ',
           style: GoogleFonts.plusJakartaSans(
             fontSize: isSmallScreen ? 13 : 14,
-            color: AppColors.textLight,
+            color: Theme.of(context).textTheme.bodySmall?.color,
             fontWeight: FontWeight.w500,
           ),
         ),

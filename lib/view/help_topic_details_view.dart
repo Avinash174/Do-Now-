@@ -28,21 +28,29 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
+        ),
         title: Text(
           widget.title,
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
         ),
         centerTitle: true,
+        systemOverlayStyle: isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -103,7 +111,8 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: isSmallScreen ? 11 : 12,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textLight,
+                  color:
+                      theme.textTheme.bodySmall?.color ?? AppColors.textLight,
                   letterSpacing: 1.0,
                 ),
               ),
@@ -119,7 +128,8 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: isSmallScreen ? 11 : 12,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textLight,
+                  color:
+                      theme.textTheme.bodySmall?.color ?? AppColors.textLight,
                   letterSpacing: 1.0,
                 ),
               ),
@@ -153,7 +163,9 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textDark,
+                        color:
+                            theme.textTheme.bodyLarge?.color ??
+                            AppColors.textDark,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -162,7 +174,9 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
-                        color: AppColors.textLight,
+                        color:
+                            theme.textTheme.bodySmall?.color ??
+                            AppColors.textLight,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -233,6 +247,7 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
   }
 
   List<Widget> _buildFAQItems(bool isSmallScreen) {
+    final theme = Theme.of(context);
     final faqs = _getFAQContent();
     return List.generate(
       faqs.length,
@@ -265,7 +280,7 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: isSmallScreen ? 13 : 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textDark,
+                  color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
                 ),
               ),
               trailing: Icon(
@@ -280,15 +295,15 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Divider(
-                        color: AppColors.textDark.withValues(alpha: 0.05),
-                      ),
+                      Divider(color: theme.dividerColor.withValues(alpha: 0.1)),
                       const SizedBox(height: 12),
                       Text(
                         faqs[index]['a'] as String,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: isSmallScreen ? 12 : 13,
-                          color: AppColors.textLight,
+                          color:
+                              theme.textTheme.bodySmall?.color ??
+                              AppColors.textLight,
                           height: 1.6,
                         ),
                       ),
@@ -306,6 +321,7 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
   }
 
   List<Widget> _buildResourceCards(bool isSmallScreen) {
+    final theme = Theme.of(context);
     final resources = _getResourceContent();
     return List.generate(
       resources.length,
@@ -316,9 +332,11 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(
+                  color: theme.dividerColor.withValues(alpha: 0.1),
+                ),
               ),
               child: Row(
                 children: [
@@ -344,7 +362,9 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: isSmallScreen ? 13 : 14,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textDark,
+                            color:
+                                theme.textTheme.bodyLarge?.color ??
+                                AppColors.textDark,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -352,7 +372,9 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
                           resources[index]['desc'],
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: isSmallScreen ? 11 : 12,
-                            color: AppColors.textLight,
+                            color:
+                                theme.textTheme.bodySmall?.color ??
+                                AppColors.textLight,
                           ),
                         ),
                       ],
@@ -361,7 +383,8 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
                   Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 16,
-                    color: AppColors.textLight,
+                    color:
+                        theme.textTheme.bodySmall?.color ?? AppColors.textLight,
                   ),
                 ],
               ),

@@ -338,7 +338,9 @@ class _SignupViewState extends ConsumerState<SignupView> {
               fillColor: Theme.of(context).cardColor,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(color: Theme.of(context).dividerColor),
+                borderSide: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),

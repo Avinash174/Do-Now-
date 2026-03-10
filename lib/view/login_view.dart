@@ -9,6 +9,7 @@ import '../const/app_colors.dart';
 import '../services/auth_service.dart';
 import '../routes/app_routes.dart';
 import '../utils/app_utils.dart';
+import '../utils/shimmer_utils.dart';
 
 class LoginView extends ConsumerStatefulWidget {
   const LoginView({super.key});
@@ -300,8 +301,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
       width: double.infinity,
       height: isSmallScreen ? 56 : 60,
       child: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryBlue),
+          ? ShimmerLoading(
+              width: double.infinity,
+              height: isSmallScreen ? 56 : 60,
+              borderRadius: 18,
             )
           : ElevatedButton(
               onPressed: _login,

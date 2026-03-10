@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../const/app_colors.dart';
 import '../utils/widgets_utils.dart';
+import 'legal_view.dart';
 
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
@@ -93,7 +94,17 @@ class AboutView extends StatelessWidget {
 
             const SizedBox(height: 48),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LegalView(
+                      title: 'Terms of Service',
+                      content: LegalTexts.termsOfService,
+                    ),
+                  ),
+                );
+              },
               child: Text(
                 'Terms of Service',
                 style: GoogleFonts.plusJakartaSans(
@@ -103,7 +114,17 @@ class AboutView extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LegalView(
+                      title: 'Privacy Policy',
+                      content: LegalTexts.privacyPolicy,
+                    ),
+                  ),
+                );
+              },
               child: Text(
                 'Privacy Policy',
                 style: GoogleFonts.plusJakartaSans(

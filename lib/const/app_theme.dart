@@ -4,15 +4,25 @@ import 'package:flutter/services.dart';
 import 'app_colors.dart';
 
 class AppTheme {
+  static TextTheme _buildTextTheme(Color bodyColor) {
+    return GoogleFonts.plusJakartaSansTextTheme().apply(
+      bodyColor: bodyColor,
+      displayColor: bodyColor,
+    );
+  }
+
   static ThemeData get lightTheme {
     return ThemeData(
+      brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.background,
+      textTheme: _buildTextTheme(AppColors.textDark),
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primaryBlue,
         primary: AppColors.primaryBlue,
         secondary: AppColors.primaryAccent,
         surface: AppColors.surface,
         error: AppColors.danger,
+        brightness: Brightness.light,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -40,11 +50,6 @@ class AppTheme {
             borderRadius: BorderRadius.circular(16),
           ),
           minimumSize: const Size(double.infinity, 56),
-          textStyle: GoogleFonts.plusJakartaSans(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -72,15 +77,21 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
+    const darkSurface = Color(0xFF1E293B);
+    const darkBackground = Color(0xFF0F172A);
+    const darkBorder = Color(0xFF334155);
+    const darkText = Color(0xFFF1F5F9);
+
     return ThemeData(
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: const Color(0xFF0F172A), // Dark slate
+      scaffoldBackgroundColor: darkBackground,
+      textTheme: _buildTextTheme(darkText),
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primaryBlue,
         brightness: Brightness.dark,
         primary: AppColors.primaryBlue,
         secondary: AppColors.primaryAccent,
-        surface: const Color(0xFF1E293B),
+        surface: darkSurface,
         error: AppColors.danger,
       ),
       appBarTheme: const AppBarTheme(
@@ -88,9 +99,9 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: darkText),
         titleTextStyle: TextStyle(
-          color: Colors.white,
+          color: darkText,
           fontSize: 20,
           fontWeight: FontWeight.w700,
         ),
@@ -109,27 +120,22 @@ class AppTheme {
             borderRadius: BorderRadius.circular(16),
           ),
           minimumSize: const Size(double.infinity, 56),
-          textStyle: GoogleFonts.plusJakartaSans(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF1E293B),
+        fillColor: darkSurface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 18,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+          borderSide: const BorderSide(color: darkBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+          borderSide: const BorderSide(color: darkBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -137,23 +143,8 @@ class AppTheme {
         ),
         hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 15),
       ),
-    );
-  }
-
-  static ThemeData getTheme(BuildContext context, ThemeMode mode) {
-    final baseTheme = mode == ThemeMode.dark ? darkTheme : lightTheme;
-    return baseTheme.copyWith(
-      textTheme:
-          GoogleFonts.plusJakartaSansTextTheme(
-            Theme.of(context).textTheme,
-          ).apply(
-            bodyColor: mode == ThemeMode.dark
-                ? Colors.white
-                : AppColors.textDark,
-            displayColor: mode == ThemeMode.dark
-                ? Colors.white
-                : AppColors.textDark,
-          ),
+      cardColor: darkSurface,
+      dividerColor: darkBorder,
     );
   }
 }

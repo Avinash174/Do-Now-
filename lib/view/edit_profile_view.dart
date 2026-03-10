@@ -10,6 +10,7 @@ import '../services/auth_service.dart';
 import '../services/database_service.dart';
 import '../utils/snackbar_utils.dart';
 import '../utils/widgets_utils.dart';
+import '../utils/shimmer_utils.dart';
 
 class EditProfileView extends ConsumerStatefulWidget {
   const EditProfileView({super.key});
@@ -349,10 +350,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                     ),
                   ),
                   child: _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.white,
-                          ),
+                      ? const ShimmerLoading(
+                          width: double.infinity,
+                          height: 60,
+                          borderRadius: 20,
                         )
                       : Text(
                           'Save Changes',

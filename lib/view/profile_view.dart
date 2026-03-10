@@ -11,6 +11,7 @@ import '../services/database_service.dart';
 import '../view_model/task_view_model.dart';
 import '../view_model/theme_view_model.dart';
 import '../utils/snackbar_utils.dart';
+import '../utils/shimmer_utils.dart';
 
 class ProfileView extends ConsumerWidget {
   const ProfileView({super.key});
@@ -83,10 +84,10 @@ class ProfileView extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       userAsync.when(
-                        loading: () => const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.white,
-                          ),
+                        loading: () => ShimmerLoading(
+                          width: isSmallScreen ? 112 : 132,
+                          height: isSmallScreen ? 112 : 132,
+                          borderRadius: 100,
                         ),
                         error: (err, _) => const Icon(
                           Icons.error_outline_rounded,
@@ -434,58 +435,150 @@ class ProfileView extends ConsumerWidget {
   }
 
   Widget _buildThemeTile(WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
-    final isDark = themeMode == ThemeMode.dark;
+    final themeModeAsync = ref.watch(themeModeProvider);
+    final themeMode = themeModeAsync.value ?? ThemeMode.system;
+    final isDark = Theme.of(ref.context).brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(
+            color: isDark ? const Color(0xFF334155) : AppColors.cardBorder,
+          ),
         ),
-        child: ListTile(
-          onTap: () {
-            ref
-                .read(themeModeProvider.notifier)
-                .setMode(isDark ? ThemeMode.light : ThemeMode.dark);
-            HapticFeedback.mediumImpact();
-          },
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryBlue.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(
+                      Icons.palette_rounded,
+                      color: AppColors.primaryBlue,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Text(
+                    'App Theme',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : AppColors.textDark,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Container(
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF0F172A)
+                      : const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.all(4),
+                child: Row(
+                  children: [
+                    _buildThemeOption(
+                      ref,
+                      label: 'Light',
+                      icon: Icons.light_mode_rounded,
+                      mode: ThemeMode.light,
+                      current: themeMode,
+                      isDark: isDark,
+                    ),
+                    _buildThemeOption(
+                      ref,
+                      label: 'System',
+                      icon: Icons.phone_android_rounded,
+                      mode: ThemeMode.system,
+                      current: themeMode,
+                      isDark: isDark,
+                    ),
+                    _buildThemeOption(
+                      ref,
+                      label: 'Dark',
+                      icon: Icons.dark_mode_rounded,
+                      mode: ThemeMode.dark,
+                      current: themeMode,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          leading: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: (isDark ? AppColors.primaryAccent : AppColors.warning)
-                  .withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-              color: isDark ? AppColors.primaryAccent : AppColors.warning,
-              size: 22,
-            ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(
+    WidgetRef ref, {
+    required String label,
+    required IconData icon,
+    required ThemeMode mode,
+    required ThemeMode current,
+    required bool isDark,
+  }) {
+    final isSelected = current == mode;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          ref.read(themeModeProvider.notifier).setMode(mode);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryBlue : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : [],
           ),
-          title: Text(
-            'Dark Mode',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textDark,
-            ),
-          ),
-          trailing: Switch.adaptive(
-            value: isDark,
-            activeThumbColor: AppColors.primaryBlue,
-            onChanged: (value) {
-              ref
-                  .read(themeModeProvider.notifier)
-                  .setMode(value ? ThemeMode.dark : ThemeMode.light);
-              HapticFeedback.mediumImpact();
-            },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: isSelected
+                    ? Colors.white
+                    : (isDark ? const Color(0xFF94A3B8) : AppColors.textMuted),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected
+                      ? Colors.white
+                      : (isDark
+                            ? const Color(0xFF94A3B8)
+                            : AppColors.textMuted),
+                ),
+              ),
+            ],
           ),
         ),
       ),

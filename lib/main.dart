@@ -20,13 +20,12 @@ void main() async {
   // Register background messaging handler
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // Clear UI mode should be immersive on some screens, but globally we want it visible
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light, // For iOS
+      statusBarBrightness: Brightness.light,
       systemNavigationBarColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
@@ -47,7 +46,6 @@ void main() async {
     );
     dev.log('Firebase initialized successfully', name: 'app');
 
-    // Initialize notification service using container
     dev.log('Initializing Notification Service...', name: 'app');
     await container.read(notificationServiceProvider).initialize();
     dev.log('Notification Service initialized successfully', name: 'app');
@@ -63,14 +61,16 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
+    // Watch the async theme provider — use system as fallback while loading
+    final themeModeAsync = ref.watch(themeModeProvider);
+    final themeMode = themeModeAsync.value ?? ThemeMode.system;
 
     return MaterialApp(
       navigatorKey: AppRoutes.navigatorKey,
       title: 'Do Now',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.getTheme(context, ThemeMode.light),
-      darkTheme: AppTheme.getTheme(context, ThemeMode.dark),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       initialRoute: AppRoutes.splash,
       routes: AppRoutes.routes,

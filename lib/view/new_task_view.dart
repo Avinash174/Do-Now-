@@ -8,6 +8,7 @@ import '../const/app_colors.dart';
 import '../view_model/task_view_model.dart';
 import '../utils/snackbar_utils.dart';
 import '../model/task_model.dart';
+import '../utils/shimmer_utils.dart';
 
 class NewTaskView extends ConsumerStatefulWidget {
   final TaskModel? task;
@@ -684,9 +685,13 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    AppColors.white.withValues(alpha: 0),
-                    AppColors.white,
-                    AppColors.white,
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.9),
+                    Theme.of(context).scaffoldBackgroundColor,
                   ],
                 ),
               ),
@@ -700,16 +705,18 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                     MediaQuery.of(context).padding.bottom + 12,
                   ),
                   child: _isLoading
-                      ? const SizedBox(
+                      ? const ShimmerLoading(
+                          width: double.infinity,
                           height: 60,
-                          child: Center(child: CircularProgressIndicator()),
+                          borderRadius: 20,
                         )
-                      : SizedBox(
+                      : AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
                           width: double.infinity,
                           height: 60,
                           child: Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(20),
                               gradient: LinearGradient(
                                 colors: [
                                   AppColors.primaryBlue,
@@ -721,48 +728,45 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                               boxShadow: [
                                 BoxShadow(
                                   color: AppColors.primaryBlue.withValues(
-                                    alpha: 0.5,
+                                    alpha: 0.4,
                                   ),
-                                  blurRadius: 20,
+                                  blurRadius: 15,
                                   offset: const Offset(0, 8),
-                                  spreadRadius: 2,
+                                  spreadRadius: 0,
                                 ),
                               ],
                             ),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: _saveTask,
-                                borderRadius: BorderRadius.circular(24),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 16,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        widget.task != null
-                                            ? Icons.check_circle_rounded
-                                            : Icons.add_rounded,
+                                onTap: () {
+                                  HapticFeedback.mediumImpact();
+                                  _saveTask();
+                                },
+                                borderRadius: BorderRadius.circular(20),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      widget.task != null
+                                          ? Icons.published_with_changes_rounded
+                                          : Icons.add_task_rounded,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      widget.task != null
+                                          ? 'Update Task'
+                                          : 'Create Task',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
                                         color: Colors.white,
-                                        size: 24,
+                                        letterSpacing: 0.5,
                                       ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        widget.task != null
-                                            ? 'Update Task'
-                                            : 'Create Task',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w800,
-                                          color: Colors.white,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),

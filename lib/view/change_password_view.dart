@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../const/app_colors.dart';
 import '../utils/widgets_utils.dart';
+import '../utils/shimmer_utils.dart';
 
 class ChangePasswordView extends StatefulWidget {
   const ChangePasswordView({super.key});
@@ -221,15 +222,10 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                       borderRadius: BorderRadius.circular(24),
                       child: Center(
                         child: _isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                  strokeWidth: 2,
-                                ),
+                            ? const ShimmerLoading(
+                                width: double.infinity,
+                                height: 56,
+                                borderRadius: 24,
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

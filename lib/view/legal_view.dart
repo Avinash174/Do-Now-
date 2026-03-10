@@ -11,33 +11,70 @@ class LegalView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
     final theme = Theme.of(context);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: PlatformBackButton(
-          color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
+          color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
         ),
         title: Text(
           title,
           style: GoogleFonts.plusJakartaSans(
-            color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
+            color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
             fontWeight: FontWeight.w800,
-            fontSize: 20,
+            fontSize: isSmallScreen ? 18 : 20,
           ),
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          content,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 15,
-            color: theme.textTheme.bodyMedium?.color ?? AppColors.textLight,
-            height: 1.6,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            horizontal: size.width * 0.06,
+            vertical: 24,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: theme.dividerColor),
+                ),
+                child: Text(
+                  content,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 15,
+                    color:
+                        theme.textTheme.bodyMedium?.color ??
+                        AppColors.textLight,
+                    height: 1.6,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              Center(
+                child: Text(
+                  '© 2026 Do Now Inc.',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color:
+                        theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 48),
+            ],
           ),
         ),
       ),

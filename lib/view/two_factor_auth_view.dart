@@ -21,17 +21,28 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color:
+              theme.textTheme.titleMedium?.color ??
+              (theme.brightness == Brightness.dark
+                  ? Colors.white
+                  : AppColors.textDark),
+        ),
         title: Text(
           'Two-Factor Authentication',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color:
+                theme.textTheme.titleMedium?.color ??
+                (theme.brightness == Brightness.dark
+                    ? Colors.white
+                    : AppColors.textDark),
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
@@ -54,15 +65,21 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.success.withValues(alpha: 0.1),
-                      AppColors.info.withValues(alpha: 0.1),
+                      AppColors.success.withValues(
+                        alpha: theme.brightness == Brightness.dark ? 0.2 : 0.1,
+                      ),
+                      AppColors.info.withValues(
+                        alpha: theme.brightness == Brightness.dark ? 0.2 : 0.1,
+                      ),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: AppColors.success.withValues(alpha: 0.2),
+                    color: AppColors.success.withValues(
+                      alpha: theme.brightness == Brightness.dark ? 0.4 : 0.2,
+                    ),
                   ),
                 ),
                 child: Column(
@@ -90,7 +107,11 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textDark,
+                        color:
+                            theme.textTheme.titleMedium?.color ??
+                            (theme.brightness == Brightness.dark
+                                ? Colors.white
+                                : AppColors.textDark),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -99,7 +120,11 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
-                        color: AppColors.textMuted,
+                        color:
+                            theme.textTheme.bodySmall?.color ??
+                            (theme.brightness == Brightness.dark
+                                ? Colors.white70
+                                : AppColors.textMuted),
                       ),
                     ),
                   ],
@@ -111,13 +136,18 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textMuted,
+                  color:
+                      theme.textTheme.bodySmall?.color ??
+                      (theme.brightness == Brightness.dark
+                          ? Colors.white60
+                          : AppColors.textMuted),
                   letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 16),
               // Email 2FA
               _buildAuthMethodTile(
+                context: context,
                 icon: Icons.mail_outline_rounded,
                 title: 'Email Verification',
                 subtitle: 'Get a code via email when you sign in',
@@ -128,6 +158,7 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
               const SizedBox(height: 12),
               // SMS 2FA
               _buildAuthMethodTile(
+                context: context,
                 icon: Icons.sms_outlined,
                 title: 'SMS Message',
                 subtitle: 'Receive authentication code via SMS',
@@ -138,6 +169,7 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
               const SizedBox(height: 12),
               // Authenticator App
               _buildAuthMethodTile(
+                context: context,
                 icon: Icons.phone_android_rounded,
                 title: 'Authenticator App',
                 subtitle: 'Use Google Authenticator or similar',
@@ -150,10 +182,14 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.info.withValues(alpha: 0.1),
+                  color: AppColors.info.withValues(
+                    alpha: theme.brightness == Brightness.dark ? 0.2 : 0.1,
+                  ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppColors.info.withValues(alpha: 0.2),
+                    color: AppColors.info.withValues(
+                      alpha: theme.brightness == Brightness.dark ? 0.4 : 0.2,
+                    ),
                   ),
                 ),
                 child: Row(
@@ -177,7 +213,11 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                         'We recommend enabling at least one 2FA method for better security',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
-                          color: AppColors.textDark,
+                          color:
+                              theme.textTheme.bodyMedium?.color ??
+                              (theme.brightness == Brightness.dark
+                                  ? Colors.white
+                                  : AppColors.textDark),
                         ),
                       ),
                     ),
@@ -193,6 +233,7 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
   }
 
   Widget _buildAuthMethodTile({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -200,13 +241,14 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
     required Color color,
     required Function(bool) onChanged,
   }) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: value ? color.withValues(alpha: 0.3) : AppColors.borderColor,
+          color: value ? color.withValues(alpha: 0.3) : theme.dividerColor,
           width: value ? 2 : 1,
         ),
         boxShadow: value
@@ -242,7 +284,11 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
+                    color:
+                        theme.textTheme.titleMedium?.color ??
+                        (theme.brightness == Brightness.dark
+                            ? Colors.white
+                            : AppColors.textDark),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -250,7 +296,11 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
                   subtitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
-                    color: AppColors.textMuted,
+                    color:
+                        theme.textTheme.bodySmall?.color ??
+                        (theme.brightness == Brightness.dark
+                            ? Colors.white70
+                            : AppColors.textMuted),
                   ),
                 ),
               ],
@@ -263,8 +313,12 @@ class _TwoFactorAuthViewState extends State<TwoFactorAuthView> {
               value: value,
               onChanged: onChanged,
               activeColor: color,
-              inactiveThumbColor: AppColors.textMuted,
-              inactiveTrackColor: AppColors.borderColor,
+              inactiveThumbColor:
+                  theme.textTheme.bodySmall?.color ??
+                  (theme.brightness == Brightness.dark
+                      ? Colors.white
+                      : AppColors.textMuted),
+              inactiveTrackColor: theme.dividerColor,
             ),
           ),
         ],

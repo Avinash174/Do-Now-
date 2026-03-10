@@ -33,7 +33,9 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: PlatformBackButton(
-          color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
+          color:
+              theme.textTheme.titleLarge?.color ??
+              (isDark ? Colors.white : AppColors.textDark),
         ),
         title: Text(
           'Profile Visibility',
@@ -295,7 +297,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                       fontWeight: FontWeight.w700,
                       color:
                           theme.textTheme.bodyLarge?.color ??
-                          AppColors.textDark,
+                          (isDark ? Colors.white : AppColors.textDark),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -305,7 +307,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                       fontSize: 12,
                       color:
                           theme.textTheme.bodySmall?.color ??
-                          AppColors.textMuted,
+                          (isDark ? Colors.white70 : AppColors.textMuted),
                     ),
                   ),
                 ],
@@ -383,7 +385,6 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: Colors.white, size: 24),
-          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -394,8 +395,8 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color:
-                        theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
+                    color: theme.textTheme.bodyLarge?.color ??
+                        (isDark ? Colors.white : AppColors.textDark),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -403,8 +404,8 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                   subtitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
-                    color:
-                        theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
+                    color: theme.textTheme.bodySmall?.color ??
+                        (isDark ? Colors.white70 : AppColors.textMuted),
                   ),
                 ),
               ],
@@ -417,7 +418,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
               value: value,
               onChanged: onChanged,
               activeColor: color,
-              inactiveThumbColor: AppColors.textMuted,
+              inactiveThumbColor: isDark ? Colors.white : AppColors.textMuted,
               inactiveTrackColor: theme.dividerColor.withValues(alpha: 0.2),
             ),
           ),

@@ -33,12 +33,16 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: PlatformBackButton(
-          color: theme.textTheme.titleLarge?.color ?? AppColors.textDark,
+          color:
+              theme.textTheme.titleLarge?.color ??
+              (isDark ? Colors.white : AppColors.textDark),
         ),
         title: Text(
           'Face ID & Biometrics',
           style: GoogleFonts.plusJakartaSans(
-            color: theme.textTheme.titleLarge?.color ?? AppColors.textDark,
+            color:
+                theme.textTheme.titleLarge?.color ??
+                (isDark ? Colors.white : AppColors.textDark),
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
@@ -64,8 +68,12 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primaryAccent.withValues(alpha: 0.15),
-                      AppColors.primaryBlue.withValues(alpha: 0.15),
+                      AppColors.primaryAccent.withValues(
+                        alpha: isDark ? 0.25 : 0.15,
+                      ),
+                      AppColors.primaryBlue.withValues(
+                        alpha: isDark ? 0.25 : 0.15,
+                      ),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -148,7 +156,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                         fontWeight: FontWeight.w700,
                         color:
                             theme.textTheme.titleMedium?.color ??
-                            AppColors.textDark,
+                            (isDark ? Colors.white : AppColors.textDark),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -159,7 +167,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                         fontSize: 13,
                         color:
                             theme.textTheme.bodySmall?.color ??
-                            AppColors.textMuted,
+                            (isDark ? Colors.white70 : AppColors.textMuted),
                       ),
                     ),
                   ],
@@ -173,7 +181,8 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color:
-                      theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
+                      theme.textTheme.bodySmall?.color ??
+                      (isDark ? Colors.white60 : AppColors.textMuted),
                   letterSpacing: 0.5,
                 ),
               ),
@@ -203,7 +212,8 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color:
-                        theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
+                        theme.textTheme.bodySmall?.color ??
+                        (isDark ? Colors.white60 : AppColors.textMuted),
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -228,10 +238,14 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withValues(alpha: 0.1),
+                    color: AppColors.success.withValues(
+                      alpha: isDark ? 0.2 : 0.1,
+                    ),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppColors.success.withValues(alpha: 0.2),
+                      color: AppColors.success.withValues(
+                        alpha: isDark ? 0.4 : 0.2,
+                      ),
                     ),
                   ),
                   child: Row(
@@ -257,7 +271,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                             fontSize: 13,
                             color:
                                 theme.textTheme.titleSmall?.color ??
-                                AppColors.textDark,
+                                (isDark ? Colors.white : AppColors.textDark),
                           ),
                         ),
                       ),
@@ -281,6 +295,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
     required Function(bool) onChanged,
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -330,7 +345,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                     fontWeight: FontWeight.w700,
                     color:
                         theme.textTheme.titleMedium?.color ??
-                        AppColors.textDark,
+                        (isDark ? Colors.white : AppColors.textDark),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -338,7 +353,9 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                   subtitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
-                    color: AppColors.textMuted,
+                    color:
+                        theme.textTheme.bodySmall?.color ??
+                        (isDark ? Colors.white70 : AppColors.textMuted),
                   ),
                 ),
               ],
@@ -351,7 +368,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
               value: value,
               onChanged: onChanged,
               activeColor: AppColors.primaryBlue,
-              inactiveThumbColor: AppColors.textMuted,
+              inactiveThumbColor: isDark ? Colors.white : AppColors.textMuted,
               inactiveTrackColor: theme.dividerColor.withValues(alpha: 0.2),
             ),
           ),
@@ -368,6 +385,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
     required Function(bool) onChanged,
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -403,7 +421,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                     fontWeight: FontWeight.w700,
                     color:
                         theme.textTheme.titleMedium?.color ??
-                        AppColors.textDark,
+                        (isDark ? Colors.white : AppColors.textDark),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -411,7 +429,9 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                   subtitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
-                    color: AppColors.textMuted,
+                    color:
+                        theme.textTheme.bodySmall?.color ??
+                        (isDark ? Colors.white70 : AppColors.textMuted),
                   ),
                 ),
               ],
@@ -424,7 +444,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
               value: value,
               onChanged: onChanged,
               activeColor: AppColors.success,
-              inactiveThumbColor: AppColors.textMuted,
+              inactiveThumbColor: isDark ? Colors.white : AppColors.textMuted,
               inactiveTrackColor: theme.dividerColor.withValues(alpha: 0.2),
             ),
           ),

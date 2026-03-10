@@ -38,7 +38,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
         title: Text(
           'Profile Visibility',
           style: GoogleFonts.plusJakartaSans(
-            color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
+            color: theme.textTheme.titleLarge?.color,
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
@@ -114,9 +114,9 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
-                        color:
-                            theme.textTheme.bodySmall?.color ??
-                            AppColors.textMuted,
+                        color: theme.textTheme.bodySmall?.color?.withValues(
+                          alpha: 0.8,
+                        ),
                       ),
                     ),
                   ],
@@ -129,8 +129,9 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color:
-                      theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
+                  color: theme.textTheme.bodySmall?.color?.withValues(
+                    alpha: 0.6,
+                  ),
                   letterSpacing: 0.5,
                 ),
               ),
@@ -165,8 +166,9 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color:
-                      theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
+                  color: theme.textTheme.bodySmall?.color?.withValues(
+                    alpha: 0.6,
+                  ),
                   letterSpacing: 0.5,
                 ),
               ),
@@ -197,8 +199,9 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color:
-                      theme.textTheme.bodySmall?.color ?? AppColors.textMuted,
+                  color: theme.textTheme.bodySmall?.color?.withValues(
+                    alpha: 0.6,
+                  ),
                   letterSpacing: 0.5,
                 ),
               ),

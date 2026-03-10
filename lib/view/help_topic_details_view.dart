@@ -256,13 +256,13 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
           Container(
             decoration: BoxDecoration(
               color: expandedIndex == index
-                  ? AppColors.primaryBlue.withValues(alpha: 0.05)
-                  : AppColors.background,
+                  ? AppColors.primaryBlue.withValues(alpha: 0.1)
+                  : theme.cardColor,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: expandedIndex == index
-                    ? AppColors.primaryBlue.withValues(alpha: 0.2)
-                    : AppColors.cardBorder,
+                    ? AppColors.primaryBlue.withValues(alpha: 0.3)
+                    : theme.dividerColor.withValues(alpha: 0.1),
               ),
             ),
             child: ExpansionTile(

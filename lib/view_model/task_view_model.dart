@@ -136,6 +136,23 @@ class TaskViewModel {
   Future<void> deleteTask(String taskId) async {
     await _db.deleteTask(uid: uid, taskId: taskId);
   }
+
+  Future<void> updateTaskDetails({
+    required String taskId,
+    required String title,
+    required String description,
+    required String category,
+    required DateTime scheduleDate,
+  }) async {
+    await _db.updateTaskDetails(
+      uid: uid,
+      taskId: taskId,
+      title: title,
+      description: description,
+      category: category,
+      scheduleTime: scheduleDate.millisecondsSinceEpoch,
+    );
+  }
 }
 
 final taskViewModelProvider = Provider<TaskViewModel?>((ref) {

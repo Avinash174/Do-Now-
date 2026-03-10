@@ -43,101 +43,109 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ),
         child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
       ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(
-            color: AppColors.borderColor.withValues(alpha: 0.5),
-          ),
-        ),
-        child: Row(
-          children: [
-            GestureDetector(
-              onTap: () => vm?.toggleTask(task.id, task.isCompleted),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: task.isCompleted
-                        ? Colors.green
-                        : AppColors.primaryBlue,
-                    width: 2,
-                  ),
-                  color: task.isCompleted ? Colors.green : Colors.transparent,
-                ),
-                child: task.isCompleted
-                    ? const Icon(Icons.check, size: 14, color: Colors.white)
-                    : null,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, AppRoutes.newTask, arguments: task);
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
+            ],
+            border: Border.all(
+              color: AppColors.borderColor.withValues(alpha: 0.5),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+          ),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () => vm?.toggleTask(task.id, task.isCompleted),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
                       color: task.isCompleted
-                          ? AppColors.textLight
-                          : AppColors.textDark,
-                      decoration: task.isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
+                          ? Colors.green
+                          : AppColors.primaryBlue,
+                      width: 2,
                     ),
+                    color: task.isCompleted ? Colors.green : Colors.transparent,
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 12,
-                        color: AppColors.textLight.withValues(alpha: 0.7),
+                  child: task.isCompleted
+                      ? const Icon(Icons.check, size: 14, color: Colors.white)
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task.title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: task.isCompleted
+                            ? AppColors.textLight
+                            : AppColors.textDark,
+                        decoration: task.isCompleted
+                            ? TextDecoration.lineThrough
+                            : null,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        task.formattedDate,
-                        style: TextStyle(
-                          fontSize: 12,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today_outlined,
+                          size: 12,
                           color: AppColors.textLight.withValues(alpha: 0.7),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                task.category,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: AppColors.primaryBlue,
-                  fontWeight: FontWeight.bold,
+                        const SizedBox(width: 4),
+                        Text(
+                          task.formattedDate,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textLight.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  task.category,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: AppColors.primaryBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -200,8 +208,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   ),
                   onPressed: () async {
                     await ref.read(authServiceProvider).signOut();
-                    if (mounted)
+                    if (mounted) {
                       Navigator.pushReplacementNamed(context, AppRoutes.login);
+                    }
                   },
                 ),
               ],

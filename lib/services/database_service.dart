@@ -145,6 +145,36 @@ class DatabaseService {
     }
   }
 
+  Future<void> updateTaskDetails({
+    required String uid,
+    required String taskId,
+    required String title,
+    required String description,
+    required String category,
+    required int scheduleTime,
+  }) async {
+    dev.log(
+      'DatabaseService: Updating details for task $taskId',
+      name: 'database',
+    );
+    try {
+      await _db.child('users/$uid/tasks/$taskId').update({
+        'title': title,
+        'description': description,
+        'category': category,
+        'scheduleTime': scheduleTime,
+      });
+      dev.log('DatabaseService: Task details updated', name: 'database');
+    } catch (e) {
+      dev.log(
+        'DatabaseService: Error in updateTaskDetails: $e',
+        name: 'database',
+        error: e,
+      );
+      rethrow;
+    }
+  }
+
   Future<void> deleteTask({required String uid, required String taskId}) async {
     dev.log(
       'DatabaseService: Deleting task $taskId for $uid',

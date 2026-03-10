@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../const/app_colors.dart';
 
 import '../view_model/task_view_model.dart';
+import '../model/task_model.dart';
 
 class NewTaskView extends ConsumerStatefulWidget {
-  const NewTaskView({super.key});
+  final TaskModel? task;
+  const NewTaskView({super.key, this.task});
 
   @override
   ConsumerState<NewTaskView> createState() => _NewTaskViewState();
@@ -19,6 +21,19 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
   bool _reminder = true;
   bool _isLoading = false;
   DateTime _selectedDate = DateTime.now().add(const Duration(hours: 1));
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.task != null) {
+      _titleController.text = widget.task!.title;
+      _descController.text = widget.task!.description;
+      _category = widget.task!.category;
+      _selectedDate = DateTime.fromMillisecondsSinceEpoch(
+        widget.task!.scheduleTime,
+      );
+    }
+  }
 
   final List<String> _categories = [
     'Work',
@@ -98,12 +113,22 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
     setState(() => _isLoading = true);
     try {
       final vm = ref.read(taskViewModelProvider);
-      await vm?.addTask(
-        title: title,
-        description: _descController.text.trim(),
-        category: _category,
-        scheduleDate: _selectedDate,
-      );
+      if (widget.task != null) {
+        await vm?.updateTaskDetails(
+          taskId: widget.task!.id,
+          title: title,
+          description: _descController.text.trim(),
+          category: _category,
+          scheduleDate: _selectedDate,
+        );
+      } else {
+        await vm?.addTask(
+          title: title,
+          description: _descController.text.trim(),
+          category: _category,
+          scheduleDate: _selectedDate,
+        );
+      }
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
@@ -152,9 +177,9 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
           icon: const Icon(Icons.close, color: AppColors.textDark),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'New Task',
-          style: TextStyle(
+        title: Text(
+          widget.task != null ? 'Edit Task' : 'New Task',
+          style: const TextStyle(
             color: AppColors.textDark,
             fontSize: 18,
             fontWeight: FontWeight.bold,

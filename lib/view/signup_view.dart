@@ -83,16 +83,18 @@ class _SignupViewState extends ConsumerState<SignupView> {
     final isSmallScreen = size.width < 360;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         leading: IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: Theme.of(context).cardColor,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -231,7 +233,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     'Already have an account? ',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: isSmallScreen ? 13 : 14,
-                      color: AppColors.textLight,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -275,13 +277,15 @@ class _SignupViewState extends ConsumerState<SignupView> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: isSmallScreen ? 13 : 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.textDark.withValues(alpha: 0.9),
+            color: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.color?.withValues(alpha: 0.9),
           ),
         ),
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
@@ -298,12 +302,14 @@ class _SignupViewState extends ConsumerState<SignupView> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: isSmallScreen ? 14 : 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.textDark,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.plusJakartaSans(
-                color: AppColors.textLight.withValues(alpha: 0.4),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -314,19 +320,19 @@ class _SignupViewState extends ConsumerState<SignupView> {
                         obscureText
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: AppColors.textLight.withValues(alpha: 0.5),
+                        color: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
                         size: 20,
                       ),
                       onPressed: onSuffixIconTap,
                     )
                   : null,
               filled: true,
-              fillColor: AppColors.white,
+              fillColor: Theme.of(context).cardColor,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(
-                  color: AppColors.black.withValues(alpha: 0.05),
-                ),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),

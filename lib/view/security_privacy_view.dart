@@ -14,22 +14,28 @@ class SecurityPrivacyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
+        ),
         title: Text(
           'Security & Privacy',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color: theme.textTheme.titleLarge?.color ?? AppColors.textDark,
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
         ),
         centerTitle: true,
+        systemOverlayStyle: theme.brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -40,9 +46,10 @@ class SecurityPrivacyView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionHeader('SECURITY SETTINGS', isSmallScreen),
+              _buildSectionHeader(context, 'SECURITY SETTINGS', isSmallScreen),
               const SizedBox(height: 16),
               _buildSecurityTile(
+                context,
                 'Change Password',
                 'Update your account password',
                 Icons.lock_outline_rounded,
@@ -51,6 +58,7 @@ class SecurityPrivacyView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               _buildSecurityTile(
+                context,
                 'Two-Factor Auth',
                 'Add extra layer of security',
                 Icons.shield_outlined,
@@ -59,6 +67,7 @@ class SecurityPrivacyView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               _buildSecurityTile(
+                context,
                 'Face ID / Biometrics',
                 'Use biometrics to unlock',
                 Icons.face_unlock_rounded,
@@ -66,9 +75,10 @@ class SecurityPrivacyView extends StatelessWidget {
                 isSmallScreen,
               ),
               const SizedBox(height: 32),
-              _buildSectionHeader('PRIVACY SETTINGS', isSmallScreen),
+              _buildSectionHeader(context, 'PRIVACY SETTINGS', isSmallScreen),
               const SizedBox(height: 16),
               _buildSecurityTile(
+                context,
                 'Profile Visibility',
                 'Manage who can see your profile',
                 Icons.visibility_outlined,
@@ -77,6 +87,7 @@ class SecurityPrivacyView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               _buildSecurityTile(
+                context,
                 'Data Export',
                 'Download your account data',
                 Icons.download_rounded,
@@ -85,6 +96,7 @@ class SecurityPrivacyView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               _buildSecurityTile(
+                context,
                 'Privacy Policy',
                 'Read our privacy commitments',
                 Icons.description_outlined,
@@ -92,9 +104,7 @@ class SecurityPrivacyView extends StatelessWidget {
                 isSmallScreen,
                 showTrailing: true,
               ),
-              const SizedBox(
-                height: 100,
-              ), // Added bottom spacing for full scroll
+              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -102,19 +112,24 @@ class SecurityPrivacyView extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title, bool isSmallScreen) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    bool isSmallScreen,
+  ) {
     return Text(
       title,
       style: GoogleFonts.plusJakartaSans(
         fontSize: isSmallScreen ? 11 : 12,
         fontWeight: FontWeight.w800,
-        color: AppColors.textLight,
+        color: Theme.of(context).primaryColor,
         letterSpacing: 1.0,
       ),
     );
   }
 
   Widget _buildSecurityTile(
+    BuildContext context,
     String title,
     String subtitle,
     IconData icon,
@@ -122,11 +137,12 @@ class SecurityPrivacyView extends StatelessWidget {
     bool isSmallScreen, {
     bool showTrailing = false,
   }) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
       ),
       child: ListTile(
         onTap: () {
@@ -151,21 +167,21 @@ class SecurityPrivacyView extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w800,
-            color: AppColors.textDark,
+            color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
           ),
         ),
         subtitle: Text(
           subtitle,
           style: GoogleFonts.plusJakartaSans(
             fontSize: isSmallScreen ? 11 : 12,
-            color: AppColors.textLight,
+            color: theme.textTheme.bodySmall?.color ?? AppColors.textLight,
           ),
         ),
         trailing: Icon(
           showTrailing
               ? Icons.open_in_new_rounded
               : Icons.chevron_right_rounded,
-          color: AppColors.textLight,
+          color: theme.textTheme.bodySmall?.color ?? AppColors.textLight,
           size: 20,
         ),
       ),

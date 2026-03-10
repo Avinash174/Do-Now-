@@ -647,7 +647,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
       style: GoogleFonts.plusJakartaSans(
         fontSize: 20,
         fontWeight: FontWeight.w800,
-        color: AppColors.textDark,
+        color:
+            Theme.of(context).textTheme.titleLarge?.color ?? AppColors.textDark,
       ),
     );
   }
@@ -715,18 +716,19 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final navBarColor = isDark ? const Color(0xFF0F172A) : AppColors.white;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: _selectedIndex == 2
-          ? SystemUiOverlayStyle.light.copyWith(
-              statusBarColor: Colors.transparent,
-              systemNavigationBarColor: AppColors.white,
-              systemNavigationBarIconBrightness: Brightness.dark,
-            )
-          : SystemUiOverlayStyle.dark.copyWith(
-              statusBarColor: Colors.transparent,
-              systemNavigationBarColor: AppColors.white,
-              systemNavigationBarIconBrightness: Brightness.dark,
-            ),
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: navBarColor,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
+      ),
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: IndexedStack(

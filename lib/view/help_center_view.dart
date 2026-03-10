@@ -13,22 +13,28 @@ class HelpCenterView extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
+        ),
         title: Text(
           'Help Center',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
         ),
         centerTitle: true,
+        systemOverlayStyle: theme.brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -39,26 +45,33 @@ class HelpCenterView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Search Bar Placeholder
+              // Search Bar
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.cardBorder),
+                  border: Border.all(
+                    color: theme.dividerColor.withValues(alpha: 0.1),
+                  ),
                 ),
                 child: TextField(
+                  style: TextStyle(color: theme.textTheme.bodyLarge?.color),
                   decoration: InputDecoration(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.search_rounded,
-                      color: AppColors.textLight,
+                      color:
+                          theme.textTheme.bodySmall?.color ??
+                          AppColors.textLight,
                     ),
                     hintText: 'Search help...',
                     hintStyle: GoogleFonts.plusJakartaSans(
-                      color: AppColors.textLight,
+                      color:
+                          theme.textTheme.bodySmall?.color ??
+                          AppColors.textLight,
                     ),
                     border: InputBorder.none,
                   ),
@@ -66,9 +79,10 @@ class HelpCenterView extends StatelessWidget {
               ),
               const SizedBox(height: 32),
 
-              _buildSectionHeader('POPULAR TOPICS', isSmallScreen),
+              _buildSectionHeader('POPULAR TOPICS', isSmallScreen, context),
               const SizedBox(height: 16),
               _buildHelpTile(
+                context,
                 'Syncing Tasks',
                 Icons.sync_rounded,
                 isSmallScreen,
@@ -81,6 +95,7 @@ class HelpCenterView extends StatelessWidget {
                 },
               ),
               _buildHelpTile(
+                context,
                 'Creating Reminders',
                 Icons.alarm_rounded,
                 isSmallScreen,
@@ -96,6 +111,7 @@ class HelpCenterView extends StatelessWidget {
                 },
               ),
               _buildHelpTile(
+                context,
                 'Account Security',
                 Icons.security_rounded,
                 isSmallScreen,
@@ -111,6 +127,7 @@ class HelpCenterView extends StatelessWidget {
                 },
               ),
               _buildHelpTile(
+                context,
                 'Premium Features',
                 Icons.star_outline_rounded,
                 isSmallScreen,
@@ -127,7 +144,7 @@ class HelpCenterView extends StatelessWidget {
               ),
 
               const SizedBox(height: 32),
-              _buildSectionHeader('CONTACT US', isSmallScreen),
+              _buildSectionHeader('CONTACT US', isSmallScreen, context),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(24),
@@ -201,19 +218,32 @@ class HelpCenterView extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title, bool isSmallScreen) {
+  Widget _buildSectionHeader(
+    String title,
+    bool isSmallScreen,
+    BuildContext context,
+  ) {
+    final theme = Theme.of(context);
     return Text(
       title,
       style: GoogleFonts.plusJakartaSans(
         fontSize: isSmallScreen ? 11 : 12,
         fontWeight: FontWeight.w800,
-        color: AppColors.textLight,
+        color: theme.textTheme.bodySmall?.color ?? AppColors.textLight,
         letterSpacing: 1.0,
       ),
     );
   }
 
-  Widget _buildHelpTile(String title, IconData icon, bool isSmallScreen, VoidCallback onTap) {
+  Widget _buildHelpTile(
+    BuildContext context,
+    String title,
+    IconData icon,
+    bool isSmallScreen,
+    VoidCallback onTap,
+  ) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         ListTile(
@@ -236,16 +266,16 @@ class HelpCenterView extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: isSmallScreen ? 14 : 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
+              color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
             ),
           ),
-          trailing: const Icon(
+          trailing: Icon(
             Icons.chevron_right_rounded,
-            color: AppColors.textLight,
+            color: theme.textTheme.bodySmall?.color ?? AppColors.textLight,
             size: 20,
           ),
         ),
-        Divider(color: AppColors.textDark.withValues(alpha: 0.03)),
+        Divider(color: theme.dividerColor.withValues(alpha: 0.1)),
       ],
     ).animate().fadeIn().slideY(begin: 0.1, end: 0);
   }

@@ -63,7 +63,9 @@ class _ForgetPasswordViewState extends ConsumerState<ForgetPasswordView> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         leading: IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),

@@ -248,6 +248,8 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
@@ -263,11 +265,17 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primaryBlue,
-                    AppColors.primaryBlue.withValues(alpha: 0.8),
-                    AppColors.primaryBlue.withValues(alpha: 0.6),
-                  ],
+                  colors: Theme.of(context).brightness == Brightness.dark
+                      ? [
+                          AppColors.primaryBlue.withValues(alpha: 0.8),
+                          AppColors.primaryBlue.withValues(alpha: 0.6),
+                          Theme.of(context).scaffoldBackgroundColor,
+                        ]
+                      : [
+                          AppColors.primaryBlue,
+                          AppColors.primaryBlue.withValues(alpha: 0.8),
+                          AppColors.primaryBlue.withValues(alpha: 0.6),
+                        ],
                 ),
               ),
               child: Opacity(
@@ -278,7 +286,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                         ? Icons.edit_note_rounded
                         : Icons.add_task_rounded,
                     size: 200,
-                    color: AppColors.white,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
               ),
@@ -371,7 +379,9 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                         ? [
                                             BoxShadow(
                                               color: AppColors.primaryBlue
-                                                  .withValues(alpha: 0.2),
+                                                  .withValues(
+                                                    alpha: isDark ? 0.4 : 0.2,
+                                                  ),
                                               blurRadius: 15,
                                               offset: const Offset(0, 4),
                                             ),

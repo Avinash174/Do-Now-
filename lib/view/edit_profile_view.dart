@@ -71,7 +71,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: AppColors.white,
+      backgroundColor: Theme.of(context).cardColor,
       builder: (BuildContext context) {
         return SafeArea(
           child: Padding(
@@ -84,7 +84,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                   style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.w800,
                     fontSize: 18,
-                    color: AppColors.textDark,
+                    color: Theme.of(context).textTheme.titleLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -97,7 +97,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                     'Camera',
                     style: GoogleFonts.plusJakartaSans(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textDark,
+                      color:
+                          Theme.of(context).textTheme.bodyLarge?.color ??
+                          AppColors.textDark,
                     ),
                   ),
                   onTap: () {
@@ -114,7 +116,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                     'Gallery',
                     style: GoogleFonts.plusJakartaSans(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textDark,
+                      color:
+                          Theme.of(context).textTheme.bodyLarge?.color ??
+                          AppColors.textDark,
                     ),
                   ),
                   onTap: () {
@@ -186,16 +190,22 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     final isSmallScreen = size.width < 360;
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        leading: PlatformBackButton(
+          color:
+              Theme.of(context).textTheme.bodyLarge?.color ??
+              AppColors.textDark,
+        ),
         title: Text(
           'Edit Profile',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color: Theme.of(context).textTheme.titleLarge?.color,
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
@@ -252,13 +262,13 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                             color: AppColors.primaryBlue,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: AppColors.white,
+                              color: Theme.of(context).cardColor,
                               width: 3,
                             ),
                           ),
                           child: Icon(
                             Icons.camera_alt_rounded,
-                            color: AppColors.white,
+                            color: Colors.white,
                             size: isSmallScreen ? 16 : 20,
                           ),
                         ),
@@ -287,13 +297,13 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                     duration: const Duration(milliseconds: 300),
                     decoration: BoxDecoration(
                       color: _nameFocus.hasFocus
-                          ? AppColors.white
-                          : AppColors.background,
+                          ? Theme.of(context).cardColor
+                          : Theme.of(context).cardColor.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: _nameFocus.hasFocus
                             ? AppColors.primaryBlue
-                            : AppColors.cardBorder,
+                            : Theme.of(context).dividerColor,
                         width: _nameFocus.hasFocus ? 1.5 : 1.0,
                       ),
                       boxShadow: _nameFocus.hasFocus
@@ -314,7 +324,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textDark,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                       decoration: InputDecoration(
                         hintText: 'Enter your name',

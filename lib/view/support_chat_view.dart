@@ -110,13 +110,16 @@ class _SupportChatViewState extends State<SupportChatView> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -124,7 +127,7 @@ class _SupportChatViewState extends State<SupportChatView> {
             Text(
               'Support',
               style: GoogleFonts.plusJakartaSans(
-                color: AppColors.textDark,
+                color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
                 fontWeight: FontWeight.w800,
                 fontSize: isSmallScreen ? 18 : 20,
               ),
@@ -143,13 +146,16 @@ class _SupportChatViewState extends State<SupportChatView> {
         actions: [
           IconButton(
             onPressed: () => HapticFeedback.lightImpact(),
-            icon: const Icon(
+            icon: Icon(
               Icons.more_vert_rounded,
-              color: AppColors.textDark,
+              color: theme.textTheme.titleMedium?.color ?? AppColors.textDark,
             ),
           ),
           const SizedBox(width: 8),
         ],
+        systemOverlayStyle: theme.brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
       ),
       body: Column(
         children: [
@@ -199,7 +205,7 @@ class _SupportChatViewState extends State<SupportChatView> {
                               decoration: BoxDecoration(
                                 color: isUser
                                     ? AppColors.primaryBlue
-                                    : AppColors.background,
+                                    : theme.cardColor,
                                 borderRadius: BorderRadius.only(
                                   topLeft: const Radius.circular(20),
                                   topRight: const Radius.circular(20),
@@ -207,7 +213,11 @@ class _SupportChatViewState extends State<SupportChatView> {
                                   bottomRight: Radius.circular(isUser ? 4 : 20),
                                 ),
                                 border: !isUser
-                                    ? Border.all(color: AppColors.cardBorder)
+                                    ? Border.all(
+                                        color: theme.dividerColor.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                      )
                                     : null,
                               ),
                               child: Text(
@@ -216,7 +226,8 @@ class _SupportChatViewState extends State<SupportChatView> {
                                   fontSize: isSmallScreen ? 13 : 14,
                                   color: isUser
                                       ? AppColors.white
-                                      : AppColors.textDark,
+                                      : (theme.textTheme.bodyLarge?.color ??
+                                            AppColors.textDark),
                                   height: 1.4,
                                 ),
                               ),
@@ -235,7 +246,9 @@ class _SupportChatViewState extends State<SupportChatView> {
                           _formatTime(msg['timestamp']),
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
-                            color: AppColors.textLight,
+                            color:
+                                theme.textTheme.bodySmall?.color ??
+                                AppColors.textLight,
                           ),
                         ),
                       ),
@@ -247,7 +260,7 @@ class _SupportChatViewState extends State<SupportChatView> {
           ),
 
           // Divider
-          Divider(height: 1, color: AppColors.cardBorder),
+          Divider(height: 1, color: theme.dividerColor.withValues(alpha: 0.1)),
 
           // Quick Reply Suggestions (optional)
           if (_messages.length < 4)
@@ -257,13 +270,13 @@ class _SupportChatViewState extends State<SupportChatView> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildQuickReply('Getting started', () {
+                    _buildQuickReply(context, 'Getting started', () {
                       _sendMessage('I need help getting started');
                     }),
-                    _buildQuickReply('Account issues', () {
+                    _buildQuickReply(context, 'Account issues', () {
                       _sendMessage('I have account issues');
                     }),
-                    _buildQuickReply('Premium', () {
+                    _buildQuickReply(context, 'Premium', () {
                       _sendMessage('Tell me about premium');
                     }),
                   ],
@@ -287,16 +300,23 @@ class _SupportChatViewState extends State<SupportChatView> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: AppColors.cardBorder),
+                        border: Border.all(
+                          color: theme.dividerColor.withValues(alpha: 0.1),
+                        ),
                       ),
                       child: TextField(
                         controller: _messageController,
+                        style: TextStyle(
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
                         decoration: InputDecoration(
                           hintText: 'Type a message...',
                           hintStyle: GoogleFonts.plusJakartaSans(
-                            color: AppColors.textLight,
+                            color:
+                                theme.textTheme.bodySmall?.color ??
+                                AppColors.textLight,
                           ),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(
@@ -338,7 +358,11 @@ class _SupportChatViewState extends State<SupportChatView> {
     );
   }
 
-  Widget _buildQuickReply(String text, VoidCallback onTap) {
+  Widget _buildQuickReply(
+    BuildContext context,
+    String text,
+    VoidCallback onTap,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: GestureDetector(

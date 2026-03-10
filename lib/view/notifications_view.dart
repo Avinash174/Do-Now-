@@ -21,23 +21,28 @@ class _NotificationsViewState extends ConsumerState<NotificationsView> {
     final settings = ref.watch(settingsServiceProvider);
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
+        ),
         title: Text(
           'Notifications',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color: theme.textTheme.titleLarge?.color ?? AppColors.textDark,
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
         ),
         centerTitle: true,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        systemOverlayStyle: theme.brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -48,7 +53,7 @@ class _NotificationsViewState extends ConsumerState<NotificationsView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionHeader('PUSH NOTIFICATIONS', isSmallScreen),
+              _buildSectionHeader(context, 'PUSH NOTIFICATIONS', isSmallScreen),
               const SizedBox(height: 16),
               _buildToggleItem(
                 'Allow Notifications',
@@ -68,7 +73,7 @@ class _NotificationsViewState extends ConsumerState<NotificationsView> {
                 isSmallScreen,
               ),
               const SizedBox(height: 32),
-              _buildSectionHeader('SOUND & VIBRATION', isSmallScreen),
+              _buildSectionHeader(context, 'SOUND & VIBRATION', isSmallScreen),
               const SizedBox(height: 16),
               _buildToggleItem(
                 'Notification Sound',
@@ -95,13 +100,17 @@ class _NotificationsViewState extends ConsumerState<NotificationsView> {
     );
   }
 
-  Widget _buildSectionHeader(String title, bool isSmallScreen) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    bool isSmallScreen,
+  ) {
     return Text(
       title,
       style: GoogleFonts.plusJakartaSans(
         fontSize: isSmallScreen ? 11 : 12,
         fontWeight: FontWeight.w800,
-        color: AppColors.textLight,
+        color: Theme.of(context).primaryColor,
         letterSpacing: 1.0,
       ),
     );
@@ -115,12 +124,13 @@ class _NotificationsViewState extends ConsumerState<NotificationsView> {
     IconData icon,
     bool isSmallScreen,
   ) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -146,14 +156,17 @@ class _NotificationsViewState extends ConsumerState<NotificationsView> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: isSmallScreen ? 14 : 16,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textDark,
+                    color:
+                        theme.textTheme.titleMedium?.color ??
+                        AppColors.textDark,
                   ),
                 ),
                 Text(
                   subtitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: isSmallScreen ? 11 : 12,
-                    color: AppColors.textLight,
+                    color:
+                        theme.textTheme.bodySmall?.color ?? AppColors.textLight,
                   ),
                 ),
               ],

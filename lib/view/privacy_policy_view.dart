@@ -13,16 +13,20 @@ class PrivacyPolicyView extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
 
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: const PlatformBackButton(color: AppColors.textDark),
+        leading: PlatformBackButton(
+          color: theme.textTheme.bodyLarge?.color ?? AppColors.textDark,
+        ),
         title: Text(
           'Privacy Policy',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textDark,
+            color: theme.textTheme.titleLarge?.color ?? AppColors.textDark,
             fontWeight: FontWeight.w800,
             fontSize: isSmallScreen ? 18 : 20,
           ),
@@ -84,7 +88,9 @@ class PrivacyPolicyView extends StatelessWidget {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textDark,
+                        color:
+                            theme.textTheme.titleMedium?.color ??
+                            AppColors.textDark,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -93,7 +99,11 @@ class PrivacyPolicyView extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
-                        color: AppColors.textMuted,
+                        color:
+                            theme.textTheme.bodySmall?.color?.withValues(
+                              alpha: 0.6,
+                            ) ??
+                            AppColors.textMuted,
                       ),
                     ),
                   ],
@@ -101,6 +111,7 @@ class PrivacyPolicyView extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               _buildSection(
+                context: context,
                 title: 'Introduction',
                 content: 'Welcome to Do Now ("the App," "we," "us," "our").',
                 items: const [
@@ -111,6 +122,7 @@ class PrivacyPolicyView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _buildSection(
+                context: context,
                 title: 'Information We Collect',
                 items: const [
                   'Account Information: Name, email address, phone number, and profile picture.',
@@ -123,6 +135,7 @@ class PrivacyPolicyView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _buildSection(
+                context: context,
                 title: 'How We Use Your Information',
                 items: const [
                   'To provide, maintain, and improve our App and services.',
@@ -135,6 +148,7 @@ class PrivacyPolicyView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _buildSection(
+                context: context,
                 title: 'Data Security',
                 items: const [
                   'We implement industry-standard security measures including encryption.',
@@ -147,6 +161,7 @@ class PrivacyPolicyView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _buildSection(
+                context: context,
                 title: 'Your Privacy Rights',
                 items: const [
                   'Right to Access: You can request a copy of your personal data.',
@@ -159,6 +174,7 @@ class PrivacyPolicyView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _buildSection(
+                context: context,
                 title: 'Third-Party Services',
                 items: const [
                   'We use Firebase for authentication and data storage.',
@@ -170,6 +186,7 @@ class PrivacyPolicyView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _buildSection(
+                context: context,
                 title: 'Contact Us',
                 items: const [
                   'Email: privacy@donow.app',
@@ -214,7 +231,9 @@ class PrivacyPolicyView extends StatelessWidget {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textDark,
+                              color:
+                                  theme.textTheme.bodyMedium?.color ??
+                                  AppColors.textDark,
                             ),
                           ),
                         ),
@@ -232,6 +251,7 @@ class PrivacyPolicyView extends StatelessWidget {
   }
 
   Widget _buildSection({
+    required BuildContext context,
     required String title,
     String? content,
     List<String> items = const [],
@@ -254,7 +274,9 @@ class PrivacyPolicyView extends StatelessWidget {
             content,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
-              color: AppColors.textDark,
+              color:
+                  Theme.of(context).textTheme.bodyMedium?.color ??
+                  AppColors.textDark,
               height: 1.6,
             ),
           ),
@@ -293,7 +315,9 @@ class PrivacyPolicyView extends StatelessWidget {
                           item,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
-                            color: AppColors.textDark,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color ??
+                                AppColors.textDark,
                             height: 1.6,
                           ),
                         ),

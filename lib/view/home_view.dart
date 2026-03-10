@@ -160,7 +160,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         Icon(
                           Icons.schedule_rounded,
                           size: 13,
-                          color: AppColors.textLight.withValues(alpha: 0.6),
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.color?.withValues(alpha: 0.6),
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -179,7 +181,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             height: 3,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: AppColors.textLight.withValues(alpha: 0.3),
+                              color: Theme.of(
+                                context,
+                              ).dividerColor.withValues(alpha: 0.3),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -215,7 +219,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     border: Border.all(
                       color: task.isCompleted
                           ? AppColors.primaryBlue
-                          : AppColors.borderColor,
+                          : Theme.of(context).dividerColor,
                       width: 2,
                     ),
                   ),
@@ -466,7 +470,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           color: AppColors.danger,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.white,
+                            color: Theme.of(context).cardColor,
                             width: 1.5,
                           ),
                         ),
@@ -617,7 +621,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
         decoration: InputDecoration(
           hintText: 'Search your tasks...',
           hintStyle: GoogleFonts.plusJakartaSans(
-            color: AppColors.textLight.withValues(alpha: 0.5),
+            color: Theme.of(
+              context,
+            ).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
             fontSize: 15,
             fontWeight: FontWeight.w500,
           ),

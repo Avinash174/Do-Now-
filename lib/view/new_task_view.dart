@@ -393,9 +393,11 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                       hintStyle: GoogleFonts.plusJakartaSans(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
-                                        color: AppColors.textLight.withValues(
-                                          alpha: 0.4,
-                                        ),
+                                        color: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.color
+                                            ?.withValues(alpha: 0.4),
                                       ),
                                       border: InputBorder.none,
                                       contentPadding:
@@ -465,9 +467,11 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                     decoration: InputDecoration(
                                       hintText: 'Add some more details...',
                                       hintStyle: GoogleFonts.plusJakartaSans(
-                                        color: AppColors.textLight.withValues(
-                                          alpha: 0.5,
-                                        ),
+                                        color: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.color
+                                            ?.withValues(alpha: 0.5),
                                         fontSize: 14,
                                       ),
                                       contentPadding:
@@ -678,7 +682,10 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                               style:
                                                   GoogleFonts.plusJakartaSans(
                                                     fontSize: 12,
-                                                    color: AppColors.textLight,
+                                                    color: Theme.of(context)
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.color,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                             ),
@@ -839,14 +846,18 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
   Widget _buildSectionLabel(String label, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: AppColors.textLight),
+        Icon(
+          icon,
+          size: 18,
+          color: Theme.of(context).textTheme.bodySmall?.color,
+        ),
         const SizedBox(width: 8),
         Text(
           label.toUpperCase(),
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textLight,
+            color: Theme.of(context).textTheme.bodySmall?.color,
+            fontWeight: FontWeight.w600,
             letterSpacing: 1.2,
           ),
         ),
@@ -895,7 +906,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textLight,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                     ),
                   ),
                   Text(

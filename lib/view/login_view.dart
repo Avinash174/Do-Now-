@@ -69,7 +69,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.dark,
+        value: Theme.of(context).brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         child: SafeArea(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -177,8 +179,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
         Text(
           'Welcome back! Please enter your details.',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: isSmallScreen ? 14 : 15,
-            color: AppColors.textLight.withValues(alpha: 0.8),
+            color: Theme.of(
+              context,
+            ).textTheme.bodySmall?.color?.withValues(alpha: 0.8),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -235,7 +238,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.plusJakartaSans(
-                color: AppColors.textLight.withValues(alpha: 0.4),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -246,7 +251,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
                         obscureText
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: AppColors.textLight.withValues(alpha: 0.5),
+                        color: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
                         size: 20,
                       ),
                       onPressed: onSuffixIconTap,

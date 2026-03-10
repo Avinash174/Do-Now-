@@ -123,7 +123,7 @@ class DatabaseService {
 
       // Get the bucket name for debugging
       dev.log(
-        'DatabaseService: Storage bucket: ${storage.bucket ?? "default"}',
+        'DatabaseService: Storage bucket: ${storage.bucket}',
         name: 'database',
       );
 

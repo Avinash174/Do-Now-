@@ -378,7 +378,7 @@ class ProfileView extends ConsumerWidget {
             Icons.list_alt_rounded,
             AppColors.primaryBlue,
           ),
-          _buildDivider(),
+          _buildDivider(context),
           _buildStatItem(
             context,
             'Completed',
@@ -386,7 +386,7 @@ class ProfileView extends ConsumerWidget {
             Icons.check_circle_rounded,
             AppColors.success,
           ),
-          _buildDivider(),
+          _buildDivider(context),
           _buildStatItem(
             context,
             'Pending',
@@ -432,7 +432,7 @@ class ProfileView extends ConsumerWidget {
           label,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12,
-            color: AppColors.textLight,
+            color: Theme.of(context).textTheme.bodySmall?.color,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -440,11 +440,11 @@ class ProfileView extends ConsumerWidget {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(BuildContext context) {
     return Container(
       height: 40,
       width: 1,
-      color: AppColors.black.withValues(alpha: 0.05),
+      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
     );
   }
 
@@ -457,10 +457,10 @@ class ProfileView extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isDark ? const Color(0xFF334155) : AppColors.cardBorder,
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
           ),
         ),
         child: Padding(
@@ -488,7 +488,7 @@ class ProfileView extends ConsumerWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? Colors.white : AppColors.textDark,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                 ],
@@ -496,9 +496,9 @@ class ProfileView extends ConsumerWidget {
               const SizedBox(height: 14),
               Container(
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF0F172A)
-                      : const Color(0xFFF3F4F6),
+                  color: Theme.of(
+                    context,
+                  ).scaffoldBackgroundColor.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 padding: const EdgeInsets.all(4),
@@ -587,9 +587,7 @@ class ProfileView extends ConsumerWidget {
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected
                       ? Colors.white
-                      : (isDark
-                            ? const Color(0xFF94A3B8)
-                            : AppColors.textMuted),
+                      : Theme.of(ref.context).textTheme.bodySmall?.color,
                 ),
               ),
             ],
@@ -621,11 +619,11 @@ class ProfileView extends ConsumerWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: AppColors.black.withValues(alpha: 0.02),
+                color: Colors.black.withValues(alpha: 0.02),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
               ),

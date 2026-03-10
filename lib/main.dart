@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'const/app_theme.dart';
 import 'firebase_options.dart';
 import 'routes/app_routes.dart';
+import 'view_model/theme_view_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,15 +38,19 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'Do Now',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.getThemeWithFonts(context),
+      theme: AppTheme.getTheme(context, ThemeMode.light),
+      darkTheme: AppTheme.getTheme(context, ThemeMode.dark),
+      themeMode: themeMode,
       initialRoute: AppRoutes.splash,
       onGenerateRoute: AppRoutes.onGenerateRoute,
     );

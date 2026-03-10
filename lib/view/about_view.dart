@@ -9,18 +9,14 @@ class AboutView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.textDark,
-          ),
-        ),
+        leading: const BackButton(color: AppColors.textDark),
         title: Text(
           'About Do Now',
           style: GoogleFonts.plusJakartaSans(
@@ -85,11 +81,13 @@ class AboutView extends StatelessWidget {
             _buildAboutCard(
               'Our Mission',
               'Simplifying productivity one task at a time. We believe that focus is the key to achieving great things.',
+              isSmallScreen,
             ),
             const SizedBox(height: 16),
             _buildAboutCard(
               'Privacy First',
               'Your data belongs to you. We use end-to-end security to ensure your tasks stay private.',
+              isSmallScreen,
             ),
 
             const SizedBox(height: 48),
@@ -127,14 +125,14 @@ class AboutView extends StatelessWidget {
     );
   }
 
-  Widget _buildAboutCard(String title, String content) {
+  Widget _buildAboutCard(String title, String content, bool isSmallScreen) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: AppColors.cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

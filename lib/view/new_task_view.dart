@@ -231,6 +231,8 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
     return Scaffold(
       backgroundColor: AppColors.white,
       body: Stack(
@@ -283,16 +285,21 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                       _buildHeaderButton(
                         icon: Icons.close_rounded,
                         onTap: () => Navigator.pop(context),
+                        isSmallScreen: isSmallScreen,
                       ),
                       Text(
                         widget.task != null ? 'Edit Task' : 'New Task',
                         style: GoogleFonts.plusJakartaSans(
                           color: AppColors.white,
-                          fontSize: 20,
+                          fontSize: isSmallScreen ? 18 : 20,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const SizedBox(width: 44), // To center the title
+                      _buildHeaderButton(
+                        icon: Icons.more_horiz_rounded,
+                        onTap: () {},
+                        isSmallScreen: isSmallScreen,
+                      ),
                     ],
                   ),
                 ),
@@ -373,8 +380,8 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                       border: InputBorder.none,
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 16,
+                                            horizontal: 20,
+                                            vertical: 20,
                                           ),
                                     ),
                                     maxLines: null,
@@ -440,8 +447,8 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                       ),
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 12,
+                                            horizontal: 20,
+                                            vertical: 16,
                                           ),
                                       border: InputBorder.none,
                                     ),
@@ -494,72 +501,73 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                               Icons.grid_view_rounded,
                             ),
                             const SizedBox(height: 16),
-                            Wrap(
-                                  spacing: 12,
-                                  runSpacing: 12,
-                                  children: _categories.map((cat) {
+                            GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: size.width > 600
+                                            ? 4
+                                            : 3,
+                                        crossAxisSpacing: 10,
+                                        mainAxisSpacing: 10,
+                                        childAspectRatio: 2.2,
+                                      ),
+                                  itemCount: _categories.length,
+                                  itemBuilder: (context, index) {
+                                    final cat = _categories[index];
                                     final isSelected = _category == cat['name'];
                                     final Color color = cat['color'];
                                     return GestureDetector(
-                                          onTap: () {
-                                            HapticFeedback.selectionClick();
-                                            setState(
-                                              () => _category = cat['name'],
-                                            );
-                                          },
-                                          child: AnimatedContainer(
-                                            duration: 400.ms,
-                                            curve: Curves.easeOutQuint,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 20,
-                                              vertical: 14,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: isSelected
-                                                  ? color
-                                                  : color.withValues(
-                                                      alpha: 0.05,
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        setState(() => _category = cat['name']);
+                                      },
+                                      child: AnimatedContainer(
+                                        duration: 400.ms,
+                                        curve: Curves.easeOutQuint,
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? color
+                                              : color.withValues(alpha: 0.05),
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? color
+                                                : color.withValues(alpha: 0.1),
+                                            width: 1.5,
+                                          ),
+                                          boxShadow: isSelected
+                                              ? [
+                                                  BoxShadow(
+                                                    color: color.withValues(
+                                                      alpha: 0.2,
                                                     ),
-                                              borderRadius:
-                                                  BorderRadius.circular(22),
-                                              border: Border.all(
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ]
+                                              : [],
+                                        ),
+                                        child: Center(
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                isSelected
+                                                    ? Icons.check_circle_rounded
+                                                    : cat['icon'],
+                                                size: 16,
                                                 color: isSelected
-                                                    ? color
-                                                    : color.withValues(
-                                                        alpha: 0.1,
-                                                      ),
-                                                width: 1.5,
+                                                    ? AppColors.white
+                                                    : color,
                                               ),
-                                              boxShadow: isSelected
-                                                  ? [
-                                                      BoxShadow(
-                                                        color: color.withValues(
-                                                          alpha: 0.25,
-                                                        ),
-                                                        blurRadius: 15,
-                                                        offset: const Offset(
-                                                          0,
-                                                          8,
-                                                        ),
-                                                      ),
-                                                    ]
-                                                  : [],
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
-                                                  isSelected
-                                                      ? Icons
-                                                            .check_circle_rounded
-                                                      : cat['icon'],
-                                                  size: 20,
-                                                  color: isSelected
-                                                      ? AppColors.white
-                                                      : color,
-                                                ),
-                                                const SizedBox(width: 10),
-                                                Text(
+                                              const SizedBox(width: 8),
+                                              Flexible(
+                                                child: Text(
                                                   cat['name'],
                                                   style:
                                                       GoogleFonts.plusJakartaSans(
@@ -570,21 +578,19 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
                                                         fontWeight: isSelected
                                                             ? FontWeight.w800
                                                             : FontWeight.w700,
-                                                        fontSize: 14,
+                                                        fontSize: 12,
                                                         letterSpacing: -0.2,
                                                       ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
-                                        )
-                                        .animate(target: isSelected ? 1 : 0)
-                                        .scale(
-                                          begin: const Offset(1, 1),
-                                          end: const Offset(1.05, 1.05),
-                                          duration: 200.ms,
-                                        );
-                                  }).toList(),
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 )
                                 .animate()
                                 .fadeIn(delay: 300.ms)
@@ -687,7 +693,12 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
               child: SafeArea(
                 top: false,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 20, 28, 20),
+                  padding: EdgeInsets.fromLTRB(
+                    28,
+                    12,
+                    28,
+                    MediaQuery.of(context).padding.bottom + 12,
+                  ),
                   child: _isLoading
                       ? const SizedBox(
                           height: 60,
@@ -732,17 +743,22 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
   Widget _buildHeaderButton({
     required IconData icon,
     required VoidCallback onTap,
+    bool isSmallScreen = false,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        width: 44,
-        height: 44,
+        padding: EdgeInsets.all(isSmallScreen ? 8 : 10),
         decoration: BoxDecoration(
           color: AppColors.white.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(icon, color: AppColors.white, size: 24),
+        child: Icon(
+          icon,
+          color: AppColors.white,
+          size: isSmallScreen ? 18 : 20,
+        ),
       ),
     );
   }

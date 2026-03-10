@@ -9,6 +9,7 @@ import '../routes/app_routes.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';
 import '../view_model/task_view_model.dart';
+import '../view_model/theme_view_model.dart';
 import '../utils/snackbar_utils.dart';
 
 class ProfileView extends ConsumerWidget {
@@ -249,6 +250,7 @@ class ProfileView extends ConsumerWidget {
                       AppColors.success,
                       () => Navigator.pushNamed(context, AppRoutes.security),
                     ),
+                    _buildThemeTile(ref),
                   ]),
 
                   const SizedBox(height: 24),
@@ -410,7 +412,66 @@ class ProfileView extends ConsumerWidget {
     return Container(
       height: 40,
       width: 1,
-      color: Colors.black.withValues(alpha: 0.05),
+      color: AppColors.black.withValues(alpha: 0.05),
+    );
+  }
+
+  Widget _buildThemeTile(WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppColors.cardBorder),
+        ),
+        child: ListTile(
+          onTap: () {
+            ref
+                .read(themeModeProvider.notifier)
+                .setMode(isDark ? ThemeMode.light : ThemeMode.dark);
+            HapticFeedback.mediumImpact();
+          },
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
+          leading: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: (isDark ? AppColors.primaryAccent : AppColors.warning)
+                  .withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              color: isDark ? AppColors.primaryAccent : AppColors.warning,
+              size: 22,
+            ),
+          ),
+          title: Text(
+            'Dark Mode',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textDark,
+            ),
+          ),
+          trailing: Switch.adaptive(
+            value: isDark,
+            activeThumbColor: AppColors.primaryBlue,
+            onChanged: (value) {
+              ref
+                  .read(themeModeProvider.notifier)
+                  .setMode(value ? ThemeMode.dark : ThemeMode.light);
+              HapticFeedback.mediumImpact();
+            },
+          ),
+        ),
+      ),
     );
   }
 
@@ -432,11 +493,11 @@ class ProfileView extends ConsumerWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
+                color: AppColors.black.withValues(alpha: 0.02),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
               ),
@@ -488,7 +549,7 @@ class ProfileView extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           'Sign Out',
@@ -512,8 +573,8 @@ class ProfileView extends ConsumerWidget {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.danger,
+              foregroundColor: AppColors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

@@ -52,7 +52,7 @@ class StatsView extends ConsumerWidget {
                     'Completed',
                     '$done',
                     Icons.check_circle_rounded,
-                    const Color(0xFF10B981),
+                    AppColors.success,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -61,7 +61,7 @@ class StatsView extends ConsumerWidget {
                     'Pending',
                     '$pending',
                     Icons.pending_actions_rounded,
-                    const Color(0xFFF59E0B),
+                    AppColors.warning,
                   ),
                 ),
               ],
@@ -156,8 +156,8 @@ class StatsView extends ConsumerWidget {
           end: Alignment.bottomRight,
           colors: [
             AppColors.primaryBlue,
-            const Color(0xFF3B82F6).withValues(alpha: 0.9),
-            const Color(0xFF6366F1).withValues(alpha: 0.9),
+            AppColors.secondaryBlue.withValues(alpha: 0.9),
+            AppColors.primaryAccent.withValues(alpha: 0.9),
           ],
         ),
         borderRadius: BorderRadius.circular(32),
@@ -178,7 +178,7 @@ class StatsView extends ConsumerWidget {
             child: Icon(
               Icons.analytics_rounded,
               size: 150,
-              color: Colors.white.withValues(alpha: 0.1),
+              color: AppColors.white.withValues(alpha: 0.1),
             ),
           ),
           Padding(
@@ -195,7 +195,7 @@ class StatsView extends ConsumerWidget {
                         Text(
                           'Completion Rate',
                           style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: AppColors.white.withValues(alpha: 0.8),
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -204,7 +204,7 @@ class StatsView extends ConsumerWidget {
                         Text(
                           '${(rate * 100).toStringAsFixed(0)}%',
                           style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white,
+                            color: AppColors.white,
                             fontSize: 48,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -1,
@@ -215,12 +215,12 @@ class StatsView extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: AppColors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Icon(
                         Icons.trending_up_rounded,
-                        color: Colors.white,
+                        color: AppColors.white,
                         size: 28,
                       ),
                     ),
@@ -233,7 +233,7 @@ class StatsView extends ConsumerWidget {
                       height: 10,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: AppColors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -244,11 +244,11 @@ class StatsView extends ConsumerWidget {
                       child: Container(
                         height: 10,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.white,
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.white.withValues(alpha: 0.5),
+                              color: AppColors.white.withValues(alpha: 0.5),
                               blurRadius: 10,
                             ),
                           ],
@@ -261,7 +261,7 @@ class StatsView extends ConsumerWidget {
                 Text(
                   'Great job! You\'ve completed $done out of $total tasks.',
                   style: GoogleFonts.plusJakartaSans(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: AppColors.white.withValues(alpha: 0.9),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -284,12 +284,12 @@ class StatsView extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: AppColors.cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: AppColors.black.withValues(alpha: 0.02),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -365,10 +365,10 @@ class StatsView extends ConsumerWidget {
     final double percent = total == 0 ? 0.0 : (count / total);
     final colors = [
       AppColors.primaryBlue,
-      const Color(0xFF8B5CF6),
-      const Color(0xFFEC4899),
-      const Color(0xFF10B981),
-      const Color(0xFFF59E0B),
+      AppColors.primaryAccent,
+      AppColors.catShopping,
+      AppColors.success,
+      AppColors.warning,
     ];
     final color = colors[index % colors.length];
 
@@ -441,7 +441,7 @@ class StatsView extends ConsumerWidget {
                   height: 8,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
+                    color: AppColors.cardBorder,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -478,11 +478,11 @@ class StatsView extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppColors.black.withValues(alpha: 0.05),
                     blurRadius: 20,
                   ),
                 ],

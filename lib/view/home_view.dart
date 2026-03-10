@@ -68,6 +68,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final vm = ref.read(taskViewModelProvider);
     final categoryColor = _getCategoryColor(task.category);
     final categoryIcon = _getCategoryIcon(task.category);
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
 
     return Dismissible(
       key: ValueKey(task.id),
@@ -81,12 +83,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 24),
         decoration: BoxDecoration(
-          color: Colors.red.withValues(alpha: 0.1),
+          color: AppColors.danger.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(24),
         ),
         child: const Icon(
           Icons.delete_outline_rounded,
-          color: Colors.red,
+          color: AppColors.danger,
           size: 28,
         ),
       ),
@@ -97,7 +99,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         },
         child: Container(
           margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(18),
+          padding: EdgeInsets.all(isSmallScreen ? 14 : 18),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(24),
@@ -120,13 +122,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
           child: Row(
             children: [
               Container(
-                width: 54,
-                height: 54,
+                width: isSmallScreen ? 48 : 54,
+                height: isSmallScreen ? 48 : 54,
                 decoration: BoxDecoration(
                   color: categoryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: Icon(categoryIcon, color: categoryColor, size: 26),
+                child: Icon(
+                  categoryIcon,
+                  color: categoryColor,
+                  size: isSmallScreen ? 22 : 26,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -136,7 +142,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     Text(
                       task.title,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
+                        fontSize: isSmallScreen ? 14 : 16,
                         fontWeight: FontWeight.w700,
                         color: task.isCompleted
                             ? AppColors.textLight.withValues(alpha: 0.5)
@@ -151,14 +157,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       children: [
                         Icon(
                           Icons.schedule_rounded,
-                          size: 14,
+                          size: 13,
                           color: AppColors.textLight.withValues(alpha: 0.6),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           _formatTaskTime(task.scheduleTime),
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
+                            fontSize: isSmallScreen ? 11 : 12,
                             color: AppColors.textLight.withValues(alpha: 0.6),
                             fontWeight: FontWeight.w600,
                           ),
@@ -177,7 +183,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           Text(
                             task.category,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
+                              fontSize: isSmallScreen ? 11 : 12,
                               color: categoryColor.withValues(alpha: 0.8),
                               fontWeight: FontWeight.w700,
                             ),
@@ -196,22 +202,26 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  width: 28,
-                  height: 28,
+                  width: isSmallScreen ? 24 : 28,
+                  height: isSmallScreen ? 24 : 28,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: task.isCompleted
                         ? AppColors.primaryBlue
-                        : Colors.transparent,
+                        : AppColors.transparent,
                     border: Border.all(
                       color: task.isCompleted
                           ? AppColors.primaryBlue
-                          : const Color(0xFFE2E8F0),
+                          : AppColors.borderColor,
                       width: 2,
                     ),
                   ),
                   child: task.isCompleted
-                      ? const Icon(Icons.check, size: 18, color: Colors.white)
+                      ? Icon(
+                          Icons.check,
+                          size: isSmallScreen ? 14 : 18,
+                          color: AppColors.white,
+                        )
                       : null,
                 ),
               ),
@@ -234,6 +244,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget _buildFilterChip(String label, TaskFilter filter) {
     final currentFilter = ref.watch(taskFilterProvider);
     final isSelected = currentFilter == filter;
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
 
     return GestureDetector(
       onTap: () {
@@ -244,7 +256,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
         margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSmallScreen ? 18 : 24,
+          vertical: isSmallScreen ? 10 : 12,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primaryBlue : AppColors.white,
           borderRadius: BorderRadius.circular(20),
@@ -267,7 +282,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           style: GoogleFonts.plusJakartaSans(
             color: isSelected ? AppColors.white : AppColors.textLight,
             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-            fontSize: 14,
+            fontSize: isSmallScreen ? 13 : 14,
           ),
         ),
       ),
@@ -277,14 +292,19 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget _buildHomeContent() {
     final userAsync = ref.watch(userProfileProvider);
     final user = ref.watch(authStateProvider).value;
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
 
     final userName = userAsync.when(
       data: (data) =>
-          (data?['name']?.toString().split(' ')[0] ??
-          user?.displayName?.split(' ')[0] ??
-          'User'),
+          (data?['name']?.toString() ?? user?.displayName ?? 'User'),
       loading: () => '...',
-      error: (err, stack) => user?.displayName?.split(' ')[0] ?? 'User',
+      error: (err, stack) => user?.displayName ?? 'User',
+    );
+    final userEmail = userAsync.when(
+      data: (data) => data?['email']?.toString() ?? user?.email ?? '',
+      loading: () => '',
+      error: (err, stack) => user?.email ?? '',
     );
 
     final stats = ref.watch(taskStatsProvider);
@@ -292,6 +312,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final progressRate = stats['rate'] as double;
 
     return SafeArea(
+      bottom: false,
       child: RefreshIndicator(
         onRefresh: () async => ref.refresh(tasksProvider),
         color: AppColors.primaryBlue,
@@ -303,22 +324,27 @@ class _HomeViewState extends ConsumerState<HomeView> {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 10),
+                padding: EdgeInsets.fromLTRB(
+                  size.width * 0.06,
+                  isSmallScreen ? 10 : 20,
+                  size.width * 0.06,
+                  10,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildTopBar(userName)
+                    _buildTopBar(userName, userEmail)
                         .animate()
                         .fadeIn(duration: 500.ms)
                         .slideY(begin: -0.1, end: 0),
-                    const SizedBox(height: 32),
+                    SizedBox(height: isSmallScreen ? 20 : 32),
                     _buildProgressCard(pendingCount, progressRate)
                         .animate()
                         .fadeIn(delay: 200.ms)
                         .scale(begin: const Offset(0.95, 0.95)),
-                    const SizedBox(height: 32),
+                    SizedBox(height: isSmallScreen ? 24 : 32),
                     _buildSearchBar().animate().fadeIn(delay: 300.ms),
-                    const SizedBox(height: 32),
+                    SizedBox(height: isSmallScreen ? 24 : 32),
                     _buildSectionHeader(
                       'Filters',
                     ).animate().fadeIn(delay: 400.ms),
@@ -340,7 +366,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         .animate()
                         .fadeIn(delay: 450.ms)
                         .slideX(begin: 0.1, end: 0),
-                    const SizedBox(height: 32),
+                    SizedBox(height: isSmallScreen ? 24 : 32),
                     _buildSectionHeader(
                       'Tasks',
                     ).animate().fadeIn(delay: 500.ms),
@@ -357,32 +383,39 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  Widget _buildTopBar(String name) {
+  Widget _buildTopBar(String name, String email) {
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Hello, $name 👋',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textDark,
-                letterSpacing: -0.5,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hello, $name 👋',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: isSmallScreen ? 18 : 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textDark,
+                  letterSpacing: -0.5,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Focus on your goals today',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textLight.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
+              if (email.isNotEmpty)
+                Text(
+                  email,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: isSmallScreen ? 11 : 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textLight.withValues(alpha: 0.7),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+            ],
+          ),
         ),
         Row(
           children: [
@@ -392,7 +425,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 Navigator.pushNamed(context, AppRoutes.notifications);
               },
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(isSmallScreen ? 10 : 12),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   shape: BoxShape.circle,
@@ -407,21 +440,24 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
                 child: Stack(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.notifications_none_rounded,
                       color: AppColors.textDark,
-                      size: 24,
+                      size: isSmallScreen ? 20 : 24,
                     ),
                     Positioned(
-                      right: 2,
-                      top: 2,
+                      right: 1,
+                      top: 1,
                       child: Container(
-                        width: 10,
-                        height: 10,
+                        width: isSmallScreen ? 7 : 9,
+                        height: isSmallScreen ? 7 : 9,
                         decoration: BoxDecoration(
-                          color: Colors.redAccent,
+                          color: AppColors.danger,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(
+                            color: AppColors.white,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -429,24 +465,24 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: isSmallScreen ? 10 : 16),
             GestureDetector(
               onTap: () => setState(() => _selectedIndex = 2),
               child: Container(
                 padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primaryBlue, Color(0xFF6366F1)],
+                  gradient: LinearGradient(
+                    colors: [AppColors.primaryBlue, AppColors.primaryAccent],
                   ),
                 ),
                 child: CircleAvatar(
-                  radius: 24,
+                  radius: isSmallScreen ? 20 : 24,
                   backgroundColor: AppColors.white,
                   child: Text(
                     name.isNotEmpty ? name[0].toUpperCase() : 'U',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 18,
+                      fontSize: isSmallScreen ? 16 : 18,
                       fontWeight: FontWeight.w800,
                       color: AppColors.primaryBlue,
                     ),
@@ -461,13 +497,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Widget _buildProgressCard(int pending, double rate) {
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.primaryBlue, Color(0xFF4F46E5)],
+          colors: [AppColors.primaryBlue, AppColors.primaryAccent],
         ),
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
@@ -485,12 +524,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
             bottom: -10,
             child: Icon(
               Icons.rocket_launch_rounded,
-              size: 100,
-              color: Colors.white.withValues(alpha: 0.1),
+              size: isSmallScreen ? 80 : 100,
+              color: AppColors.white.withValues(alpha: 0.1),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(28),
+            padding: EdgeInsets.all(isSmallScreen ? 20 : 28),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -500,22 +539,22 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     Text(
                       'Daily Goals',
                       style: GoogleFonts.plusJakartaSans(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 18,
+                        color: AppColors.white.withValues(alpha: 0.9),
+                        fontSize: isSmallScreen ? 16 : 18,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     Text(
                       '${(rate * 100).toStringAsFixed(0)}%',
                       style: GoogleFonts.plusJakartaSans(
-                        color: Colors.white,
-                        fontSize: 22,
+                        color: AppColors.white,
+                        fontSize: isSmallScreen ? 20 : 22,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: isSmallScreen ? 16 : 24),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
@@ -524,17 +563,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     valueColor: const AlwaysStoppedAnimation<Color>(
                       AppColors.white,
                     ),
-                    minHeight: 10,
+                    minHeight: isSmallScreen ? 7 : 10,
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: isSmallScreen ? 16 : 24),
                 Text(
                   pending == 0
                       ? 'All tasks done! 👏'
                       : '$pending tasks remaining for today',
                   style: GoogleFonts.plusJakartaSans(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 14,
+                    color: AppColors.white.withValues(alpha: 0.9),
+                    fontSize: isSmallScreen ? 13 : 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -680,12 +719,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
               },
               backgroundColor: AppColors.primaryBlue,
               elevation: 4,
-              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              icon: const Icon(Icons.add_rounded, color: AppColors.white),
               label: Text(
                 'New Task',
                 style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
             ).animate().scale(delay: 300.ms, curve: Curves.easeOutBack)
@@ -694,12 +733,15 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Widget _buildBottomNav() {
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.black.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -719,27 +761,27 @@ class _HomeViewState extends ConsumerState<HomeView> {
           unselectedItemColor: AppColors.textLight.withValues(alpha: 0.4),
           selectedLabelStyle: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.w800,
-            fontSize: 12,
+            fontSize: isSmallScreen ? 10 : 12,
           ),
           unselectedLabelStyle: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.w700,
-            fontSize: 12,
+            fontSize: isSmallScreen ? 10 : 12,
           ),
+          selectedFontSize: isSmallScreen ? 10 : 12,
+          unselectedFontSize: isSmallScreen ? 10 : 12,
+          iconSize: isSmallScreen ? 20 : 24,
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.grid_view_rounded),
-              activeIcon: Icon(Icons.grid_view_rounded),
               label: 'Tasks',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.analytics_outlined),
-              activeIcon: Icon(Icons.analytics_rounded),
               label: 'Stats',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_rounded),
-              activeIcon: Icon(Icons.person_rounded),
               label: 'Profile',
             ),
           ],

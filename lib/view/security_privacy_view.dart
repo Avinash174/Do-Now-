@@ -18,13 +18,7 @@ class SecurityPrivacyView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.textDark,
-          ),
-        ),
+        leading: const BackButton(color: AppColors.textDark),
         title: Text(
           'Security & Privacy',
           style: GoogleFonts.plusJakartaSans(
@@ -96,6 +90,9 @@ class SecurityPrivacyView extends StatelessWidget {
                 isSmallScreen,
                 showTrailing: true,
               ),
+              const SizedBox(
+                height: 100,
+              ), // Added bottom spacing for full scroll
             ],
           ),
         ),

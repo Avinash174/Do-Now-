@@ -18,13 +18,7 @@ class HelpCenterView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.textDark,
-          ),
-        ),
+        leading: const BackButton(color: AppColors.textDark),
         title: Text(
           'Help Center',
           style: GoogleFonts.plusJakartaSans(
@@ -159,6 +153,7 @@ class HelpCenterView extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 100),
             ],
           ),
         ),

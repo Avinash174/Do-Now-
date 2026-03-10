@@ -78,25 +78,24 @@ class _SignupViewState extends ConsumerState<SignupView> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.light,
-        ),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: AppColors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -115,7 +114,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 28),
+          padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -123,7 +122,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
               Text(
                 'Create Account',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 34,
+                  fontSize: isSmallScreen ? 28 : 34,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textDark,
                   letterSpacing: -1,
@@ -133,7 +132,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
               Text(
                     'Join us to start your productive journey',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 16,
+                      fontSize: isSmallScreen ? 14 : 16,
                       color: AppColors.textLight.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w500,
                     ),
@@ -141,13 +140,14 @@ class _SignupViewState extends ConsumerState<SignupView> {
                   .animate()
                   .fadeIn(delay: 100.ms, duration: 400.ms)
                   .slideY(begin: 0.2, end: 0),
-              const SizedBox(height: 48),
+              SizedBox(height: size.height * 0.05),
 
               _buildInputField(
                 label: 'Full Name',
                 hint: 'John Doe',
                 controller: _nameController,
                 icon: Icons.person_outline_rounded,
+                isSmallScreen: isSmallScreen,
               ).animate().fadeIn(delay: 200.ms).slideX(begin: 0.1, end: 0),
 
               const SizedBox(height: 24),
@@ -158,6 +158,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                 controller: _emailController,
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
+                isSmallScreen: isSmallScreen,
               ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.1, end: 0),
 
               const SizedBox(height: 24),
@@ -169,6 +170,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                 icon: Icons.lock_outline_rounded,
                 isPassword: true,
                 obscureText: _obscurePassword,
+                isSmallScreen: isSmallScreen,
                 onSuffixIconTap: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
               ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1, end: 0),
@@ -182,13 +184,14 @@ class _SignupViewState extends ConsumerState<SignupView> {
                 icon: Icons.lock_reset_rounded,
                 isPassword: true,
                 obscureText: _obscurePassword,
+                isSmallScreen: isSmallScreen,
               ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0),
 
-              const SizedBox(height: 48),
+              SizedBox(height: size.height * 0.05),
 
               SizedBox(
                 width: double.infinity,
-                height: 60,
+                height: isSmallScreen ? 56 : 60,
                 child: _isLoading
                     ? const Center(
                         child: CircularProgressIndicator(
@@ -199,7 +202,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                         onPressed: _signUp,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryBlue,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.white,
                           elevation: 8,
                           shadowColor: AppColors.primaryBlue.withValues(
                             alpha: 0.4,
@@ -211,7 +214,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                         child: Text(
                           'Create Account',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
+                            fontSize: isSmallScreen ? 15 : 16,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.5,
                           ),
@@ -226,7 +229,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                   Text(
                     'Already have an account? ',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
+                      fontSize: isSmallScreen ? 13 : 14,
                       color: AppColors.textLight,
                       fontWeight: FontWeight.w500,
                     ),
@@ -236,7 +239,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     child: Text(
                       'Login',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
+                        fontSize: isSmallScreen ? 13 : 14,
                         color: AppColors.primaryBlue,
                         fontWeight: FontWeight.w800,
                       ),
@@ -261,6 +264,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
     bool obscureText = false,
     VoidCallback? onSuffixIconTap,
     TextInputType? keyboardType,
+    required bool isSmallScreen,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,7 +272,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
         Text(
           label,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
+            fontSize: isSmallScreen ? 13 : 14,
             fontWeight: FontWeight.w700,
             color: AppColors.textDark.withValues(alpha: 0.9),
           ),
@@ -276,11 +280,11 @@ class _SignupViewState extends ConsumerState<SignupView> {
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
+                color: AppColors.black.withValues(alpha: 0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -291,7 +295,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
             obscureText: obscureText,
             keyboardType: keyboardType,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 15,
+              fontSize: isSmallScreen ? 14 : 15,
               fontWeight: FontWeight.w600,
               color: AppColors.textDark,
             ),
@@ -316,11 +320,11 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     )
                   : null,
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.white,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
                 borderSide: BorderSide(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: AppColors.black.withValues(alpha: 0.05),
                 ),
               ),
               focusedBorder: OutlineInputBorder(

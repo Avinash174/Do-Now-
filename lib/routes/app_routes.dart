@@ -14,6 +14,8 @@ import '../view/edit_profile_view.dart';
 import '../view/notifications_view.dart';
 import '../view/security_privacy_view.dart';
 import '../view/help_center_view.dart';
+import '../view/help_topic_details_view.dart';
+import '../view/support_chat_view.dart';
 import '../view/about_view.dart';
 import '../view/change_password_view.dart';
 import '../view/two_factor_auth_view.dart';
@@ -40,6 +42,8 @@ class AppRoutes {
   static const String dataExport = '/data_export';
   static const String privacyPolicy = '/privacy_policy';
   static const String helpCenter = '/help_center';
+  static const String helpTopicDetails = '/help_topic_details';
+  static const String supportChat = '/support_chat';
   static const String about = '/about';
 
   static Map<String, WidgetBuilder> get routes => {
@@ -60,10 +64,44 @@ class AppRoutes {
     dataExport: (context) => const DataExportView(),
     privacyPolicy: (context) => const PrivacyPolicyView(),
     helpCenter: (context) => const HelpCenterView(),
+    supportChat: (context) => const SupportChatView(),
     about: (context) => const AboutView(),
   };
 
-  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+    // Handle routes with arguments
+    switch (settings.name) {
+      case helpTopicDetails:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return PageRouteBuilder(
+          settings: settings,
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              HelpTopicDetailsView(
+                title: args?['title'] ?? 'Help Topic',
+                topic: args?['topic'] ?? '',
+              ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const curve = Curves.easeOutCubic;
+            var fadeAnimation = Tween<double>(
+              begin: 0.0,
+              end: 1.0,
+            ).animate(CurvedAnimation(parent: animation, curve: curve));
+            var slideAnimation = Tween<Offset>(
+              begin: const Offset(0.05, 0.0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: animation, curve: curve));
+            return FadeTransition(
+              opacity: fadeAnimation,
+              child: SlideTransition(position: slideAnimation, child: child),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        );
+      default:
+        break;
+    }
+
+    // Handle regular routes
     final builder = routes[settings.name];
     if (builder != null) {
       return PageRouteBuilder(
@@ -98,6 +136,8 @@ class AppRoutes {
       builder: (_) =>
           const Scaffold(body: Center(child: Text('Route not found'))),
     );
+  }
+}
   }
 
   static Future<String> getInitialRoute() async {

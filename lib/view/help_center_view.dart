@@ -72,21 +72,58 @@ class HelpCenterView extends StatelessWidget {
                 'Syncing Tasks',
                 Icons.sync_rounded,
                 isSmallScreen,
+                () {
+                  Navigator.pushNamed(
+                    context,
+                    '/help_topic_details',
+                    arguments: {'title': 'Syncing Tasks', 'topic': 'syncing'},
+                  );
+                },
               ),
               _buildHelpTile(
                 'Creating Reminders',
                 Icons.alarm_rounded,
                 isSmallScreen,
+                () {
+                  Navigator.pushNamed(
+                    context,
+                    '/help_topic_details',
+                    arguments: {
+                      'title': 'Creating Reminders',
+                      'topic': 'reminders',
+                    },
+                  );
+                },
               ),
               _buildHelpTile(
                 'Account Security',
                 Icons.security_rounded,
                 isSmallScreen,
+                () {
+                  Navigator.pushNamed(
+                    context,
+                    '/help_topic_details',
+                    arguments: {
+                      'title': 'Account Security',
+                      'topic': 'security',
+                    },
+                  );
+                },
               ),
               _buildHelpTile(
                 'Premium Features',
                 Icons.star_outline_rounded,
                 isSmallScreen,
+                () {
+                  Navigator.pushNamed(
+                    context,
+                    '/help_topic_details',
+                    arguments: {
+                      'title': 'Premium Features',
+                      'topic': 'premium',
+                    },
+                  );
+                },
               ),
 
               const SizedBox(height: 32),
@@ -131,7 +168,9 @@ class HelpCenterView extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/support_chat');
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.white,
                         foregroundColor: AppColors.primaryBlue,
@@ -174,13 +213,11 @@ class HelpCenterView extends StatelessWidget {
     );
   }
 
-  Widget _buildHelpTile(String title, IconData icon, bool isSmallScreen) {
+  Widget _buildHelpTile(String title, IconData icon, bool isSmallScreen, VoidCallback onTap) {
     return Column(
       children: [
         ListTile(
-          onTap: () {
-            HapticFeedback.lightImpact();
-          },
+          onTap: onTap,
           contentPadding: EdgeInsets.zero,
           leading: Container(
             padding: const EdgeInsets.all(10),

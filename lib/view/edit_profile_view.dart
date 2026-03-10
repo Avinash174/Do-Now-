@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 import '../const/app_colors.dart';
 import '../services/auth_service.dart';
@@ -19,6 +21,8 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   final _nameController = TextEditingController();
   final _nameFocus = FocusNode();
   bool _isLoading = false;
+  File? _selectedImage;
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -41,6 +45,55 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     super.dispose();
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final pickedFile = await _imagePicker.pickImage(source: source);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackbarUtils.showError(context, 'Error', 'Failed to pick image: $e');
+      }
+    }
+  }
+
+  void _showImageSourceDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Choose Image Source',
+            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+              child: const Text('Camera'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+              child: const Text('Gallery'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _updateProfile() async {
     if (_nameController.text.trim().isEmpty) {
       SnackbarUtils.showError(context, 'Error', 'Name cannot be empty');
@@ -52,15 +105,29 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     if (user == null) return;
 
     try {
+      // Update name
       await ref
           .read(databaseServiceProvider)
           .updateUserName(user.uid, _nameController.text.trim());
-      if (mounted) {
+
+      // If image was selected, upload it
+      if (_selectedImage != null) {
+        final profileService = ref.read(databaseServiceProvider);
+        await profileService.uploadProfilePhoto(user.uid, _selectedImage!);
+        SnackbarUtils.showSuccess(
+          context,
+          'Success',
+          'Profile and photo updated successfully',
+        );
+      } else {
         SnackbarUtils.showSuccess(
           context,
           'Success',
           'Profile updated successfully',
         );
+      }
+
+      if (mounted) {
         Navigator.pop(context);
       }
     } catch (e) {
@@ -124,27 +191,38 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                         backgroundColor: AppColors.primaryBlue.withValues(
                           alpha: 0.1,
                         ),
-                        child: Icon(
-                          Icons.person_rounded,
-                          size: size.width * 0.15,
-                          color: AppColors.primaryBlue,
-                        ),
+                        backgroundImage: _selectedImage != null
+                            ? FileImage(_selectedImage!)
+                            : null,
+                        child: _selectedImage == null
+                            ? Icon(
+                                Icons.person_rounded,
+                                size: size.width * 0.15,
+                                color: AppColors.primaryBlue,
+                              )
+                            : null,
                       ),
                     ),
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryBlue,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.white, width: 3),
-                        ),
-                        child: Icon(
-                          Icons.camera_alt_rounded,
-                          color: AppColors.white,
-                          size: isSmallScreen ? 16 : 20,
+                      child: GestureDetector(
+                        onTap: _showImageSourceDialog,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryBlue,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.white,
+                              width: 3,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.camera_alt_rounded,
+                            color: AppColors.white,
+                            size: isSmallScreen ? 16 : 20,
+                          ),
                         ),
                       ),
                     ),

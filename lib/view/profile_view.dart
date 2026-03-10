@@ -115,16 +115,26 @@ class ProfileView extends ConsumerWidget {
                                     child: CircleAvatar(
                                       radius: isSmallScreen ? 50 : 60,
                                       backgroundColor: AppColors.white,
-                                      child: Text(
-                                        name.isNotEmpty
-                                            ? name[0].toUpperCase()
-                                            : 'U',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: isSmallScreen ? 40 : 48,
-                                          fontWeight: FontWeight.w900,
-                                          color: AppColors.primaryBlue,
-                                        ),
-                                      ),
+                                      backgroundImage:
+                                          profile?['photoUrl'] != null
+                                          ? NetworkImage(profile!['photoUrl'])
+                                          : null,
+                                      child: profile?['photoUrl'] == null
+                                          ? Text(
+                                              name.isNotEmpty
+                                                  ? name[0].toUpperCase()
+                                                  : 'U',
+                                              style:
+                                                  GoogleFonts.plusJakartaSans(
+                                                    fontSize: isSmallScreen
+                                                        ? 40
+                                                        : 48,
+                                                    fontWeight: FontWeight.w900,
+                                                    color:
+                                                        AppColors.primaryBlue,
+                                                  ),
+                                            )
+                                          : null,
                                     ),
                                   ).animate().scale(
                                     duration: 600.ms,

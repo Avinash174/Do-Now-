@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'const/app_theme.dart';
 import 'firebase_options.dart';
 import 'routes/app_routes.dart';
+import 'services/notification_service.dart';
 import 'view_model/theme_view_model.dart';
 
 void main() async {
@@ -31,8 +32,13 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     dev.log('Firebase initialized successfully', name: 'app');
+
+    // Initialize notification service
+    dev.log('Initializing Notification Service...', name: 'app');
+    await NotificationService().initialize();
+    dev.log('Notification Service initialized successfully', name: 'app');
   } catch (e) {
-    dev.log('Firebase initialization failed: $e', name: 'app', error: e);
+    dev.log('Initialization failed: $e', name: 'app', error: e);
   }
 
   runApp(const ProviderScope(child: MyApp()));
@@ -52,6 +58,7 @@ class MyApp extends ConsumerWidget {
       darkTheme: AppTheme.getTheme(context, ThemeMode.dark),
       themeMode: themeMode,
       initialRoute: AppRoutes.splash,
+      routes: AppRoutes.routes,
       onGenerateRoute: AppRoutes.onGenerateRoute,
     );
   }

@@ -1,5 +1,7 @@
 import 'dart:developer' as dev;
+import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -85,6 +87,40 @@ class DatabaseService {
     } catch (e) {
       dev.log(
         'DatabaseService: Error in updateUserName: $e',
+        name: 'database',
+        error: e,
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> uploadProfilePhoto(String uid, File imageFile) async {
+    dev.log(
+      'DatabaseService: Uploading profile photo for $uid',
+      name: 'database',
+    );
+    try {
+      final storageRef = FirebaseStorage.instance.ref();
+      final profilePhotoRef = storageRef.child(
+        'profile_photos/$uid/profile.jpg',
+      );
+
+      await profilePhotoRef.putFile(imageFile);
+      final downloadUrl = await profilePhotoRef.getDownloadURL();
+
+      // Save the photo URL to database
+      await _db.child('users/$uid/profile').update({
+        'photoUrl': downloadUrl,
+        'photoUpdatedAt': ServerValue.timestamp,
+      });
+
+      dev.log(
+        'DatabaseService: Profile photo uploaded successfully',
+        name: 'database',
+      );
+    } catch (e) {
+      dev.log(
+        'DatabaseService: Error in uploadProfilePhoto: $e',
         name: 'database',
         error: e,
       );

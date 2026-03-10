@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../const/app_colors.dart';
 import '../model/task_model.dart';
 import '../services/auth_service.dart';
@@ -26,125 +27,207 @@ class _HomeViewState extends ConsumerState<HomeView> {
     super.dispose();
   }
 
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'Work':
+        return Colors.blueAccent;
+      case 'Personal':
+        return Colors.orangeAccent;
+      case 'Shopping':
+        return Colors.pinkAccent;
+      case 'Health':
+        return Colors.greenAccent;
+      default:
+        return AppColors.primaryBlue;
+    }
+  }
+
   Widget _buildTaskItem(TaskModel task) {
     final vm = ref.read(taskViewModelProvider);
+    final categoryColor = _getCategoryColor(task.category);
 
     return Dismissible(
       key: ValueKey(task.id),
       direction: DismissDirection.endToStart,
       onDismissed: (_) => vm?.deleteTask(task.id),
       background: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 16),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 24),
         decoration: BoxDecoration(
           color: Colors.red.shade400,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+        child: const Icon(Icons.delete_sweep, color: Colors.white, size: 32),
       ),
       child: GestureDetector(
         onTap: () {
           Navigator.pushNamed(context, AppRoutes.newTask, arguments: task);
         },
         child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                color: categoryColor.withValues(alpha: 0.08),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
               ),
             ],
             border: Border.all(
-              color: AppColors.borderColor.withValues(alpha: 0.5),
+              color: categoryColor.withValues(alpha: 0.2),
+              width: 1,
             ),
           ),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () => vm?.toggleTask(task.id, task.isCompleted),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 24,
-                  height: 24,
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                Container(
+                  width: 12,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: task.isCompleted
-                          ? Colors.green
-                          : AppColors.primaryBlue,
-                      width: 2,
+                    color: categoryColor.withValues(alpha: 0.6),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      bottomLeft: Radius.circular(20),
                     ),
-                    color: task.isCompleted ? Colors.green : Colors.transparent,
                   ),
-                  child: task.isCompleted
-                      ? const Icon(Icons.check, size: 14, color: Colors.white)
-                      : null,
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      task.title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: task.isCompleted
-                            ? AppColors.textLight
-                            : AppColors.textDark,
-                        decoration: task.isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.calendar_today_outlined,
-                          size: 12,
-                          color: AppColors.textLight.withValues(alpha: 0.7),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                task.title,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: task.isCompleted
+                                      ? AppColors.textLight
+                                      : AppColors.textDark,
+                                  decoration: task.isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                ),
+                              ),
+                              if (task.description.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  task.description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    height: 1.4,
+                                    color: AppColors.textLight,
+                                    decoration: task.isCompleted
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: categoryColor.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      task.category,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: categoryColor,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Icon(
+                                    Icons.access_time_rounded,
+                                    size: 14,
+                                    color: AppColors.textLight.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    task.formattedDate,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.textLight.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          task.formattedDate,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textLight.withValues(alpha: 0.7),
+                        const SizedBox(width: 16),
+                        GestureDetector(
+                          onTap: () =>
+                              vm?.toggleTask(task.id, task.isCompleted),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOutBack,
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: task.isCompleted
+                                    ? Colors.green
+                                    : AppColors.borderColor,
+                                width: 2,
+                              ),
+                              color: task.isCompleted
+                                  ? Colors.green
+                                  : Colors.transparent,
+                              boxShadow: task.isCompleted
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.green.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: task.isCompleted
+                                ? const Icon(
+                                    Icons.check,
+                                    size: 20,
+                                    color: Colors.white,
+                                  )
+                                : null,
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  task.category,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: AppColors.primaryBlue,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

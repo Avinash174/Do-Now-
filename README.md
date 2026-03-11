@@ -2,62 +2,56 @@
 
 > **Your Productivity Companion** - Stay focused, stay organized, achieve more! 🚀
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue?style=for-the-badge&logo=flutter)](https://flutter.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.41.4-blue?style=for-the-badge&logo=flutter)](https://flutter.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Realtime%20DB-orange?style=for-the-badge&logo=firebase)](https://firebase.google.com)
 
 ---
 
 ## 📋 About Do Now
 
-**Do Now** is a modern, feature-rich task management application built with Flutter. Taking inspiration from productivity best practices, Do Now helps you organize your tasks, track your productivity, and achieve your goals with ease.
+**Do Now** is a modern, high-performance task management application built with Flutter. It combines a premium design aesthetic with real-time cloud synchronization to help you stay productive across all your devices.
 
-Whether you're managing personal projects, work tasks, or daily habits, Do Now provides an intuitive interface with powerful features to keep you on track.
+Whether you're managing complex projects or simple daily habits, Do Now provides a glassmorphism-inspired interface with powerful search, filtering, and notification features.
 
 ---
 
 ## ✨ Key Features
 
-- 📝 **Smart Task Management** - Create, edit, and organize tasks effortlessly
-- 🌓 **Dark & Light Themes** - Beautiful Material 3 design with full theme support
-- 🔐 **Secure Authentication** - Firebase Auth with email/password
-- ☁️ **Cloud Sync** - Real-time sync with Firebase Realtime Database
-- 📊 **Productivity Analytics** - Track your stats and visualize your progress
-- 📸 **Profile Customization** - Upload custom profile photos to Firebase Storage
-- 🔔 **Smart Notifications** - Push notifications with Firebase Cloud Messaging
-- ⚙️ **Granular Settings** - Security, privacy, and notification preferences
-- 🎨 **Beautiful UI** - Smooth animations and responsive design for all devices
-- 🌐 **Multi-Platform** - iOS, Android, Web, Windows, macOS, and Linux support
+- 📝 **Advanced Task Management** - Create, schedule, and track tasks with real-time status updates.
+- 🔍 **Global Search & Filter** - High-speed search bars on Home and Help Center with instant results.
+- 🌓 **Adaptive Dark Mode** - Premium dark and light theme support with auto-detection.
+- 🔐 **Zero-Config Auth** - Secure Firebase Authentication with optimized email handling.
+- ☁️ **Real-time Sync** - Instant updates across devices using Firebase Realtime Database.
+- 📸 **Cloud Profile** - Customizable user profiles with Firebase Storage photo uploads.
+- 🔔 **Custom Alerts** - Push notifications with granular sound and vibration controls.
+- 🎨 **Premium UI/UX** - Fluid animations using `flutter_animate` and curated typography.
+- 🛠️ **Robust Architecture** - Clean code structure powered by Riverpod state management.
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend
+### Frontend & UI
 
-- **Framework**: Flutter 3.0+
-- **State Management**: flutter_riverpod (reactive provider pattern)
-- **UI Library**: Material 3 Design System
-- **Animations**: flutter_animate for smooth transitions
-- **Fonts**: Google Fonts (Plus Jakarta Sans)
+- **Framework**: Flutter 3.41.4 (Stable)
+- **State Management**: Riverpod (Reactive Provider Pattern)
+- **UI Design**: Modern Material 3 / Glassmorphism
+- **Animations**: `flutter_animate` for micro-interactions
+- **Typography**: Plus Jakarta Sans (Google Fonts)
 
-### Backend & Services
+### Backend Services
 
 - **Authentication**: Firebase Auth (Email/Password)
 - **Database**: Firebase Realtime Database
-- **Storage**: Firebase Cloud Storage (Profile photos)
-- **Notifications**: Firebase Cloud Messaging (FCM)
-- **Local Caching**: SharedPreferences
+- **Storage**: Firebase Cloud Storage (Media handling)
+- **Cloud Messaging**: Firebase FCM (Push Notifications)
 
-### Additional Packages
+### Dependency Highlights
 
-- **firebase_auth** - Authentication
-- **firebase_database** - Real-time data sync
-- **firebase_storage** - File storage
-- **firebase_messaging** - Push notifications
-- **flutter_local_notifications** - Local notification handling
-- **image_picker** - Photo selection
-- **flutter_timezone** - Timezone support
-- **path_provider** - File system access
+- `firebase_core` & `firebase_database`: Core infrastructure
+- `flutter_local_notifications`: Advanced notification scheduling
+- `image_picker`: Camera and Gallery integration
+- `shared_preferences`: Local settings persistence
 
 ---
 
@@ -65,34 +59,36 @@ Whether you're managing personal projects, work tasks, or daily habits, Do Now p
 
 ### Prerequisites
 
-- Flutter 3.0 or higher
-- Dart 2.17+
-- Firebase project setup
-- Android SDK / Xcode (for native development)
+- Flutter SDK 3.x
+- Android Studio / VS Code
+- A Firebase Project
 
-### Installation
+### Installation & Setup
 
-1. **Clone the Repository**
+1. **Clone the Project**
 
    ```bash
    git clone https://github.com/Avinash174/do_now.git
    cd do_now
    ```
 
-2. **Install Dependencies**
+2. **Initialize Environment**
 
    ```bash
    flutter pub get
    ```
 
-3. **Configure Firebase**
-   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com)
-   - Download `google-services.json` (Android) and `GoogleService-Info.plist` (iOS)
-   - Place them in the appropriate directories:
-     - Android: `android/app/google-services.json`
-     - iOS: `ios/Runner/GoogleService-Info.plist`
+3. **Firebase Configuration**
+   - Download your `google-services.json` from the Firebase Console.
+   - Place it in `android/app/google-services.json`.
 
-4. **Run the App**
+4. **⚠️ Critical Setup: Firebase Storage**
+   To enable profile photo uploads, you **must** manually activate Storage:
+   - Go to [Firebase Console > Storage](https://console.firebase.google.com).
+   - Click **"Get Started"** and follow the prompts.
+   - Deploy the storage rules using `firebase deploy --only storage`.
+
+5. **Run Development Build**
    ```bash
    flutter run
    ```
@@ -105,111 +101,40 @@ Whether you're managing personal projects, work tasks, or daily habits, Do Now p
 lib/
 ├── main.dart                 # App entry point
 ├── const/
+│   ├── app_colors.dart      # Centralized color palette
 │   └── app_theme.dart       # Material 3 theme definitions
-├── model/                    # Data models
 ├── services/
-│   ├── auth_service.dart       # Firebase authentication
-│   ├── database_service.dart    # Firestore operations
-│   └── notification_service.dart # FCM integration
-├── view/                     # UI screens
-│   ├── home_view.dart
-│   ├── stats_view.dart
-│   ├── profile_view.dart
-│   ├── auth_views/
-│   └── settings_views/
-├── view_model/               # Business logic & state
-│   ├── theme_view_model.dart
-│   └── task_view_model.dart
-└── utils/                    # Utilities
-    ├── app_utils.dart
-    └── shimmer_utils.dart
+│   ├── auth_service.dart     # Firebase Auth logic
+│   ├── database_service.dart  # RTDB & Storage operations
+│   ├── settings_service.dart  # Local preference management
+│   └── notification_service.dart # Local & Push notifications
+├── view/                     # UI Layer
+│   ├── home_view.dart        # Dashboard with search
+│   ├── profile_view.dart     # User profile & settings
+│   ├── help_center_view.dart # Searchable FAQ & Support
+│   └── edit_profile_view.dart # Photo & info updates
+└── utils/                    # Helper functions
+    ├── snackbar_utils.dart
+    └── widgets_utils.dart
 ```
 
 ---
 
 ## 🎨 Design Highlights
 
-- **Material 3 Compliance** - Modern design with custom color schemes
-- **Full Dark Mode Support** - Adaptive UI that responds to system theme
-- **Smooth Animations** - Polished transitions and interactions
-- **Responsive Layout** - Optimized for phones, tablets, and web
-- **Accessibility** - Semantic widgets and proper color contrast
+- **Dynamic Search UI**: Real-time filtering in Help Center with "No Results" empty states.
+- **Glassmorphism Elements**: Subtle blurs and gradients for a premium feel.
+- **Haptic Feedback**: Taptic integration for button presses and task completions.
+- **Desugarized Builds**: Optimized for modern Android versions (desugar_jdk_libs 2.1.4).
 
 ---
-
-## 🔐 Security & Privacy
-
-- 🔒 Firebase Security Rules for data protection
-- 🚫 User authentication required for all operations
-- 📱 Local storage with SharedPreferences
-- 🔑 Secure password handling with Firebase Auth
-
----
-
-## 📸 Screenshots
-
-| Dashboard        | Statistics               | Profile            |
-| ---------------- | ------------------------ | ------------------ |
-| 📋 Task Overview | 📊 Productivity Insights | 👤 User Profile    |
-| Manage all tasks | Track your progress      | Customize settings |
-
----
-
-## 🐛 Troubleshooting
-
-### Firebase Connection Issues
-
-- Ensure Firebase project is properly configured
-- Check Firebase Security Rules
-- Verify network permissions in AndroidManifest.xml
-
-### Theme Not Changing
-
-- Rebuild the app: `flutter clean && flutter pub get`
-- Restart the development server
-
-### Notification Issues
-
-- Check Firebase Cloud Messaging setup
-- Verify notification permissions are granted
-- Review FCM debug messages in logs
-
----
-
-## 🤝 Contributing
-
-We'd love your contributions! Here's how:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing-feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📚 Learning Resources
-
-- [Flutter Documentation](https://docs.flutter.dev)
-- [Firebase Documentation](https://firebase.google.com/docs)
-- [Riverpod Documentation](https://riverpod.dev)
-- [Material Design 3](https://m3.material.io)
 
 ## 👨‍💻 Author
 
 **Avinash Magar**  
-📧 Email: [avinashmagar15@gmail.com](mailto:avinashmagar15@gmail.com)  
-🐙 GitHub: [@Avinash174](https://github.com/Avinash174)  
-🔗 LinkedIn: [Avinash Magar](https://www.linkedin.com/in/avinash-magar-1ba853168/)
-
----
-
-## 🙏 Acknowledgments
-
-- Flutter team for the amazing framework
-- Firebase for backend infrastructure
-- Material Design team for design guidelines
-- All contributors and testers
+📧 [avinashmagar15@gmail.com](mailto:avinashmagar15@gmail.com)  
+🐙 [@Avinash174](https://github.com/Avinash174)  
+🔗 [LinkedIn](https://www.linkedin.com/in/avinash-magar-1ba853168/)
 
 ---
 

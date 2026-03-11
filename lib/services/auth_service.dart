@@ -37,13 +37,14 @@ class AuthService {
     String email,
     String password,
   ) async {
+    final cleanEmail = email.trim().toLowerCase();
     dev.log(
-      'AuthService: Starting signUpWithEmailPassword for $email',
+      'AuthService: Starting signUpWithEmailPassword for $cleanEmail',
       name: 'auth',
     );
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
-        email: email,
+        email: cleanEmail,
         password: password,
       );
 
@@ -76,13 +77,14 @@ class AuthService {
     String email,
     String password,
   ) async {
+    final cleanEmail = email.trim().toLowerCase();
     dev.log(
-      'AuthService: Starting signInWithEmailPassword for $email',
+      'AuthService: Starting signInWithEmailPassword for $cleanEmail',
       name: 'auth',
     );
     try {
       final credential = await _auth.signInWithEmailAndPassword(
-        email: email,
+        email: cleanEmail,
         password: password,
       );
       dev.log('AuthService: Login successful for $email', name: 'auth');
@@ -187,11 +189,12 @@ class AuthService {
   }
 
   Future<void> updateEmail(String newEmail) async {
-    dev.log('AuthService: Updating email to $newEmail', name: 'auth');
+    final cleanEmail = newEmail.trim().toLowerCase();
+    dev.log('AuthService: Updating email to $cleanEmail', name: 'auth');
     try {
       final user = _auth.currentUser;
       if (user != null) {
-        await user.verifyBeforeUpdateEmail(newEmail);
+        await user.verifyBeforeUpdateEmail(cleanEmail);
         dev.log('AuthService: Verification email sent for new email', name: 'auth');
       }
     } catch (e) {
@@ -201,11 +204,15 @@ class AuthService {
   }
 
   Future<void> reauthenticate(String email, String password) async {
-    dev.log('AuthService: Re-authenticating user', name: 'auth');
+    final cleanEmail = email.trim().toLowerCase();
+    dev.log('AuthService: Starting reauthentication for $cleanEmail', name: 'auth');
     try {
       final user = _auth.currentUser;
       if (user != null) {
-        final credential = EmailAuthProvider.credential(email: email, password: password);
+        final credential = EmailAuthProvider.credential(
+          email: cleanEmail,
+          password: password,
+        );
         await user.reauthenticateWithCredential(credential);
         dev.log('AuthService: Re-authentication successful', name: 'auth');
       }

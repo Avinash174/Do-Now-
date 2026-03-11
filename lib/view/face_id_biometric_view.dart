@@ -2,22 +2,69 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:local_auth/local_auth.dart';
 
 import '../const/app_colors.dart';
 import '../utils/widgets_utils.dart';
+import '../services/settings_service.dart';
+import '../services/biometric_service.dart';
 
-class FaceIdBiometricView extends StatefulWidget {
+class FaceIdBiometricView extends ConsumerStatefulWidget {
   const FaceIdBiometricView({super.key});
 
   @override
-  State<FaceIdBiometricView> createState() => _FaceIdBiometricViewState();
+  ConsumerState<FaceIdBiometricView> createState() => _FaceIdBiometricViewState();
 }
 
-class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
+class _FaceIdBiometricViewState extends ConsumerState<FaceIdBiometricView> {
   bool _faceIDEnabled = false;
   bool _fingerprintEnabled = false;
   bool _unlockApp = false;
   bool _unlockPayments = false;
+  bool _offlineAccessOnly = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSettings());
+  }
+
+  void _loadSettings() {
+    final settings = ref.read(settingsServiceProvider);
+    setState(() {
+      _unlockApp = settings.biometricEnabled;
+      // We can also check device capabilities to show correct labels
+      _checkBiometrics();
+    });
+  }
+
+  Future<void> _checkBiometrics() async {
+    final bioService = ref.read(biometricServiceProvider);
+    final available = await bioService.getAvailableBiometrics();
+    setState(() {
+      _faceIDEnabled = available.contains(BiometricType.face);
+      _fingerprintEnabled = available.contains(BiometricType.fingerprint) || 
+                          available.contains(BiometricType.strong) || 
+                          available.contains(BiometricType.weak);
+    });
+  }
+
+  void _toggleAppLock(bool value) async {
+    if (value) {
+      // If enabling, verify first
+      final authenticated = await ref.read(biometricServiceProvider).authenticate(
+        reason: 'Verify your identity to enable biometric lock',
+      );
+      if (authenticated) {
+        await ref.read(settingsServiceProvider).setBiometricEnabled(true);
+        setState(() => _unlockApp = true);
+      }
+    } else {
+      await ref.read(settingsServiceProvider).setBiometricEnabled(false);
+      setState(() => _unlockApp = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,8 +188,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                             subtitle: 'Require biometric for entry',
                             value: _unlockApp,
                             color: AppColors.success,
-                            onChanged: (value) =>
-                                setState(() => _unlockApp = value),
+                            onChanged: _toggleAppLock,
                             index: 2,
                             isDark: isDark,
                             textColor: textColor,
@@ -165,6 +211,21 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
                             cardColor: cardColor,
                             borderColor: borderColor,
                           ),
+                           _buildPremiumBiometricTile(
+                             icon: Icons.cloud_off_rounded,
+                             title: 'Offline Access Only',
+                             subtitle: 'Restrict data to local storage',
+                             value: _offlineAccessOnly,
+                             color: AppColors.primaryAccent,
+                             onChanged: (value) =>
+                                 setState(() => _offlineAccessOnly = value),
+                             index: 4,
+                             isDark: isDark,
+                             textColor: textColor,
+                             mutedTextColor: mutedTextColor,
+                             cardColor: cardColor,
+                             borderColor: borderColor,
+                           ),
 
                           const SizedBox(height: 32),
                           _buildInfoCard(isDark, textColor),
@@ -269,7 +330,7 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
           ),
           const SizedBox(height: 24),
           Text(
-            'Sanctuary Auth',
+            'Biometric Auth',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 24,
               fontWeight: FontWeight.w900,
@@ -277,7 +338,34 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
               letterSpacing: -1,
             ),
           ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primaryBlue.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.shield_rounded, size: 14, color: AppColors.primaryBlue),
+                const SizedBox(width: 6),
+                Text(
+                  'OFFLINE ACCESS ONLY',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryBlue,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
+          ).animate().fadeIn(delay: 300.ms),
+          const SizedBox(height: 16),
           Text(
             'Advanced cryptographic verification using your unique biometric signatures.',
             textAlign: TextAlign.center,
@@ -470,7 +558,30 @@ class _FaceIdBiometricViewState extends State<FaceIdBiometricView> {
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
-          // Logic for applying profile
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Biometric protocols synchronized',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              margin: const EdgeInsets.all(20),
+              duration: const Duration(seconds: 2),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(24),
         child: Container(

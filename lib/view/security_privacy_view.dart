@@ -45,7 +45,7 @@ class SecurityPrivacyView extends StatelessWidget {
             child: PlatformBackButton(color: textColor),
           ),
           title: Text(
-            'Sanctuary Settings',
+            'Security Settings',
             style: GoogleFonts.plusJakartaSans(
               color: textColor,
               fontWeight: FontWeight.w900,

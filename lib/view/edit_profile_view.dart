@@ -207,16 +207,39 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     setState(() => _isLoading = true);
     HapticFeedback.mediumImpact();
     final user = ref.read(authStateProvider).value;
-    if (user == null) return;
+    if (user == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
 
     try {
-      final currentName = ref.read(userProfileProvider).value?['name'];
-      final currentEmail = ref.read(userProfileProvider).value?['email'];
+      final currentProfile = ref.read(userProfileProvider).value;
+      final currentName = currentProfile?['name'];
+      final currentEmail = currentProfile?['email'];
       final newName = _nameController.text.trim();
       final newEmail = _emailController.text.trim();
 
       bool nameChanged = newName != currentName;
       bool emailChanged = newEmail != currentEmail;
+      bool photoChanged = _selectedImage != null;
+
+      if (!nameChanged && !emailChanged && !photoChanged) {
+        setState(() => _isLoading = false);
+        Navigator.pop(context);
+        return;
+      }
+
+      // If email changed, we need re-authentication
+      if (emailChanged) {
+        final password = await _showReauthDialog();
+        if (password == null) {
+          setState(() => _isLoading = false);
+          return; // User cancelled
+        }
+
+        final authService = ref.read(authServiceProvider);
+        await authService.reauthenticate(user.email!, password);
+      }
 
       // Update name if changed
       if (nameChanged) {
@@ -234,7 +257,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       }
 
       // If image was selected, upload it
-      if (_selectedImage != null) {
+      if (photoChanged) {
         final profileService = ref.read(databaseServiceProvider);
         await profileService.uploadProfilePhoto(user.uid, _selectedImage!);
       }
@@ -257,7 +280,12 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         String errorMessage = e.toString();
         if (errorMessage.contains('Exception:')) {
           errorMessage = errorMessage.split('Exception:').last.trim();
+        } else if (errorMessage.contains('invalid-credential')) {
+          errorMessage = 'The password you provided is incorrect.';
+        } else if (errorMessage.contains('requires-recent-login')) {
+          errorMessage = 'For security, this operation requires recent authentication. Please try again.';
         }
+        
         SnackbarUtils.showError(
           context,
           'Operation Failed',
@@ -267,6 +295,90 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<String?> _showReauthDialog() async {
+    String? password;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        title: Text(
+          'Security Check',
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w800,
+            color: isDark ? Colors.white : AppColors.textDark,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'To update your official email address, please confirm your current security access key.',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                color: isDark ? Colors.white70 : AppColors.textLight,
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              obscureText: true,
+              autofocus: true,
+              onChanged: (value) => password = value,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark ? Colors.black26 : Colors.grey[100],
+                hintText: 'Enter Password',
+                prefixIcon: const Icon(Icons.lock_rounded, size: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 15,
+                color: isDark ? Colors.white : AppColors.textDark,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'CANCEL',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, password),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryBlue,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: Text(
+              'CONFIRM',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

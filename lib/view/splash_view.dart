@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../routes/app_routes.dart';
+import '../services/settings_service.dart';
+import '../services/biometric_service.dart';
 
 class SplashView extends ConsumerStatefulWidget {
   const SplashView({super.key});
@@ -42,7 +44,25 @@ class _SplashViewState extends ConsumerState<SplashView> {
         AppRoutes.getInitialRoute(),
       ]);
 
-      final nextRoute = results[1] as String;
+      String nextRoute = results[1] as String;
+
+      // --- Biometric Authentication Check ---
+      final settings = ref.read(settingsServiceProvider);
+      if (settings.biometricEnabled) {
+        final bioService = ref.read(biometricServiceProvider);
+        final authenticated = await bioService.authenticate(
+          reason: 'Unlock Do Now to continue',
+        );
+        
+        if (!authenticated) {
+          // If auth fails or cancelled, we don't proceed.
+          // In a real app, you might show an error or try again button.
+          // For now, we'll just keep the splash or show a simple error to the dev.
+          debugPrint('Biometric authentication failed');
+          return; 
+        }
+      }
+      // ----------------------------------------
 
       if (!mounted) return;
 

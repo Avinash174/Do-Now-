@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:developer' as dev;
 
 import '../const/app_colors.dart';
 import '../services/auth_service.dart';
@@ -106,8 +108,28 @@ class _SignupViewState extends ConsumerState<SignupView> {
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
     } catch (e) {
+      dev.log('SignupView: Error during registration: $e', name: 'view', error: e);
+      String errorMessage = 'Account creation failed.';
+      if (e is FirebaseAuthException) {
+        switch (e.code) {
+          case 'email-already-in-use':
+            errorMessage = 'This email is already registered in our database.';
+            break;
+          case 'invalid-email':
+            errorMessage = 'The email format entered is invalid.';
+            break;
+          case 'weak-password':
+            errorMessage = 'The password provided is too weak for encryption.';
+            break;
+          case 'network-request-failed':
+            errorMessage = 'Connectivity error. Please check your network status.';
+            break;
+          default:
+            errorMessage = e.message ?? errorMessage;
+        }
+      }
       if (mounted) {
-        SnackbarUtils.showError(context, 'Registration Failed', e.toString());
+        SnackbarUtils.showError(context, 'Registration Failed', errorMessage);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

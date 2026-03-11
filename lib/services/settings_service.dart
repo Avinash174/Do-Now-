@@ -14,12 +14,14 @@ class SettingsService {
   static const String _keySound = 'sound_enabled';
   static const String _keyTaskReminders = 'task_reminders_enabled';
   static const String _keyPushNotifications = 'push_notifications_enabled';
+  static const String _keyBiometric = 'biometric_enabled';
 
   bool get vibrationEnabled => _prefs.getBool(_keyVibration) ?? true;
   bool get soundEnabled => _prefs.getBool(_keySound) ?? true;
   bool get taskRemindersEnabled => _prefs.getBool(_keyTaskReminders) ?? true;
   bool get pushNotificationsEnabled =>
       _prefs.getBool(_keyPushNotifications) ?? true;
+  bool get biometricEnabled => _prefs.getBool(_keyBiometric) ?? false;
 
   Future<void> setVibrationEnabled(bool value) =>
       _prefs.setBool(_keyVibration, value);
@@ -28,4 +30,6 @@ class SettingsService {
       _prefs.setBool(_keyTaskReminders, value);
   Future<void> setPushNotificationsEnabled(bool value) =>
       _prefs.setBool(_keyPushNotifications, value);
+  Future<void> setBiometricEnabled(bool value) =>
+      _prefs.setBool(_keyBiometric, value);
 }

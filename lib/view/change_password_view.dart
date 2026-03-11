@@ -210,7 +210,7 @@ class _ChangePasswordViewState extends ConsumerState<ChangePasswordView> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Establish a new high-entropy access key for your Sanctuary terminal.',
+                        'Establish a new high-entropy access key for your account.',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           color: mutedTextColor,

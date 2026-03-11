@@ -67,12 +67,27 @@ class _LoginViewState extends ConsumerState<LoginView> {
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
     } catch (e) {
-      String errorMessage = 'Authentication failed';
+      String errorMessage = 'Digital identification failed.';
       if (e is FirebaseAuthException) {
-        errorMessage = e.message ?? errorMessage;
+        switch (e.code) {
+          case 'invalid-credential':
+            errorMessage = 'The credentials provided do not match our records. Please verify your email and password.';
+            break;
+          case 'user-disabled':
+            errorMessage = 'This account has been deactivated. Please contact support.';
+            break;
+          case 'too-many-requests':
+            errorMessage = 'Too many attempts. Please try again later for security.';
+            break;
+          case 'network-request-failed':
+            errorMessage = 'Connectivity error. Please check your network status.';
+            break;
+          default:
+            errorMessage = e.message ?? errorMessage;
+        }
       }
       if (mounted) {
-        SnackbarUtils.showError(context, 'Login Error', errorMessage);
+        SnackbarUtils.showError(context, 'Access Denied', errorMessage);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

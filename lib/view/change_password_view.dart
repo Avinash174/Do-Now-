@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:developer' as dev;
 
 import '../const/app_colors.dart';
 import '../utils/widgets_utils.dart';
 
-class ChangePasswordView extends StatefulWidget {
+import '../services/auth_service.dart';
+import '../utils/snackbar_utils.dart';
+
+class ChangePasswordView extends ConsumerStatefulWidget {
   const ChangePasswordView({super.key});
 
   @override
-  State<ChangePasswordView> createState() => _ChangePasswordViewState();
+  ConsumerState<ChangePasswordView> createState() => _ChangePasswordViewState();
 }
 
-class _ChangePasswordViewState extends State<ChangePasswordView> {
+class _ChangePasswordViewState extends ConsumerState<ChangePasswordView> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _currentPasswordController;
   late TextEditingController _newPasswordController;
@@ -45,25 +50,51 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
       HapticFeedback.mediumImpact();
       setState(() => _isLoading = true);
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        final authService = ref.read(authServiceProvider);
+        final email = authService.currentUser?.email;
+        
+        if (email == null) {
+          throw Exception('User email not found');
+        }
 
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Access Cryptography Updated',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
-            ),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
+        // 1. Re-authenticate
+        await authService.reauthenticate(
+          email,
+          _currentPasswordController.text,
         );
-        Navigator.pop(context);
+
+        // 2. Update Password
+        await authService.updatePassword(_newPasswordController.text);
+
+        if (mounted) {
+          SnackbarUtils.showSuccess(
+            context,
+            'Security Updated',
+            'Your access key has been successfully re-encrypted.',
+          );
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        dev.log('ChangePasswordView: Error changing password: $e', name: 'view', error: e);
+        if (mounted) {
+          String errorMessage = e.toString();
+          if (errorMessage.contains('Exception:')) {
+            errorMessage = errorMessage.split('Exception:').last.trim();
+          } else if (errorMessage.contains('invalid-credential')) {
+            errorMessage = 'The current password provided is incorrect.';
+          } else if (errorMessage.contains('requires-recent-login')) {
+            errorMessage = 'For security, please log out and log back in before changing your password.';
+          }
+          
+          SnackbarUtils.showError(
+            context,
+            'Update Failed',
+            errorMessage,
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
       }
     }
   }

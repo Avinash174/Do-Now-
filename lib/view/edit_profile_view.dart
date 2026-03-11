@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,7 +23,9 @@ class EditProfileView extends ConsumerStatefulWidget {
 
 class _EditProfileViewState extends ConsumerState<EditProfileView> {
   final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _nameFocus = FocusNode();
+  final _emailFocus = FocusNode();
   bool _isLoading = false;
   File? _selectedImage;
   final ImagePicker _imagePicker = ImagePicker();
@@ -38,8 +41,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       final user = ref.read(authStateProvider).value;
       if (profile != null) {
         _nameController.text = profile['name'] ?? user?.displayName ?? '';
+        _emailController.text = profile['email'] ?? user?.email ?? '';
       } else {
         _nameController.text = user?.displayName ?? '';
+        _emailController.text = user?.email ?? '';
       }
     });
   }
@@ -47,7 +52,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
     _nameFocus.dispose();
+    _emailFocus.dispose();
     super.dispose();
   }
 
@@ -203,10 +210,28 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     if (user == null) return;
 
     try {
-      // Update name
-      await ref
-          .read(databaseServiceProvider)
-          .updateUserName(user.uid, _nameController.text.trim());
+      final currentName = ref.read(userProfileProvider).value?['name'];
+      final currentEmail = ref.read(userProfileProvider).value?['email'];
+      final newName = _nameController.text.trim();
+      final newEmail = _emailController.text.trim();
+
+      bool nameChanged = newName != currentName;
+      bool emailChanged = newEmail != currentEmail;
+
+      // Update name if changed
+      if (nameChanged) {
+        await ref
+            .read(databaseServiceProvider)
+            .updateUserName(user.uid, newName);
+      }
+
+      // Update email if changed
+      if (emailChanged) {
+        await ref.read(authServiceProvider).updateEmail(newEmail);
+        await ref
+            .read(databaseServiceProvider)
+            .updateUserEmail(user.uid, newEmail);
+      }
 
       // If image was selected, upload it
       if (_selectedImage != null) {
@@ -215,19 +240,28 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       }
 
       if (mounted) {
+        String message = 'Your profile information has been synchronized.';
+        if (emailChanged) {
+          message += '\nA verification link has been sent to your new email.';
+        }
         SnackbarUtils.showSuccess(
           context,
           'Profile Updated',
-          'Your profile information has been synchronized.',
+          message,
         );
         Navigator.pop(context);
       }
     } catch (e) {
+      dev.log('EditProfileView: Error updating profile: $e', name: 'view', error: e);
       if (mounted) {
+        String errorMessage = e.toString();
+        if (errorMessage.contains('Exception:')) {
+          errorMessage = errorMessage.split('Exception:').last.trim();
+        }
         SnackbarUtils.showError(
           context,
           'Operation Failed',
-          'An error occurred while updating your profile.',
+          errorMessage,
         );
       }
     } finally {
@@ -448,6 +482,16 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                         isDark: isDark,
                         textColor: textColor,
                       ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _emailController,
+                        focusNode: _emailFocus,
+                        hint: 'Email address',
+                        icon: Icons.email_rounded,
+                        isDark: isDark,
+                        textColor: textColor,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
                     ],
                   ),
                 ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.1, end: 0),
@@ -525,6 +569,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     required IconData icon,
     required bool isDark,
     required Color textColor,
+    TextInputType? keyboardType,
   }) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -547,6 +592,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       child: TextField(
         controller: controller,
         focusNode: focusNode,
+        keyboardType: keyboardType,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           fontWeight: FontWeight.w700,

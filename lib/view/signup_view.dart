@@ -57,8 +57,8 @@ class _SignupViewState extends ConsumerState<SignupView> {
   Future<void> _signUp() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-    final confirm = _confirmPasswordController.text.trim();
+    final password = _passwordController.text;
+    final confirm = _confirmPasswordController.text;
 
     if (name.isEmpty || email.isEmpty || password.isEmpty || confirm.isEmpty) {
       HapticFeedback.vibrate();

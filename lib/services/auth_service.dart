@@ -186,5 +186,48 @@ class AuthService {
     dev.log('AuthService: Logged out successfully', name: 'auth');
   }
 
+  Future<void> updateEmail(String newEmail) async {
+    dev.log('AuthService: Updating email to $newEmail', name: 'auth');
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.verifyBeforeUpdateEmail(newEmail);
+        dev.log('AuthService: Verification email sent for new email', name: 'auth');
+      }
+    } catch (e) {
+      dev.log('AuthService: Error in updateEmail: $e', name: 'auth', error: e);
+      rethrow;
+    }
+  }
+
+  Future<void> reauthenticate(String email, String password) async {
+    dev.log('AuthService: Re-authenticating user', name: 'auth');
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        final credential = EmailAuthProvider.credential(email: email, password: password);
+        await user.reauthenticateWithCredential(credential);
+        dev.log('AuthService: Re-authentication successful', name: 'auth');
+      }
+    } catch (e) {
+      dev.log('AuthService: Error in reauthenticate: $e', name: 'auth', error: e);
+      rethrow;
+    }
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    dev.log('AuthService: Updating password', name: 'auth');
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.updatePassword(newPassword);
+        dev.log('AuthService: Password updated successfully', name: 'auth');
+      }
+    } catch (e) {
+      dev.log('AuthService: Error in updatePassword: $e', name: 'auth', error: e);
+      rethrow;
+    }
+  }
+
   User? get currentUser => _auth.currentUser;
 }

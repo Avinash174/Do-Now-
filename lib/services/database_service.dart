@@ -104,6 +104,24 @@ class DatabaseService {
     }
   }
 
+  Future<void> updateUserEmail(String uid, String email) async {
+    dev.log(
+      'DatabaseService: Updating email for $uid to $email',
+      name: 'database',
+    );
+    try {
+      await _db.child('users/$uid/profile').update({'email': email});
+      dev.log('DatabaseService: Email updated successfully', name: 'database');
+    } catch (e) {
+      dev.log(
+        'DatabaseService: Error in updateUserEmail: $e',
+        name: 'database',
+        error: e,
+      );
+      rethrow;
+    }
+  }
+
   Future<void> uploadProfilePhoto(String uid, File imageFile) async {
     dev.log(
       'DatabaseService: Uploading profile photo for $uid',

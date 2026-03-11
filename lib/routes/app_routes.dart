@@ -19,9 +19,7 @@ import '../view/support_chat_view.dart';
 import '../view/about_view.dart';
 import '../view/change_password_view.dart';
 import '../view/two_factor_auth_view.dart';
-import '../view/face_id_biometric_view.dart';
 import '../view/profile_visibility_view.dart';
-import '../view/data_export_view.dart';
 import '../view/privacy_policy_view.dart';
 
 class AppRoutes {
@@ -40,9 +38,7 @@ class AppRoutes {
   static const String security = '/security';
   static const String changePassword = '/change_password';
   static const String twoFactorAuth = '/two_factor_auth';
-  static const String faceIdBiometric = '/face_id_biometric';
   static const String profileVisibility = '/profile_visibility';
-  static const String dataExport = '/data_export';
   static const String privacyPolicy = '/privacy_policy';
   static const String helpCenter = '/help_center';
   static const String helpTopicDetails = '/help_topic_details';
@@ -62,9 +58,7 @@ class AppRoutes {
     security: (context) => const SecurityPrivacyView(),
     changePassword: (context) => const ChangePasswordView(),
     twoFactorAuth: (context) => const TwoFactorAuthView(),
-    faceIdBiometric: (context) => const FaceIdBiometricView(),
     profileVisibility: (context) => const ProfileVisibilityView(),
-    dataExport: (context) => const DataExportView(),
     privacyPolicy: (context) => const PrivacyPolicyView(),
     helpCenter: (context) => const HelpCenterView(),
     supportChat: (context) => const SupportChatView(),

@@ -12,8 +12,6 @@ import '../view_model/task_view_model.dart';
 import '../view_model/theme_view_model.dart';
 import '../utils/snackbar_utils.dart';
 import '../utils/shimmer_utils.dart';
-import '../services/export_service.dart';
-
 class ProfileView extends ConsumerWidget {
   const ProfileView({super.key});
 
@@ -345,46 +343,7 @@ class ProfileView extends ConsumerWidget {
                         ),
                       ]),
 
-                      const SizedBox(height: 32),
 
-                      _buildSettingsSection(context, 'DATA MANAGEMENT', [
-                        _buildSettingsTile(
-                          context,
-                          'Export as CSV',
-                          'Download tasks in spreadsheet format',
-                          Icons.grid_on_rounded,
-                          Colors.green,
-                          () async {
-                            final tasks = ref.read(tasksProvider).value ?? [];
-                            if (tasks.isEmpty) {
-                              SnackbarUtils.showHelp(context, 'No Data', 'No tasks available to export');
-                              return;
-                            }
-                            await ExportService.exportToCSV(tasks);
-                          },
-                          textColor,
-                          mutedTextColor,
-                          0,
-                        ),
-                        _buildSettingsTile(
-                          context,
-                          'Export as PDF',
-                          'Download tasks in document format',
-                          Icons.picture_as_pdf_rounded,
-                          Colors.redAccent,
-                          () async {
-                            final tasks = ref.read(tasksProvider).value ?? [];
-                            if (tasks.isEmpty) {
-                              SnackbarUtils.showHelp(context, 'No Data', 'No tasks available to export');
-                              return;
-                            }
-                            await ExportService.exportToPDF(tasks);
-                          },
-                          textColor,
-                          mutedTextColor,
-                          1,
-                        ),
-                      ]),
 
                       const SizedBox(height: 32),
 

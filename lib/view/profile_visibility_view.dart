@@ -16,7 +16,6 @@ class ProfileVisibilityView extends StatefulWidget {
 class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
   String _profileVisibility = 'public'; // public, private, friends_only
   bool _showEmail = false;
-  bool _showPhone = false;
   bool _allowMessages = true;
   bool _showActivity = true;
 
@@ -152,19 +151,7 @@ class _ProfileVisibilityViewState extends State<ProfileVisibilityView> {
                           borderColor: borderColor,
                           index: 3,
                         ),
-                        _buildToggleTile(
-                          icon: Icons.phone_iphone_rounded,
-                          title: 'Biometric Contact',
-                          subtitle: 'Reveal satellite uplink number',
-                          value: _showPhone,
-                          onChanged: (v) => setState(() => _showPhone = v),
-                          color: AppColors.warning,
-                          textColor: textColor,
-                          mutedTextColor: mutedTextColor,
-                          cardColor: cardColor,
-                          borderColor: borderColor,
-                          index: 4,
-                        ),
+
 
                         const SizedBox(height: 40),
                         _buildSectionLabel('OPERATIONAL STATUS'),

@@ -34,15 +34,15 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final plugin = FlutterLocalNotificationsPlugin();
   const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
   await plugin.initialize(
-    const InitializationSettings(android: androidSettings),
+    settings: const InitializationSettings(android: androidSettings),
   );
   final notification = message.notification;
   if (notification != null) {
     await plugin.show(
-      message.hashCode,
-      notification.title,
-      notification.body,
-      const NotificationDetails(
+      id: message.hashCode,
+      title: notification.title,
+      body: notification.body,
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'high_importance_channel',
           'High Importance Notifications',
@@ -89,7 +89,16 @@ class NotificationService {
     // Initialize Timezones
     tz.initializeTimeZones();
     final tzInfo = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(tzInfo.toString()));
+    try {
+      String tzName = tzInfo.toString();
+      if (tzName.startsWith('TimezoneInfo(')) {
+        tzName = tzName.substring(13, tzName.indexOf(','));
+      }
+      tz.setLocalLocation(tz.getLocation(tzName));
+    } catch (e) {
+      dev.log('NotificationService: Timezone fallback to UTC due to $e', name: 'fcm');
+      tz.setLocalLocation(tz.getLocation('UTC'));
+    }
 
     try {
       // 1. Create notification channels (Android 8+)
@@ -139,7 +148,7 @@ class NotificationService {
         );
 
         await _localNotifications.initialize(
-          initSettings,
+          settings: initSettings,
           onDidReceiveNotificationResponse: (details) {
             dev.log(
               'NotificationService: Local notification tapped',
@@ -328,10 +337,10 @@ class NotificationService {
     );
 
     await _localNotifications.show(
-      message.hashCode,
-      notification.title,
-      notification.body,
-      platformDetails,
+      id: message.hashCode,
+      title: notification.title,
+      body: notification.body,
+      notificationDetails: platformDetails,
       payload: jsonEncode(message.data),
     );
   }
@@ -369,14 +378,12 @@ class NotificationService {
     );
 
     await _localNotifications.zonedSchedule(
-      task.id.hashCode,
-      'Task Reminder: ${task.title}',
-      task.description.isNotEmpty ? task.description : 'Your task is due soon!',
-      tz.TZDateTime.from(scheduleDate, tz.local),
-      platformDetails,
+      id: task.id.hashCode,
+      title: 'Task Reminder: ${task.title}',
+      body: task.description.isNotEmpty ? task.description : 'Your task is due soon!',
+      scheduledDate: tz.TZDateTime.from(scheduleDate, tz.local),
+      notificationDetails: platformDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       payload: jsonEncode({'id': task.id, 'type': 'task_reminder'}),
     );
 
@@ -387,7 +394,7 @@ class NotificationService {
   }
 
   Future<void> cancelTaskNotification(String taskId) async {
-    await _localNotifications.cancel(taskId.hashCode);
+    await _localNotifications.cancel(id: taskId.hashCode);
     dev.log(
       'NotificationService: Cancelled notification for task $taskId',
       name: 'fcm',

@@ -1,7 +1,6 @@
 import 'dart:developer' as dev;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'database_service.dart';
@@ -16,7 +15,6 @@ final authStateProvider = StreamProvider<User?>((ref) {
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Helper to save session locally
   Future<void> _saveSession(String uid) async {
@@ -105,64 +103,7 @@ class AuthService {
     }
   }
 
-  Future<UserCredential?> signInWithGoogle() async {
-    dev.log('AuthService: Starting signInWithGoogle', name: 'auth');
-    try {
-      dev.log('AuthService: Triggering GoogleSignIn.signIn()', name: 'auth');
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        dev.log(
-          'AuthService: Google Sign-In was cancelled by user',
-          name: 'auth',
-        );
-        return null;
-      }
 
-      dev.log('AuthService: Google User: ${googleUser.email}', name: 'auth');
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      dev.log('AuthService: Google Auth tokens obtained', name: 'auth');
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      dev.log(
-        'AuthService: Signing in to Firebase with credentials',
-        name: 'auth',
-      );
-      final userCredential = await _auth.signInWithCredential(credential);
-
-      dev.log('AuthService: Firebase Google login success', name: 'auth');
-
-      // Save user profile info if it's a new user
-      if (userCredential.user != null) {
-        if (userCredential.additionalUserInfo?.isNewUser == true) {
-          dev.log(
-            'AuthService: New Google user, creating database profile',
-            name: 'auth',
-          );
-          await DatabaseService().createUserProfile(
-            uid: userCredential.user!.uid,
-            name: userCredential.user!.displayName ?? 'User',
-            email: userCredential.user!.email ?? '',
-          );
-        }
-        // Store session in SharedPreferences as requested
-        await _saveSession(userCredential.user!.uid);
-      }
-
-      return userCredential;
-    } catch (e) {
-      dev.log(
-        'AuthService: Error in signInWithGoogle: $e',
-        name: 'auth',
-        error: e,
-      );
-      rethrow;
-    }
-  }
 
   Future<void> sendPasswordResetEmail(String email) async {
     dev.log('AuthService: Sending password reset to $email', name: 'auth');
@@ -181,8 +122,11 @@ class AuthService {
 
   Future<void> signOut() async {
     dev.log('AuthService: User logging out', name: 'auth');
-    await _googleSignIn.signOut();
-    await _auth.signOut();
+    try {
+      await _auth.signOut().timeout(const Duration(seconds: 3));
+    } catch (e) {
+      dev.log('AuthService: Error signing out of Firebase: $e', name: 'auth', error: e);
+    }
     // Clear local session as requested
     await _clearSession();
     dev.log('AuthService: Logged out successfully', name: 'auth');

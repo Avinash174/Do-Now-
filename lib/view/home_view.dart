@@ -611,45 +611,79 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Widget _buildSearchBar() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final hasText = _searchController.text.isNotEmpty;
+
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Theme.of(context).dividerColor),
+        border: Border.all(
+          color: hasText
+              ? AppColors.primaryBlue.withValues(alpha: 0.5)
+              : theme.dividerColor.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
             blurRadius: 15,
-            offset: const Offset(0, 8),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: TextFormField(
         controller: _searchController,
-        onChanged: (v) => ref.read(taskSearchProvider.notifier).update(v),
-        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+        onChanged: (v) {
+          ref.read(taskSearchProvider.notifier).update(v);
+          setState(() {});
+        },
+        style: GoogleFonts.plusJakartaSans(
+          fontWeight: FontWeight.w600,
+          color: theme.textTheme.bodyLarge?.color,
+          fontSize: 15,
+        ),
+        cursorColor: AppColors.primaryBlue,
         decoration: InputDecoration(
           hintText: 'Search your tasks...',
           hintStyle: GoogleFonts.plusJakartaSans(
-            color: Theme.of(
-              context,
-            ).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+            color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.45),
             fontSize: 15,
             fontWeight: FontWeight.w500,
           ),
-          prefixIcon: const Icon(
+          prefixIcon: Icon(
             Icons.search_rounded,
-            color: AppColors.primaryBlue,
+            color: hasText
+                ? AppColors.primaryBlue
+                : theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+            size: 22,
           ),
+          suffixIcon: hasText
+              ? IconButton(
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    _searchController.clear();
+                    ref.read(taskSearchProvider.notifier).update('');
+                    setState(() {});
+                  },
+                )
+              : null,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             vertical: 18,
-            horizontal: 20,
+            horizontal: 8,
           ),
         ),
       ),
     );
   }
+
 
   Widget _buildSectionHeader(String title) {
     return Text(

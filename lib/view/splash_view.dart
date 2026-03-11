@@ -3,8 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../routes/app_routes.dart';
-import '../services/settings_service.dart';
-import '../services/biometric_service.dart';
+
 
 class SplashView extends ConsumerStatefulWidget {
   const SplashView({super.key});
@@ -14,12 +13,32 @@ class SplashView extends ConsumerStatefulWidget {
 }
 
 class _SplashViewState extends ConsumerState<SplashView> {
+
+  String _nextRoute = '';
   @override
   void initState() {
     super.initState();
     // Hide status bar on splash screen
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    _startNavigation();
+    _initializeValuesAndNavigate();
+  }
+
+  Future<void> _initializeValuesAndNavigate() async {
+    try {
+      final results = await Future.wait([
+        Future.delayed(const Duration(seconds: 3)),
+        AppRoutes.getInitialRoute(),
+      ]);
+      if (mounted) {
+        _nextRoute = results[1] as String;
+        _startNavigation();
+      }
+    } catch (e) {
+      if (mounted) {
+        _nextRoute = AppRoutes.login;
+        _startNavigation();
+      }
+    }
   }
 
   @override
@@ -38,36 +57,12 @@ class _SplashViewState extends ConsumerState<SplashView> {
 
   Future<void> _startNavigation() async {
     try {
-      // Run both the minimum splash duration and the route logic in parallel
-      final results = await Future.wait([
-        Future.delayed(const Duration(seconds: 3)),
-        AppRoutes.getInitialRoute(),
-      ]);
 
-      String nextRoute = results[1] as String;
-
-      // --- Biometric Authentication Check ---
-      final settings = ref.read(settingsServiceProvider);
-      if (settings.biometricEnabled) {
-        final bioService = ref.read(biometricServiceProvider);
-        final authenticated = await bioService.authenticate(
-          reason: 'Unlock Do Now to continue',
-        );
-        
-        if (!authenticated) {
-          // If auth fails or cancelled, we don't proceed.
-          // In a real app, you might show an error or try again button.
-          // For now, we'll just keep the splash or show a simple error to the dev.
-          debugPrint('Biometric authentication failed');
-          return; 
-        }
-      }
-      // ----------------------------------------
 
       if (!mounted) return;
 
       // Navigate to the next screen
-      Navigator.pushReplacementNamed(context, nextRoute);
+      Navigator.pushReplacementNamed(context, _nextRoute);
     } catch (e) {
       debugPrint('Navigation Error: $e');
       // Fallback in case of error
@@ -76,6 +71,8 @@ class _SplashViewState extends ConsumerState<SplashView> {
       }
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +87,7 @@ class _SplashViewState extends ConsumerState<SplashView> {
                 .scale(duration: 600.ms, curve: Curves.easeOutBack)
                 .fadeIn()
                 .shimmer(delay: 800.ms, duration: 1500.ms),
+
           ],
         ),
       ),

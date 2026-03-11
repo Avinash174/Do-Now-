@@ -456,11 +456,7 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
             'a':
                 'Go to Settings > Security & Privacy > Two-Factor Authentication. Follow the setup wizard to enable 2FA on your account.',
           },
-          {
-            'q': 'Can I use biometric authentication?',
-            'a':
-                'Yes! Enable Face ID or Fingerprint in Settings > Security & Privacy > Biometric Authentication for quick and secure access.',
-          },
+
           {
             'q': 'What happens if I forget my password?',
             'a':
@@ -545,11 +541,7 @@ class _HelpTopicDetailsViewState extends State<HelpTopicDetailsView> {
             'desc': 'Secure your device',
             'icon': Icons.devices_rounded,
           },
-          {
-            'title': 'Data Export',
-            'desc': 'Export your data',
-            'icon': Icons.download_rounded,
-          },
+
         ];
       case 'premium':
         return [

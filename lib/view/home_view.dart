@@ -12,7 +12,6 @@ import '../view_model/task_view_model.dart';
 import '../routes/app_routes.dart';
 import 'profile_view.dart';
 import 'stats_view.dart';
-import '../utils/shimmer_utils.dart';
 
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
@@ -723,8 +722,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
         );
       },
       loading: () => const SliverPadding(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        sliver: SliverToBoxAdapter(child: ShimmerList(itemCount: 6)),
+        padding: EdgeInsets.symmetric(vertical: 32),
+        sliver: SliverToBoxAdapter(
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
       ),
       error: (err, stack) =>
           SliverFillRemaining(child: Center(child: Text('Error: $err'))),

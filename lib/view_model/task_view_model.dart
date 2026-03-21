@@ -4,7 +4,7 @@ import '../services/auth_service.dart';
 import '../services/database_service.dart';
 import '../services/notification_service.dart';
 
-enum TaskFilter { all, pending, completed }
+enum TaskFilter { all, pending, completed, deleted }
 
 // Current filter state
 class TaskFilterNotifier extends Notifier<TaskFilter> {
@@ -62,12 +62,6 @@ final filteredTasksProvider = Provider<List<TaskModel>>((ref) {
   final search = ref.watch(taskSearchProvider).toLowerCase();
 
   return tasks.where((task) {
-    // Filter by completion status
-    final matchesFilter =
-        filter == TaskFilter.all ||
-        (filter == TaskFilter.completed && task.isCompleted) ||
-        (filter == TaskFilter.pending && !task.isCompleted);
-
     // Filter by search query
     final matchesSearch =
         search.isEmpty ||
@@ -75,20 +69,32 @@ final filteredTasksProvider = Provider<List<TaskModel>>((ref) {
         task.description.toLowerCase().contains(search) ||
         task.category.toLowerCase().contains(search);
 
+    if (filter == TaskFilter.deleted) {
+      return task.isDeleted && matchesSearch;
+    }
+    if (task.isDeleted) return false;
+
+    // Filter by completion status
+    final matchesFilter =
+        filter == TaskFilter.all ||
+        (filter == TaskFilter.completed && task.isCompleted) ||
+        (filter == TaskFilter.pending && !task.isCompleted);
+
     return matchesFilter && matchesSearch;
   }).toList();
 });
 
-// Detailed stats derived from all tasks
 final taskStatsProvider = Provider<Map<String, dynamic>>((ref) {
   final tasks = ref.watch(tasksProvider).value ?? [];
-  final total = tasks.length;
-  final done = tasks.where((t) => t.isCompleted).length;
+  final activeTasks = tasks.where((t) => !t.isDeleted).toList();
+  
+  final total = activeTasks.length;
+  final done = activeTasks.where((t) => t.isCompleted).length;
   final pending = total - done;
 
   // Group by category
   final Map<String, int> categories = {};
-  for (var task in tasks) {
+  for (var task in activeTasks) {
     categories[task.category] = (categories[task.category] ?? 0) + 1;
   }
 
@@ -116,6 +122,7 @@ class TaskViewModel {
     required String description,
     required String category,
     required DateTime scheduleDate,
+    required bool reminderEnabled,
   }) async {
     final taskId = await _db.addTask(
       uid: uid,
@@ -136,7 +143,9 @@ class TaskViewModel {
         scheduleTime: scheduleDate.millisecondsSinceEpoch,
         createdAt: DateTime.now().millisecondsSinceEpoch,
       );
-      await _notifications.scheduleTaskNotification(task);
+      if (reminderEnabled) {
+        await _notifications.scheduleTaskNotification(task);
+      }
     }
   }
 
@@ -166,6 +175,7 @@ class TaskViewModel {
     required String description,
     required String category,
     required DateTime scheduleDate,
+    required bool reminderEnabled,
   }) async {
     await _db.updateTaskDetails(
       uid: uid,
@@ -186,7 +196,11 @@ class TaskViewModel {
       scheduleTime: scheduleDate.millisecondsSinceEpoch,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
-    await _notifications.scheduleTaskNotification(task);
+    if (reminderEnabled) {
+      await _notifications.scheduleTaskNotification(task);
+    } else {
+      await _notifications.cancelTaskNotification(taskId);
+    }
   }
 }
 

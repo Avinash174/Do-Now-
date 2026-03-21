@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:developer' as dev;
+import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -75,7 +76,7 @@ class NotificationService {
   );
 
   static const _taskReminderChannel = AndroidNotificationChannel(
-    'task_reminders',
+    'task_reminders_v2',
     'Task Reminders',
     description: 'Notifications for scheduled tasks',
     importance: Importance.max,
@@ -83,21 +84,39 @@ class NotificationService {
     enableVibration: true,
   );
 
+  static const _dailyReminderChannel = AndroidNotificationChannel(
+    'daily_reminders',
+    'Daily Reminders',
+    description: 'Daily goals and check-ins',
+    importance: Importance.defaultImportance,
+    playSound: true,
+    enableVibration: true,
+  );
+
   Future<void> initialize() async {
     dev.log('NotificationService: Initializing', name: 'fcm');
 
-    // Initialize Timezones
+    // Initialize Timezones robustly
     tz.initializeTimeZones();
-    final tzInfo = await FlutterTimezone.getLocalTimezone();
     try {
-      String tzName = tzInfo.toString();
-      if (tzName.startsWith('TimezoneInfo(')) {
-        tzName = tzName.substring(13, tzName.indexOf(','));
+      final tzInfo = await FlutterTimezone.getLocalTimezone();
+      String tzName = tzInfo.toString().trim();
+      // Strip wrapper if present e.g. "TimezoneInfo(America/New_York, ...)"
+      if (tzName.contains('(')) {
+        tzName = tzName.substring(tzName.indexOf('(') + 1);
+        if (tzName.contains(',')) tzName = tzName.substring(0, tzName.indexOf(','));
+        if (tzName.contains(')')) tzName = tzName.substring(0, tzName.indexOf(')'));
+        tzName = tzName.trim();
       }
       tz.setLocalLocation(tz.getLocation(tzName));
+      dev.log('NotificationService: Timezone set to $tzName', name: 'fcm');
     } catch (e) {
       dev.log('NotificationService: Timezone fallback to UTC due to $e', name: 'fcm');
-      tz.setLocalLocation(tz.getLocation('UTC'));
+      try {
+        tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
+      } catch (_) {
+        tz.setLocalLocation(tz.getLocation('UTC'));
+      }
     }
 
     try {
@@ -110,6 +129,7 @@ class NotificationService {
 
         await androidPlugin?.createNotificationChannel(_highImportanceChannel);
         await androidPlugin?.createNotificationChannel(_taskReminderChannel);
+        await androidPlugin?.createNotificationChannel(_dailyReminderChannel);
 
         // Request notification permission (Android 13+)
         await androidPlugin?.requestNotificationsPermission();
@@ -118,7 +138,34 @@ class NotificationService {
         await androidPlugin?.requestExactAlarmsPermission();
       }
 
-      // 2. Request FCM permissions
+      // 2. Initialize Local Notifications FIRST (before FCM permissions)
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const iosSettings = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
+      const initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
+
+      await _localNotifications.initialize(
+        settings: initSettings,
+        onDidReceiveNotificationResponse: (details) {
+          dev.log(
+            'NotificationService: Local notification tapped',
+            name: 'fcm',
+          );
+          if (details.payload != null) {
+            _handleNotificationPayload(details.payload!);
+          }
+        },
+        onDidReceiveBackgroundNotificationResponse:
+            _onBackgroundNotificationResponse,
+      );
+
+      // 3. Request FCM permissions
       final settings = await _firebaseMessaging.requestPermission(
         alert: true,
         badge: true,
@@ -131,100 +178,40 @@ class NotificationService {
         name: 'fcm',
       );
 
-      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
-          settings.authorizationStatus == AuthorizationStatus.provisional) {
-        // 3. Initialize Local Notifications
-        const androidSettings = AndroidInitializationSettings(
-          '@mipmap/ic_launcher',
-        );
-        const iosSettings = DarwinInitializationSettings(
-          requestAlertPermission: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-        );
-        const initSettings = InitializationSettings(
-          android: androidSettings,
-          iOS: iosSettings,
-        );
+      // 4. Force FCM to deliver foreground messages as heads-up notifications
+      await _firebaseMessaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
 
-        await _localNotifications.initialize(
-          settings: initSettings,
-          onDidReceiveNotificationResponse: (details) {
-            dev.log(
-              'NotificationService: Local notification tapped',
-              name: 'fcm',
-            );
-            if (details.payload != null) {
-              _handleNotificationPayload(details.payload!);
-            }
-          },
-          onDidReceiveBackgroundNotificationResponse:
-              _onBackgroundNotificationResponse,
-        );
+      // 5. Setup FCM Listeners
+      _setupFCMListeners();
 
-        // 4. Force FCM to deliver foreground messages as heads-up notifications
-        await _firebaseMessaging.setForegroundNotificationPresentationOptions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+      // 6. Setup Auth Listener to save token on login
+      _setupAuthListener();
 
-        // 5. Setup FCM Listeners
-        _setupFCMListeners();
+      // 7. Get and save current token
+      await Future.delayed(const Duration(milliseconds: 500));
+      await _updateToken();
 
-        // 6. Setup Auth Listener to save token on login
-        _setupAuthListener();
-
-        // 7. Get and save current token
-        // Add a small delay to ensure Firebase is fully initialized
-        await Future.delayed(const Duration(milliseconds: 500));
-        await _updateToken();
-
-        // Listen for token refresh
-        _firebaseMessaging.onTokenRefresh.listen((newToken) {
-          dev.log(
-            'NotificationService: Token refreshed: ${newToken.substring(0, 20)}...',
-            name: 'fcm',
-          );
-          _updateToken(token: newToken);
-        });
-
-        // 8. Check if app was opened from a terminated state notification
-        final initialMessage = await _firebaseMessaging.getInitialMessage();
-        if (initialMessage != null) {
-          dev.log(
-            'NotificationService: App opened from terminated state via notification',
-            name: 'fcm',
-          );
-          _handleNotificationPayload(jsonEncode(initialMessage.data));
-        }
-      } else {
+      // Listen for token refresh
+      _firebaseMessaging.onTokenRefresh.listen((newToken) {
         dev.log(
-          'NotificationService: Permissions NOT granted: ${settings.authorizationStatus}',
+          'NotificationService: Token refreshed: ${newToken.substring(0, 20)}...',
           name: 'fcm',
         );
-        // Even without permissions, try to get token on Android
-        if (Platform.isAndroid) {
-          dev.log(
-            'NotificationService: Attempting to get FCM token despite permissions on Android',
-            name: 'fcm',
-          );
-          try {
-            final token = await _firebaseMessaging.getToken();
-            if (token != null) {
-              dev.log(
-                'NotificationService: Got FCM token without explicit permissions: ${token.substring(0, 20)}...',
-                name: 'fcm',
-              );
-            }
-          } catch (e) {
-            dev.log(
-              'NotificationService: Failed to get token on Android: $e',
-              name: 'fcm',
-              error: e,
-            );
-          }
-        }
+        _updateToken(token: newToken);
+      });
+
+      // 8. Check if app was opened from a terminated state notification
+      final initialMessage = await _firebaseMessaging.getInitialMessage();
+      if (initialMessage != null) {
+        dev.log(
+          'NotificationService: App opened from terminated state via notification',
+          name: 'fcm',
+        );
+        _handleNotificationPayload(jsonEncode(initialMessage.data));
       }
     } catch (e) {
       dev.log('NotificationService: Init error: $e', name: 'fcm', error: e);
@@ -366,13 +353,16 @@ class NotificationService {
       priority: Priority.high,
       enableVibration: appSettings.vibrationEnabled,
       playSound: appSettings.soundEnabled,
+      vibrationPattern: appSettings.vibrationEnabled 
+          ? Int64List.fromList([0, 1000, 500, 1000]) 
+          : null,
     );
 
     final platformDetails = NotificationDetails(
       android: androidDetails,
-      iOS: const DarwinNotificationDetails(
+      iOS: DarwinNotificationDetails(
         presentAlert: true,
-        presentSound: true,
+        presentSound: appSettings.soundEnabled,
         presentBadge: true,
       ),
     );
@@ -399,6 +389,60 @@ class NotificationService {
       'NotificationService: Cancelled notification for task $taskId',
       name: 'fcm',
     );
+  }
+
+  Future<void> scheduleDailyReminder(int hour, int minute) async {
+    final appSettings = _ref.read(settingsServiceProvider);
+    if (!appSettings.pushNotificationsEnabled) return;
+
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduleDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    
+    // If time is already past today, schedule for tomorrow
+    if (scheduleDate.isBefore(now)) {
+      scheduleDate = scheduleDate.add(const Duration(days: 1));
+    }
+
+    final androidDetails = AndroidNotificationDetails(
+      _dailyReminderChannel.id,
+      _dailyReminderChannel.name,
+      channelDescription: _dailyReminderChannel.description,
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      enableVibration: appSettings.vibrationEnabled,
+      playSound: appSettings.soundEnabled,
+      vibrationPattern: appSettings.vibrationEnabled 
+          ? Int64List.fromList([0, 1000, 500, 1000]) 
+          : null,
+    );
+    
+    final platformDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentSound: appSettings.soundEnabled,
+        presentBadge: true,
+      ),
+    );
+
+    // Cancel existing one first to be safe
+    await cancelDailyReminder();
+
+    await _localNotifications.zonedSchedule(
+      id: 1001,
+      title: 'Daily Check-in',
+      body: 'Time to review your goals for today!',
+      scheduledDate: scheduleDate,
+      notificationDetails: platformDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+    dev.log('NotificationService: Scheduled daily reminder for $hour:$minute', name: 'fcm');
+  }
+
+  Future<void> cancelDailyReminder() async {
+    await _localNotifications.cancel(id: 1001);
+    dev.log('NotificationService: Cancelled daily reminder', name: 'fcm');
   }
 }
 

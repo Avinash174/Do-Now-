@@ -4,6 +4,7 @@ class TaskModel {
   final String description;
   final String category;
   final bool isCompleted;
+  final bool isDeleted;
   final int scheduleTime;
   final int createdAt;
 
@@ -13,6 +14,7 @@ class TaskModel {
     required this.description,
     required this.category,
     required this.isCompleted,
+    this.isDeleted = false,
     required this.scheduleTime,
     required this.createdAt,
   });
@@ -24,6 +26,7 @@ class TaskModel {
       description: map['description'] ?? '',
       category: map['category'] ?? '',
       isCompleted: map['isCompleted'] ?? false,
+      isDeleted: map['isDeleted'] ?? false,
       scheduleTime: map['scheduleTime'] ?? 0,
       createdAt: map['createdAt'] ?? 0,
     );
@@ -36,18 +39,20 @@ class TaskModel {
       'description': description,
       'category': category,
       'isCompleted': isCompleted,
+      'isDeleted': isDeleted,
       'scheduleTime': scheduleTime,
       'createdAt': createdAt,
     };
   }
 
-  TaskModel copyWith({bool? isCompleted}) {
+  TaskModel copyWith({bool? isCompleted, bool? isDeleted}) {
     return TaskModel(
       id: id,
       title: title,
       description: description,
       category: category,
       isCompleted: isCompleted ?? this.isCompleted,
+      isDeleted: isDeleted ?? this.isDeleted,
       scheduleTime: scheduleTime,
       createdAt: createdAt,
     );

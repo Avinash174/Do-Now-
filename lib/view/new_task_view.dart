@@ -41,6 +41,9 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
       _selectedDate = DateTime.fromMillisecondsSinceEpoch(
         widget.task!.scheduleTime,
       );
+      // Default reminder to true when editing; 
+      // if schedule is in the past, disable reminder automatically
+      _reminder = widget.task!.scheduleTime > DateTime.now().millisecondsSinceEpoch;
     }
   }
 
@@ -203,6 +206,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
           description: _descController.text.trim(),
           category: _category,
           scheduleDate: _selectedDate,
+          reminderEnabled: _reminder,
         );
       } else {
         await vm?.addTask(
@@ -210,6 +214,7 @@ class _NewTaskViewState extends ConsumerState<NewTaskView> {
           description: _descController.text.trim(),
           category: _category,
           scheduleDate: _selectedDate,
+          reminderEnabled: _reminder,
         );
       }
       if (mounted) {

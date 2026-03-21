@@ -377,6 +377,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                 'Completed',
                                 TaskFilter.completed,
                               ),
+                              _buildFilterChip('Deleted', TaskFilter.deleted),
                             ],
                           ),
                         )

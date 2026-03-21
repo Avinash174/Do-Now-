@@ -21,6 +21,7 @@ import '../view/change_password_view.dart';
 import '../view/two_factor_auth_view.dart';
 import '../view/profile_visibility_view.dart';
 import '../view/privacy_policy_view.dart';
+import '../model/task_model.dart';
 
 class AppRoutes {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -93,6 +94,30 @@ class AppRoutes {
             );
           },
           transitionDuration: const Duration(milliseconds: 400),
+        );
+      case newTask:
+        final task = settings.arguments as TaskModel?;
+        return PageRouteBuilder(
+          settings: settings,
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              NewTaskView(task: task),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const curve = Curves.easeOutCubic;
+            var fadeAnimation = Tween<double>(
+              begin: 0.0,
+              end: 1.0,
+            ).animate(CurvedAnimation(parent: animation, curve: curve));
+            var slideAnimation = Tween<Offset>(
+              begin: const Offset(0.05, 0.0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: animation, curve: curve));
+            return FadeTransition(
+              opacity: fadeAnimation,
+              child: SlideTransition(position: slideAnimation, child: child),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+          reverseTransitionDuration: const Duration(milliseconds: 400),
         );
       default:
         break;

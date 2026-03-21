@@ -357,8 +357,8 @@ class DatabaseService {
       name: 'database',
     );
     try {
-      await _db.child('users/$uid/tasks/$taskId').remove();
-      dev.log('DatabaseService: Task deleted successfully', name: 'database');
+      await _db.child('users/$uid/tasks/$taskId').update({'isDeleted': true});
+      dev.log('DatabaseService: Task deleted (soft) successfully', name: 'database');
     } catch (e) {
       dev.log(
         'DatabaseService: Error in deleteTask: $e',
